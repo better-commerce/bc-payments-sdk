@@ -8,7 +8,7 @@ import { PaymentMethod } from "./payment-method";
 import { Order } from "./order";
 import { PaymentOrderStatus } from "../../constants/enums/PaymentOrderStatus";
 import { PayPal, PaymentGateway } from "../../constants/enums/PaymentGateway";
-import { PayPalPayment } from "../payments/payPal";
+import { PayPalPayment } from "../payments/pay-pal";
 import { PaymentResponse } from "./payment-response";
 
 /**

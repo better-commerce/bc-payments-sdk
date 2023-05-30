@@ -1,9 +1,9 @@
 import { BCEnvironment } from "../../base/config/BCEnvironment";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { CheckoutPayment } from "./checkout";
-import { ClearPayPayment } from "./clearPay";
+import { ClearPayPayment } from "./clear-pay";
 import { KlarnaPayment } from "./klarna";
-import { PayPalPayment } from "./payPal";
+import { PayPalPayment } from "./pay-pal";
 
 /**
  * Class {BCPayment}

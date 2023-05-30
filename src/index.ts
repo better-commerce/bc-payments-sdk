@@ -5,10 +5,10 @@ import { APIConnectionException, APIException, AuthenticationException, BCExcept
 import { BCPayment } from "./modules/payments";
 
 // BetterCommerce Module
-import { BCOperation } from "./modules/betterCommerce";
-//import { Order } from "./modules/betterCommerce/order";
-//import { PaymentMethod } from "./modules/betterCommerce/payment-method";
-//import { PaymentResponse } from "./modules/betterCommerce/payment-response";
+import { BCOperation } from "./modules/better-commerce";
+//import { Order } from "./modules/better-commerce/order";
+//import { PaymentMethod } from "./modules/better-commerce/payment-method";
+//import { PaymentResponse } from "./modules/better-commerce/payment-response";
 
 export { BCEnvironment, BCPayment };
 export { BCOperation, /*PaymentMethod, Order, PaymentResponse*/ };

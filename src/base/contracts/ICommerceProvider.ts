@@ -1,4 +1,4 @@
-import { IPaymentProcessingData } from "../../modules/betterCommerce/entity/IPaymentProcessingData";
+import { IPaymentProcessingData } from "../../modules/better-commerce/entity/IPaymentProcessingData";
 
 export interface ICommerceProvider {
     processPayment(data: IPaymentProcessingData): any;
