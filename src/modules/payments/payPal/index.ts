@@ -5,9 +5,11 @@ import { PayPalEnvironment, Order } from "bc-paypal-sdk";
 import { Defaults } from "../../../constants/constants";
 import { stringToBoolean } from "../../../utils/parse-util";
 import { IPaymentProvider } from "../../../base/contracts/IPaymentProvider";
+import { BCEnvironment } from "../../../base/config/BCEnvironment";
 
 export class PayPalPayment implements IPaymentProvider {
-    async getOrderDetails(data: any, config: any): Promise<any> {
+    async getOrderDetails(data: any): Promise<any> {
+        const config: any = BCEnvironment.getConfig();
         try {
 
             if (config?.settings?.length) {

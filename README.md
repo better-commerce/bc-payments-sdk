@@ -49,16 +49,9 @@ npm install @better-commerce/bc-payments-sdk
 **Use following snippet to initialize the SDK:**
 
 ```
-BCEnvironment.init();
-BCEnvironment.withCredentials("<client_id>", "<shared_secret>", [useSandbox: boolean]);
-```
-
-## Usage Example
-
-### Get PayPal Order Details
-
-```
-const settings = [{
+const config = {
+    systemName: "Paypal"
+    [{
         "key": "AccountCode",
         "value": "<AccountCode>"
     },
@@ -69,7 +62,16 @@ const settings = [{
     {
         "key": "UseSandbox",
         "value": "True"
-    }];
-const paypal = new BCPayment.PayPal();
-const result = await paypal.getOrderDetails("<order_id>", settings);
+    }]
+};
+BCEnvironment.init(config);
+BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbox: boolean]);
+```
+
+## Usage Example
+
+### Get PayPal Order Details
+
+```
+const result = await BCPayment.getOrderDetails("<order_id>", settings);
 ```

@@ -62,11 +62,17 @@ export class BCEnvironment {
 
     /**
      *
+     * @property {Object}
+     */
+    static config: any;
+
+    /**
+     *
      * @property {BCEnvironment}
      */
     static thisObj: any;
 
-    static init(baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
+    static init(config: any, baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
         if (BCEnvironment.thisObj != undefined) {
             return BCEnvironment.thisObj;
         } else {
@@ -76,6 +82,7 @@ export class BCEnvironment {
             BCEnvironment.defaultCountry = "GB";
             BCEnvironment.defaultCurrency = "GBP";
             BCEnvironment.defaultLanguage = "en-GB";
+            BCEnvironment.config = config;
 
             if (baseAuthUrl) {
                 BCEnvironment.baseAuthUrl = baseAuthUrl;
@@ -213,5 +220,13 @@ export class BCEnvironment {
      */
     static getReadTimeout(): number {
         return BCEnvironment.readTimeout;
+    }
+
+    /**
+     *
+     * @return {Object}
+     */
+    static getConfig(): Object {
+        return BCEnvironment.config;
     }
 }

@@ -11,7 +11,7 @@ export class RequestOptions {
      * @return RequestOptions
     */
     static createDefault() {
-        BCEnvironment.init();
+        BCEnvironment.init({});
         return new RequestOptions();
     }
 }
