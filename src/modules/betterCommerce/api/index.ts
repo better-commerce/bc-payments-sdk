@@ -27,7 +27,7 @@ export class Api {
                     ...options,
                     ...{ params: params },
                 };
-            } else if (method?.toUpperCase() === RequestMethod.POST) {
+            } else if (method?.toUpperCase() === RequestMethod.POST || method?.toUpperCase() === RequestMethod.PUT) {
                 options = {
                     ...options,
                     ...{ data: params },

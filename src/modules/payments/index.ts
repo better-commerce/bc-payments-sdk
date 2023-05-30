@@ -8,9 +8,9 @@ import { PayPalPayment } from "./payPal";
 /**
  * Class {BCPayment}
  */
-export class BCPayment {
+export class BCPayment implements IPaymentProvider {
 
-    static async getOrderDetails(data: any): Promise<any> {
+    async getOrderDetails(data: any): Promise<any> {
         const obj = this.getObject();
         if (obj) {
             const orderResult = await obj.getOrderDetails(data);
@@ -19,7 +19,7 @@ export class BCPayment {
         return null;
     }
 
-    private static getObject(): IPaymentProvider {
+    private getObject(): IPaymentProvider {
         let obj: IPaymentProvider;
         const config: any = BCEnvironment.getConfig();
         if (config?.systemName === "Paypal") {
