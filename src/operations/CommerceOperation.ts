@@ -2,10 +2,10 @@
 import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
 
 // Other Imports
-import { Order } from "./better-commerce/Order";
-import { PaymentMethod } from "./better-commerce/PaymentMethod";
-import { PayPalPayment } from "./payments/PayPalPayment";
-import { PaymentResponse } from "./better-commerce/PaymentResponse";
+import { Order } from "../modules/better-commerce/Order";
+import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
+import { PayPalPayment } from "../modules/payments/PayPalPayment";
+import { PaymentResponse } from "../modules/better-commerce/PaymentResponse";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentOrderStatus } from "../constants/enums/PaymentOrderStatus";
@@ -14,7 +14,7 @@ import { PayPal, PaymentGateway } from "../constants/enums/PaymentGateway";
 /**
  * Class {BCOperation}
  */
-export class BCOperation implements ICommerceProvider {
+export class CommerceOperation implements ICommerceProvider {
 
     async processPayment(data: IPaymentProcessingData): Promise<any> {
 
@@ -27,14 +27,14 @@ export class BCOperation implements ICommerceProvider {
             if (gateway === PaymentGateway.PAYPAL) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
-            const paymentMethod = await this.getPaymentMethod(gateway, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+            const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
             if (paymentMethod) {
                 const additionalServiceCharge = paymentMethod?.settings?.length
                     ? paymentMethod?.settings?.find((x: any) => x?.key === "AdditionalServiceCharge")?.value || "0"
                     : "0";
 
                 const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
-                const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+                const { result: orderResult }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
                 const { headers, cookies, ...rest } = data?.extras;
                 if (orderResult) {
                     let paymentStatus: any;
@@ -156,8 +156,7 @@ export class BCOperation implements ICommerceProvider {
                             model: orderModel,
                             orderId: orderId,
                         };
-                        //console.log("paymentResponseInput", paymentResponseInput);
-                        const { result: paymentResponseResult } = await PaymentResponse.put(paymentResponseInput, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+                        const { result: paymentResponseResult } = await PaymentResponse.put(paymentResponseInput, { cookies: data?.extras?.cookies });
                         if (paymentResponseResult) {
                             return isCancelled
                                 ? PaymentOrderStatus.DECLINED

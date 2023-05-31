@@ -1,4 +1,4 @@
-const { BCEnvironment, BCPaymentOperation, } = require("../../dist");
+const { BCEnvironment, PaymentOperation, } = require("../../dist");
 
 const config = {
     systemName: "Paypal",
@@ -15,6 +15,6 @@ const config = {
 };
 BCEnvironment.init(config);
 BCEnvironment.withCredentials("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=");
-new BCPaymentOperation().getOrderDetails("30Y2289006605445H").then(response => {
+new PaymentOperation().getOrderDetails("30Y2289006605445H").then(response => {
     console.log(JSON.stringify(response));
 });
