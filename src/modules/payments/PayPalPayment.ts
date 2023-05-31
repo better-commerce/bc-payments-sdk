@@ -2,10 +2,10 @@
 import { PayPalEnvironment, Order } from "bc-paypal-sdk";
 
 // Other Imports
-import { Defaults } from "../../../constants/constants";
-import { stringToBoolean } from "../../../utils/parse-util";
-import { IPaymentProvider } from "../../../base/contracts/IPaymentProvider";
-import { BCEnvironment } from "../../../base/config/BCEnvironment";
+import { Defaults } from "../../constants/constants";
+import { stringToBoolean } from "../../utils/parse-util";
+import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
+import { BCEnvironment } from "../../base/config/BCEnvironment";
 
 export class PayPalPayment implements IPaymentProvider {
     async getOrderDetails(data: any): Promise<any> {

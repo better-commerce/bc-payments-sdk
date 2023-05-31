@@ -1,14 +1,14 @@
-import { BCEnvironment } from "../../base/config/BCEnvironment";
-import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
-import { CheckoutPayment } from "./checkout";
-import { ClearPayPayment } from "./clear-pay";
-import { KlarnaPayment } from "./klarna";
-import { PayPalPayment } from "./pay-pal";
+import { BCEnvironment } from "../base/config/BCEnvironment";
+import { IPaymentProvider } from "../base/contracts/IPaymentProvider";
+import { CheckoutPayment } from "./payments/CheckoutPayment";
+import { ClearPayPayment } from "./payments/ClearPayPament";
+import { KlarnaPayment } from "./payments/KlarnaPayment";
+import { PayPalPayment } from "./payments/PayPalPayment";
 
 /**
- * Class {BCPayment}
+ * Class {BCPaymentOperation}
  */
-export class BCPayment implements IPaymentProvider {
+export class BCPaymentOperation implements IPaymentProvider {
 
     async getOrderDetails(data: any): Promise<any> {
         const obj = this.getObject();

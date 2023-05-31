@@ -1,3 +1,3 @@
-import { BCPayment } from "./payments";
+import { BCPaymentOperation } from "./BCPaymentOperation";
 
-export { BCPayment as Payment, };
+export { BCPaymentOperation as Payment, };

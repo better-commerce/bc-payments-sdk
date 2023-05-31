@@ -1,6 +1,10 @@
 # BetterCommerce Payments NodeJS SDK
 
-BetterCommerce's Payments NodeJS SDK is a complete solution for storefront clients that integrate payments. bc-payments-sdk is a single point interface for storefront clients for interacting with payment gateways. It integrates SDK APIs for the following providers:
+BetterCommerce's Payments NodeJS SDK is a complete solution for storefront clients that integrate payments. bc-payments-sdk is a single point interface for storefront clients for interacting with payment gateways. 
+
+# Supported Payment Providers
+
+It integrates SDK APIs for the following providers:
 
 ## PayPal
 
@@ -73,5 +77,5 @@ BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbo
 ### Get PayPal Order Details
 
 ```
-const result = await BCPayment.getOrderDetails("<order_id>", settings);
+const result = await BCPaymentOperation.getOrderDetails("<order_id>", settings);
 ```

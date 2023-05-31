@@ -1,7 +1,7 @@
 // Package Imports
 
 // Other Imports
-import { IPaymentProvider } from "../../../base/contracts/IPaymentProvider";
+import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 
 /**
  * Class {KlarnaPayment}

@@ -1,5 +1,5 @@
-import { RequestMethod } from "../../../constants/enums/RequestMethod";
-import { Api } from "../api";
+import { RequestMethod } from "../../constants/enums/RequestMethod";
+import { Api } from "./api";
 
 /**
  * Class {PaymentResponse}

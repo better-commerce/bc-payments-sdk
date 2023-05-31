@@ -1,7 +1,7 @@
-import { Api } from "../api";
-import { BCEnvironment } from "../../../base/config/BCEnvironment";
-import { Defaults } from "../../../constants/constants";
-import { RequestMethod } from "../../../constants/enums/RequestMethod";
+import { Api } from "./api";
+import { BCEnvironment } from "../../base/config/BCEnvironment";
+import { Defaults } from "../../constants/constants";
+import { RequestMethod } from "../../constants/enums/RequestMethod";
 
 /**
  * Class {PaymentResponse}

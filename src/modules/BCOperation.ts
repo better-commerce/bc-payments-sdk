@@ -1,15 +1,15 @@
 // Model Imports
-import { IPaymentProcessingData } from "./entity/IPaymentProcessingData";
+import { IPaymentProcessingData } from "./models/IPaymentProcessingData";
 
 // Other Imports
-import { ICommerceProvider } from "../../base/contracts/ICommerceProvider";
-import { Defaults } from "../../constants/constants";
-import { PaymentMethod } from "./payment-method";
-import { Order } from "./order";
-import { PaymentOrderStatus } from "../../constants/enums/PaymentOrderStatus";
-import { PayPal, PaymentGateway } from "../../constants/enums/PaymentGateway";
-import { PayPalPayment } from "../payments/pay-pal";
-import { PaymentResponse } from "./payment-response";
+import { Order } from "./better-commerce/Order";
+import { PaymentMethod } from "./better-commerce/PaymentMethod";
+import { PayPalPayment } from "./payments/PayPalPayment";
+import { PaymentResponse } from "./better-commerce/PaymentResponse";
+import { Defaults } from "../constants/constants";
+import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
+import { PaymentOrderStatus } from "../constants/enums/PaymentOrderStatus";
+import { PayPal, PaymentGateway } from "../constants/enums/PaymentGateway";
 
 /**
  * Class {BCOperation}
@@ -82,6 +82,9 @@ export class BCOperation implements ICommerceProvider {
                             isPrePaid: false,
                             additionalServiceCharge: additionalServiceCharge,
                         };
+                        paymentStatus = {
+                            statusId: PaymentOrderStatus.AUTHORIZED,
+                        }
                     } else {
                         paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
                         orderModel = {
