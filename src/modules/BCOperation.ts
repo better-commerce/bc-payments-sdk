@@ -27,14 +27,15 @@ export class BCOperation implements ICommerceProvider {
             if (gateway === PaymentGateway.PAYPAL) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
-            const paymentMethod = await this.getPaymentMethod(gateway, data?.extras?.cookies);
+            const paymentMethod = await this.getPaymentMethod(gateway, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
             if (paymentMethod) {
                 const additionalServiceCharge = paymentMethod?.settings?.length
                     ? paymentMethod?.settings?.find((x: any) => x?.key === "AdditionalServiceCharge")?.value || "0"
                     : "0";
 
                 const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
-                const { result: orderResult }: any = Order.get(orderId);
+                const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+                const { headers, cookies, ...rest } = data?.extras;
                 if (orderResult) {
                     let paymentStatus: any;
                     const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
@@ -105,7 +106,7 @@ export class BCOperation implements ICommerceProvider {
                                 : null,
                             issuerUrl: null,
                             paRequest: null,
-                            pspSessionCookie: JSON.stringify(data?.extras),
+                            pspSessionCookie: JSON.stringify({ ...rest }),
                             pspResponseCode: null,
                             pspResponseMessage: null,
                             paymentGatewayId: paymentMethod?.id,
@@ -136,7 +137,7 @@ export class BCOperation implements ICommerceProvider {
                             isMoto: false,
                             upFrontPayment: false,
                             upFrontAmount: '0.00',
-                            isPrePaid: false,
+                            isPrePaid: !isCOD,
 
                             discountedTotal: bankOfferDetails?.discountedTotal ?? 0,
                             externalPromoCode: bankOfferDetails?.voucherCode ?? null,
@@ -155,7 +156,8 @@ export class BCOperation implements ICommerceProvider {
                             model: orderModel,
                             orderId: orderId,
                         };
-                        const { result: paymentResponseResult } = await PaymentResponse.put(paymentResponseInput);
+                        //console.log("paymentResponseInput", paymentResponseInput);
+                        const { result: paymentResponseResult } = await PaymentResponse.put(paymentResponseInput, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
                         if (paymentResponseResult) {
                             return isCancelled
                                 ? PaymentOrderStatus.DECLINED
@@ -182,23 +184,24 @@ export class BCOperation implements ICommerceProvider {
                 if (orderDetails?.status === PayPal.PaymentOrderStatus.COMPLETED) {
                     statusId = PaymentOrderStatus.PAID;
                 }
-                purchaseAmount = parseFloat(orderDetails?.purchase_units?.amount?.value.toString());
+                purchaseAmount = parseFloat(orderDetails?.purchase_units[0]?.amount?.value.toString());
                 break;
         }
 
         return { statusId, purchaseAmount };
     }
 
-    private async getPaymentMethod(gateway: string, cookies: any): Promise<any> {
+    private async getPaymentMethod(gateway: string, { headers, cookies }: any): Promise<any> {
 
         const data = {
             countryCode: cookies?.Country,
             currencyCode: cookies?.Currency,
             basketId: cookies?.basketId,
         }
-        const { result: paymentMethods }: any = PaymentMethod.getAll(data);
+        const { result: paymentMethods }: any = await PaymentMethod.getAll(data, { headers, cookies });
+        //console.log("paymentMethods", paymentMethods);
         if (paymentMethods?.length) {
-            const paymentMethod = paymentMethods?.find((x: any) => x?.displayName?.toLowerCase() === gateway?.toLowerCase());
+            const paymentMethod = paymentMethods?.find((x: any) => x?.systemName?.toLowerCase() === gateway?.toLowerCase());
             return paymentMethod;
         }
         return null;

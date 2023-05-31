@@ -6,9 +6,10 @@ import { Api } from "./api";
  */
 export class PaymentResponse {
 
-    static async put(data: any): Promise<any> {
+    static async put(data: any, { headers, cookies }: any): Promise<any> {
 
-        const paymentResponseResult = await Api.call(`api/v2/commerce/checkout/${data?.orderId}/payment-response`, RequestMethod.PUT, data);
+        const paymentResponseResult = await Api.call(`api/v2/commerce/checkout/${data?.orderId}/payment-response`, RequestMethod.PUT, data, headers, cookies);
+        //console.log("paymentResponseResult", paymentResponseResult);
         return paymentResponseResult;
     }
 }

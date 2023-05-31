@@ -8,14 +8,14 @@ import { RequestMethod } from "../../constants/enums/RequestMethod";
  */
 export class PaymentMethod {
 
-    static async getAll(data: any): Promise<any> {
+    static async getAll(data: any, { headers, cookies }: any): Promise<any> {
 
         const params = {
             country: data?.countryCode || BCEnvironment.getDefaultCountry(),
             currency: data?.currencyCode || BCEnvironment.getDefaultCurrency(),
             basketId: data?.basketId || Defaults.Guid.Value,
         }
-        const paymentResponseResult = await Api.call(`api/v2/commerce/checkout/payment-methods`, RequestMethod.GET, params);
+        const paymentResponseResult = await Api.call(`api/v2/commerce/checkout/payment-methods`, RequestMethod.GET, params, headers, cookies);
         return paymentResponseResult;
     }
 }

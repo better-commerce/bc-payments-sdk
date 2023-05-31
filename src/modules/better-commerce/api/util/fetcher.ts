@@ -101,7 +101,7 @@ const fetcher = async ({
         config.params = params;
     }
 
-    if (Object.keys(data).length) {
+    if (data && Object.keys(data).length) {
         config.data = data;
     }
     //console.log(config)

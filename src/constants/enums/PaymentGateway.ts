@@ -27,5 +27,23 @@ export module PayPal {
 
         // The order requires an action from the payer (e.g. 3DS authentication). Redirect the payer to the "rel":"payer-action" HATEOAS link returned as part of the response prior to authorizing or capturing the order.
         PAYER_ACTION_REQUIRED = "PAYER_ACTION_REQUIRED",
-    }
+    };
+};
+
+export module Juspay {
+
+    export enum PaymentOrderStatus {
+        AUTHORIZATION_FAILED = "AUTHORIZATION_FAILED",
+        AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED", // UPI
+        PENDING = "PENDING_VBV", // Card
+        VBV_SUCCESSFUL = "VBV_SUCCESSFUL",
+        CHARGED = "CHARGED",
+        JUSPAY_DECLINED = "JUSPAY_DECLINED",
+        AUTO_REFUNDED = "AUTO_REFUNDED",
+        CAPTURE_FAILED = "CAPTURE_FAILED",
+        NOT_FOUND = "NOT_FOUND",
+        AUTHORIZING = "AUTHORIZING",
+        STARTED = "STARTED",
+        CAPTURE_INITIATED = "CAPTURE_INITIATED",
+    };
 }
