@@ -1,5 +1,5 @@
 // Model Imports
-import { IPaymentProcessingData } from "./models/IPaymentProcessingData";
+import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
 
 // Other Imports
 import { Order } from "./better-commerce/Order";
