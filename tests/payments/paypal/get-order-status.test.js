@@ -1,4 +1,4 @@
-const { BCEnvironment, PaymentOperation, } = require("../../dist");
+const { BCEnvironment, PaymentOperation, } = require("../../../dist");
 
 const config = {
     systemName: "Paypal",
