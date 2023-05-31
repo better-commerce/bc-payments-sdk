@@ -77,5 +77,5 @@ BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbo
 ### Get PayPal Order Details
 
 ```
-const result = await BCPaymentOperation.getOrderDetails("<order_id>", settings);
+const result = await new PaymentOperation()("<order_id>");
 ```
