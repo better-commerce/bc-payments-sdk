@@ -2,8 +2,13 @@
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
+import { BasePayment } from "../../base/entity/BasePayment";
 
-export class ClearPayPayment implements IPaymentProvider {
+export class ClearPayPayment extends BasePayment implements IPaymentProvider {
+
+    async requestPayment(data: any): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 
     async getOrderDetails(data: any): Promise<any> {
         throw new Error("Not Implemented");

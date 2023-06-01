@@ -1,6 +1,6 @@
 # BetterCommerce Payments NodeJS SDK
 
-BetterCommerce's Payments NodeJS SDK is a complete solution for storefront clients that integrate payments. bc-payments-sdk is a single point interface for storefront clients for interacting with payment gateways. 
+BetterCommerce's Payments NodeJS SDK is a complete solution for storefront clients that integrate payments. `bc-payments-sdk` is a single point interface for storefront clients for interacting with payment gateways. 
 
 # Supported Payment Providers
 
@@ -20,7 +20,7 @@ It integrates SDK APIs for the following providers:
 | :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
 | API Collection  | https://www.checkout.com/docs/payments                          | Integrate with Checkout.com's various payment services. |
 | API SDK         | https://api-reference.checkout.com/#operation/getPaymentDetails |                                                         |
-| bc-checkout-sdk | TBP                                                             | NPM package for interaction with Checkout APIs          |
+| bc-checkout-sdk | https://github.com/better-commerce/bc-checkout-sdk      | NPM package for interaction with Checkout APIs          |
 
 ## ClearPay
 
@@ -32,8 +32,8 @@ It integrates SDK APIs for the following providers:
 
 ## Klarna
 
-| Name           | Reference                                                                           | Description                                    |
-| :------------- | :---------------------------------------------------------------------------------- | :--------------------------------------------- |
+| Name           | Reference      | Description                                |
+| :------------- | :------------- | :----------------------------------------- |
 | API Collection | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments        |                                                |
 | API SDK        | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id |                                                |
 | bc-klarna-sdk  | TBP                                                                                 | NPM package for interaction with Checkout APIs |
@@ -52,23 +52,72 @@ npm install @better-commerce/bc-payments-sdk
 
 **Use following snippet to initialize the SDK:**
 
+### PayPal
+
 ```
-const config = {
-    systemName: "Paypal"
-    [{
+const paypalConfig = {
+    systemName: "Paypal",
+    notificationUrl: "<Return_Url>",
+    settings: [{
         "key": "AccountCode",
-        "value": "<AccountCode>"
+        "value": "<Client_Id>"
     },
     {
         "key": "Signature",
-        "value": "<Signature>"
+        "value": "<Secret_Key>"
     },
     {
         "key": "UseSandbox",
         "value": "True"
+    },
+    {
+        "key": "CancelUrl",
+        "value": "<Cancel_Url>"
     }]
 };
-BCEnvironment.init(config);
+```
+
+### Checkout
+
+```
+const checkoutConfig = {
+    systemName: "Checkout",
+    notificationUrl: "<Return_Url>",
+    settings: [{
+        "key": "AccountCode",
+        "value": "<Public_Key>"
+    },
+    {
+        "key": "Signature",
+        "value": "<Secret_Key>"
+    },
+    {
+        "key": "MotoAccountCode",
+        "value": "<Client_Id>"
+    },
+    {
+        "key": "MotoSignature",
+        "value": "<Access_Secret>"
+    },
+    {
+        "key": "MotoUserName",
+        "value": "<Processing_Channel_Id>"
+    },
+    {
+        "key": "UseSandbox",
+        "value": "True"
+    },
+    {
+        "key": "CancelUrl",
+        "value": "<Cancel_Url>"
+    }]
+};
+```
+
+### Initialization
+
+```
+BCEnvironment.init(paypalConfig || checkoutConfig);
 BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbox: boolean]);
 ```
 

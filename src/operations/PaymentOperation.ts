@@ -10,6 +10,15 @@ import { PayPalPayment } from "../modules/payments/PayPalPayment";
  */
 export class PaymentOperation implements IPaymentProvider {
 
+    async requestPayment(data: any): Promise<any> {
+        const obj = this.getObject();
+        if (obj) {
+            const requestPaymentResult = await obj.requestPayment(data);
+            return requestPaymentResult;
+        }
+        return null;
+    }
+
     async getOrderDetails(data: any): Promise<any> {
         const obj = this.getObject();
         if (obj) {
