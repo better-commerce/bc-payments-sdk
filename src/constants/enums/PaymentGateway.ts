@@ -5,6 +5,7 @@ export enum PaymentGateway {
     MASTER_CARD = "mastercard",
     CLEAR_PAY = "clearpay",
     KLARNA = "klarna",
+    STRIPE = "stripe",
 };
 
 export module PayPal {
@@ -30,6 +31,23 @@ export module PayPal {
     };
 };
 
+export module Checkout {
+    export enum PaymentOrderStatus {
+        PENDING = "Pending",
+        AUTHORIZED = "Authorized",
+        CARD_VERIFIED = "Card Verified",
+        VOIDED = "Voided",
+        PARTIALLY_CAPTURED = "Partially Captured",
+        CAPTURED = "Captured",
+        PARTIALLY_REFUNDED = "Partially Refunded",
+        REFUNDED = "Refunded",
+        DECLINED = "Declined",
+        CANCELED = "Canceled",
+        EXPIRED = "Expired",
+        PAID = "Paid",
+    };
+};
+
 export module Juspay {
 
     export enum PaymentOrderStatus {
@@ -46,4 +64,4 @@ export module Juspay {
         STARTED = "STARTED",
         CAPTURE_INITIATED = "CAPTURE_INITIATED",
     };
-}
+};

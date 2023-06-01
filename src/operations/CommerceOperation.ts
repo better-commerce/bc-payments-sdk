@@ -5,11 +5,12 @@ import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProces
 import { Order } from "../modules/better-commerce/Order";
 import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
+import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { PaymentResponse } from "../modules/better-commerce/PaymentResponse";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentOrderStatus } from "../constants/enums/PaymentOrderStatus";
-import { PayPal, PaymentGateway } from "../constants/enums/PaymentGateway";
+import { Checkout, PayPal, PaymentGateway } from "../constants/enums/PaymentGateway";
 
 /**
  * Class {BCOperation}
@@ -179,11 +180,33 @@ export class CommerceOperation implements ICommerceProvider {
 
             case PaymentGateway.PAYPAL?.toLowerCase():
 
-                const orderDetails = await new PayPalPayment().getOrderDetails(data);
-                if (orderDetails?.status === PayPal.PaymentOrderStatus.COMPLETED) {
+                const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
+                if (paypalOrderDetails?.status === PayPal.PaymentOrderStatus.COMPLETED) {
                     statusId = PaymentOrderStatus.PAID;
                 }
-                purchaseAmount = parseFloat(orderDetails?.purchase_units[0]?.amount?.value.toString());
+                purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
+                break;
+
+            case PaymentGateway.CHECKOUT?.toLowerCase():
+
+                const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
+                if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.PAID) {
+                    statusId = PaymentOrderStatus.PAID;
+                } else {
+                    if (checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.DECLINED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.CANCELED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.EXPIRED) {
+                        statusId = PaymentOrderStatus.DECLINED;
+                    }
+                }
+                purchaseAmount = checkoutOrderDetails?.amount / 100.0;
+                break;
+
+            case PaymentGateway.CLEAR_PAY?.toLowerCase():
+                break;
+
+            case PaymentGateway.KLARNA?.toLowerCase():
+                break;
+
+            case PaymentGateway.STRIPE?.toLowerCase():
                 break;
         }
 
