@@ -1,5 +1,5 @@
 import { BCEnvironment } from "./base/config/BCEnvironment";
-import { PaymentType as CheckoutPaymentType, PaymentRequest as CheckoutPaymentRequest } from "bc-checkout-sdk";
+import { PaymentSourceType as CheckoutPaymentSourceType, PaymentType as CheckoutPaymentType, PaymentRequest as CheckoutPaymentRequest } from "bc-checkout-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 
 // Payments Module
@@ -15,7 +15,7 @@ import { CommerceOperation } from "./operations/CommerceOperation";
 export { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException };
 
 // Checkout Types
-export { CheckoutPaymentType, CheckoutPaymentRequest };
+export { CheckoutPaymentSourceType, CheckoutPaymentType, CheckoutPaymentRequest };
 
 // BC Types
 export { BCEnvironment, PaymentOperation };
