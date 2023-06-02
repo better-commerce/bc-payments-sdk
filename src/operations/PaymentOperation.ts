@@ -32,7 +32,6 @@ export class PaymentOperation implements IPaymentProvider {
     private getObject(): IPaymentProvider {
         let obj: IPaymentProvider;
         const config: any = BCEnvironment.getConfig();
-        console.log("getObject(): config", config);
         if (config?.systemName?.toLowerCase() === PaymentGateway.PAYPAL) {
             obj = new PayPalPayment();
         } else if (config?.systemName?.toLowerCase() === PaymentGateway.CHECKOUT) {
