@@ -25,7 +25,7 @@ export class CommerceOperation implements ICommerceProvider {
 
         if (gateway) {
             let paymentGatewayOrderTxnId = "";
-            if (gateway === PaymentGateway.PAYPAL || gateway === PaymentGateway.CHECKOUT) {
+            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase()) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
             const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });

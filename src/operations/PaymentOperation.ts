@@ -1,5 +1,6 @@
 import { BCEnvironment } from "../base/config/BCEnvironment";
 import { IPaymentProvider } from "../base/contracts/IPaymentProvider";
+import { PaymentGateway } from "../constants/enums/PaymentGateway";
 import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
@@ -31,13 +32,14 @@ export class PaymentOperation implements IPaymentProvider {
     private getObject(): IPaymentProvider {
         let obj: IPaymentProvider;
         const config: any = BCEnvironment.getConfig();
-        if (config?.systemName === "Paypal") {
+        console.log("getObject(): config", config);
+        if (config?.systemName?.toLowerCase() === PaymentGateway.PAYPAL) {
             obj = new PayPalPayment();
-        } else if (config?.systemName === "Checkout") {
+        } else if (config?.systemName?.toLowerCase() === PaymentGateway.CHECKOUT) {
             obj = new CheckoutPayment();
-        } else if (config?.systemName === "Clearpay") {
+        } else if (config?.systemName?.toLowerCase() === PaymentGateway.CLEAR_PAY) {
             obj = new ClearPayPayment();
-        } else if (config?.systemName === "Klarna") {
+        } else if (config?.systemName?.toLowerCase() === PaymentGateway.KLARNA) {
             obj = new KlarnaPayment();
         }
         return obj;
