@@ -1,8 +1,7 @@
 const { BCEnvironment } = require("../../dist");
 const { PaymentMethod } = require("../../dist/modules/better-commerce/PaymentMethod");
 
-BCEnvironment.init();
-BCEnvironment.withCredentials("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=");
+BCEnvironment.init("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=");
 const params = {
     countryCode: "GB",
     currencyCode: "GBP",

@@ -72,53 +72,19 @@ export class BCEnvironment {
      */
     static thisObj: any;
 
-    static init(config: any, baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
-        if (BCEnvironment.thisObj != undefined) {
+    static init(clientId: string, sharedSecret: string, config?: any, baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
+        /*if (BCEnvironment.thisObj != undefined) {
             return BCEnvironment.thisObj;
-        } else {
-            BCEnvironment.thisObj = new BCEnvironment();
-            BCEnvironment.baseAuthUrl = Endpoints.Base.AUTH_URL;
-            BCEnvironment.baseApiUrl = Endpoints.Base.API_URL;
-            BCEnvironment.defaultCountry = "GB";
-            BCEnvironment.defaultCurrency = "GBP";
-            BCEnvironment.defaultLanguage = "en-GB";
-            BCEnvironment.config = config;
-
-            if (baseAuthUrl) {
-                BCEnvironment.baseAuthUrl = baseAuthUrl;
-            }
-
-            if (baseApiUrl) {
-                BCEnvironment.baseApiUrl = baseApiUrl;
-            }
-
-            if (connectTimeout) {
-                BCEnvironment.connectTimeout = connectTimeout;
-            }
-
-            if (readTimeout) {
-                BCEnvironment.readTimeout = readTimeout;
-            }
-
-            if (defaultCountry) {
-                BCEnvironment.defaultCountry = defaultCountry;
-            }
-
-            if (defaultCurrency) {
-                BCEnvironment.defaultCurrency = defaultCurrency;
-            }
-
-            if (defaultLanguage) {
-                BCEnvironment.defaultLanguage = defaultLanguage;
-            }
-            return BCEnvironment.thisObj;
-        }
-    }
-
-    static withCredentials(clientId: string, sharedSecret: string, baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
+        } else {*/
+        BCEnvironment.thisObj = new BCEnvironment();
         BCEnvironment.clientId = clientId;
         BCEnvironment.sharedSecret = sharedSecret;
+        BCEnvironment.baseAuthUrl = Endpoints.Base.AUTH_URL;
         BCEnvironment.baseApiUrl = Endpoints.Base.API_URL;
+        BCEnvironment.defaultCountry = "GB";
+        BCEnvironment.defaultCurrency = "GBP";
+        BCEnvironment.defaultLanguage = "en-GB";
+        BCEnvironment.config = config;
 
         if (baseAuthUrl) {
             BCEnvironment.baseAuthUrl = baseAuthUrl;
@@ -147,7 +113,8 @@ export class BCEnvironment {
         if (defaultLanguage) {
             BCEnvironment.defaultLanguage = defaultLanguage;
         }
-        return this;
+        return BCEnvironment.thisObj;
+        //}
     }
 
     /**

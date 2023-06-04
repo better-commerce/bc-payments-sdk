@@ -26,8 +26,7 @@ const config = {
         "value": "/payment-notification/checkout/canceled"
     }]
 };
-BCEnvironment.init(config);
-BCEnvironment.withCredentials("ack_ikrzccuhjple7dmn7aozgoaeki", "kybvHsoZwlEBSNbR7Id0FyOKyUrggHBFLdDX2gZZ5E6BESRGHtKBN9zN9AG4U-BODolfLDYBXo-voy0-VMBykA");
+BCEnvironment.init("ack_ikrzccuhjple7dmn7aozgoaeki", "kybvHsoZwlEBSNbR7Id0FyOKyUrggHBFLdDX2gZZ5E6BESRGHtKBN9zN9AG4U-BODolfLDYBXo-voy0-VMBykA", config);
 new PaymentOperation().getOrderDetails("pay_pnrjrwewym6edlf7wiojsgsg7i").then(response => {
     console.log(JSON.stringify(response));
 });

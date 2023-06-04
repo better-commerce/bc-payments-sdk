@@ -1,8 +1,7 @@
 const { BCEnvironment, CommerceOperation } = require("../../../dist");
 
 const config = { id: 20, systemName: "Checkout", displayName: "Checkout", slug: null, isOnsite: false, "enabled": true, isBillingAddressRequired: true, "displayOrder": 0, iconCssClass: "Apps-checkout.png", description: "Our Payment Gateway will let you as a online business accept payments on your website smoothly and securely. We have configured our gateway with all leading shopping carts and are 3D secured to reduce fraudulent transactions", enableImmediateCapture: false, "forSubscription": false, inputType: 15, notificationUrl: "/payment-notification/checkout", settings: [{ key: "AccountCode", value: "pk_sbox_dzxjkk5cfnepqvn2wfqnz732oej" }, { key: "Signature", value: "sk_sbox_sfqi22eviwtbdki3itilxrkgmuc" }, { key: "MotoUserName", value: "pc_ptat6wn535wetjzlnbsmuims7m" }, { key: "MotoPassword", value: null }, { key: "MotoSignature", value: "kybvHsoZwlEBSNbR7Id0FyOKyUrggHBFLdDX2gZZ5E6BESRGHtKBN9zN9AG4U-BODolfLDYBXo-voy0-VMBykA" }, { key: "MotoAccountCode", value: "ack_ikrzccuhjple7dmn7aozgoaeki" }, { key: "TestUrl", value: null }, { key: "ProductionUrl", value: null }, { key: "CancelUrl", value: "/payment-notification/paypal/canceled" }, { key: "Version", value: null }, { key: "UseSandbox", value: "True" }, { key: "EnablePayInInstallment", value: "False" }, { key: "InstallmentDisplayText", value: null }, { key: "AdditionalServiceCharge", value: "0.0" }], "basicSettings": [{ key: "Version", value: null }, { key: "OrderTypes", value: "[\"Standard\",\"\"]" }], "message": null };
-BCEnvironment.init(config);
-BCEnvironment.withCredentials("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=");
+BCEnvironment.init("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=", config);
 const params = {
     isCOD: false,
     orderId: 'bb4ef462-a2ff-ed11-b1c2-000d3a211cf7',

@@ -1,5 +1,4 @@
 import fetcher from "./util/fetcher";
-import { RequestOptions } from "../../../base/entity/RequestOptions";
 import { RequestMethod } from "../../../constants/enums/RequestMethod";
 import { BCEnvironment } from "../../../base/config/BCEnvironment";
 
@@ -8,11 +7,7 @@ import { BCEnvironment } from "../../../base/config/BCEnvironment";
  */
 export class Api {
 
-    static async call(url: string, method: string, params?: any, headers?: any, cookies?: any, requestOptions?: RequestOptions): Promise<any> {
-
-        if (requestOptions == undefined) {
-            requestOptions = RequestOptions.createDefault();
-        }
+    static async call(url: string, method: string, params?: any, headers?: any, cookies?: any): Promise<any> {
 
         let options = {
             url,
