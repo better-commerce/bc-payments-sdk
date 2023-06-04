@@ -6,6 +6,10 @@ import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
 import { BasePayment } from "../../base/entity/BasePayment";
 
 export class CheckoutPayment extends BasePayment implements IPaymentProvider {
+    
+    initPaymentIntent(data: any) {
+        throw new Error("Method not implemented.");
+    }
 
     async requestPayment(data: any): Promise<any> {
         try {

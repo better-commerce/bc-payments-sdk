@@ -22,6 +22,14 @@ It integrates SDK APIs for the following providers:
 | API SDK         | https://api-reference.checkout.com/#operation/getPaymentDetails |                                                         |
 | bc-checkout-sdk | https://github.com/better-commerce/bc-checkout-sdk      | NPM package for interaction with Checkout APIs          |
 
+## Stripe
+
+| Name            | Reference                                                       | Description                                             |
+| :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
+| API Collection  | https://stripe.com/docs/payments                          | Integrate with Stripe's various payment services. |
+| API SDK         | https://stripe.com/docs/api |                                                         |
+| bc-checkout-sdk | https://github.com/better-commerce/bc-stripe-sdk      | NPM package for interaction with Stripe APIs          |
+
 ## ClearPay
 
 | Name            | Reference | Description                                    |

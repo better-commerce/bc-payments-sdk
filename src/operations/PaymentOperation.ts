@@ -5,11 +5,21 @@ import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
+import { StripePayment } from "../modules/payments/StripePayment";
 
 /**
  * Class {PaymentOperation}
  */
 export class PaymentOperation implements IPaymentProvider {
+
+    async initPaymentIntent(data: any): Promise<any> {
+        const obj = this.getObject();
+        if (obj) {
+            const requestPaymentResult = await obj.initPaymentIntent(data);
+            return requestPaymentResult;
+        }
+        return null;
+    }
 
     async requestPayment(data: any): Promise<any> {
         const obj = this.getObject();
@@ -41,6 +51,8 @@ export class PaymentOperation implements IPaymentProvider {
             obj = new ClearPayPayment();
         } else if (config?.systemName?.toLowerCase() === PaymentGateway.KLARNA) {
             obj = new KlarnaPayment();
+        } else if (config?.systemName?.toLowerCase() === PaymentGateway.STRIPE) {
+            obj = new StripePayment();
         }
         return obj;
     }

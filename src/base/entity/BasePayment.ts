@@ -1,12 +1,13 @@
 // Package Imports
 import { PayPalEnvironment } from "bc-paypal-sdk";
 import { CheckoutEnvironment } from "bc-checkout-sdk";
+import { StripeEnvironment } from "bc-stripe-sdk";
 
 // Other Imports
-import { PaymentGateway } from "../../constants/enums/PaymentGateway";
-import { stringToBoolean } from "../../utils/parse-util";
-import { BCEnvironment } from "../config/BCEnvironment";
 import { Defaults } from "../../constants/constants";
+import { BCEnvironment } from "../config/BCEnvironment";
+import { stringToBoolean } from "../../utils/parse-util";
+import { PaymentGateway } from "../../constants/enums/PaymentGateway";
 
 export abstract class BasePayment {
 
@@ -37,6 +38,15 @@ export abstract class BasePayment {
 
                     // Init Env
                     CheckoutEnvironment.initServer(clientId, accessSecret, processingChannelId, isSandbox);
+                    return true;
+                }
+            } else if (config?.systemName?.toLowerCase() === PaymentGateway.STRIPE.toLowerCase()) {
+                if (config?.settings?.length) {
+                    const publicKey = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                    const privateKey = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+
+                    // Init Env
+                    StripeEnvironment.init(publicKey, privateKey);
                     return true;
                 }
             }

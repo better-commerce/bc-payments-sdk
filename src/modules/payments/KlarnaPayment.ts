@@ -9,6 +9,10 @@ import { BasePayment } from "../../base/entity/BasePayment";
  */
 export class KlarnaPayment extends BasePayment implements IPaymentProvider {
 
+    initPaymentIntent(data: any) {
+        throw new Error("Method not implemented.");
+    }
+
     async requestPayment(data: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
