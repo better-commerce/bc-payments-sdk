@@ -6,6 +6,14 @@ BetterCommerce's Payments NodeJS SDK is a complete solution for storefront clien
 
 It integrates SDK APIs for the following providers:
 
+| Payment Gateway           | Implementation Approach              |
+| :------------- | :------------------------------------------------------- |
+| PayPal           | Redirect Method              |
+| Checkout         | Frame              |
+| Stripe           | Frame              |
+| ClearPay           | Redirect Method              |
+| Klarna           | Redirect Method              |
+
 ## PayPal
 
 | Name           | Reference                                                | Description                                                                   |
