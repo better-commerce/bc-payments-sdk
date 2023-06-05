@@ -122,10 +122,35 @@ const checkoutConfig = {
 };
 ```
 
+### Stripe
+
+```
+const stripeConfig = {
+    systemName: "Stripe",
+    notificationUrl: "<Return_Url>",
+    settings: [{
+        "key": "AccountCode",
+        "value": "<Public_Key>"
+    },
+    {
+        "key": "Signature",
+        "value": "<Secret_Key>"
+    },
+    {
+        "key": "UseSandbox",
+        "value": "True"
+    },
+    {
+        "key": "CancelUrl",
+        "value": "<Cancel_Url>"
+    }]
+};
+```
+
 ### Initialization
 
 ```
-BCEnvironment.init(paypalConfig || checkoutConfig);
+BCEnvironment.init(paypalConfig || checkoutConfig || stripeConfig);
 BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbox: boolean]);
 ```
 

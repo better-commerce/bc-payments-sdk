@@ -10,7 +10,8 @@ import { PaymentResponse } from "../modules/better-commerce/PaymentResponse";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentOrderStatus } from "../constants/enums/PaymentOrderStatus";
-import { Checkout, PayPal, PaymentGateway } from "../constants/enums/PaymentGateway";
+import { Checkout, PayPal, PaymentGateway, Stripe } from "../constants/enums/PaymentGateway";
+import { StripePayment } from "../modules/payments/StripePayment";
 
 /**
  * Class {BCOperation}
@@ -25,7 +26,7 @@ export class CommerceOperation implements ICommerceProvider {
 
         if (gateway) {
             let paymentGatewayOrderTxnId = "";
-            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase()) {
+            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase()) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
             const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
@@ -207,6 +208,12 @@ export class CommerceOperation implements ICommerceProvider {
                 break;
 
             case PaymentGateway.STRIPE?.toLowerCase():
+
+                const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
+                if (stripeOrderDetails?.status?.toLowerCase() === Stripe.PaymentOrderStatus.SUCCEEDED?.toLowerCase()) {
+                    statusId = PaymentOrderStatus.PAID;
+                }
+                purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;
                 break;
         }
 

@@ -25,7 +25,16 @@ export class StripePayment extends BasePayment implements IPaymentProvider {
         throw new Error("Method not implemented.");
     }
 
-    getOrderDetails(data: any) {
-        throw new Error("Method not implemented.");
+    async getOrderDetails(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const intentResult = await new Payment().getDetails(data);
+                return intentResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 }

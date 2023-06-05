@@ -48,6 +48,14 @@ export module Checkout {
     };
 };
 
+export module Stripe {
+    export enum PaymentOrderStatus {
+        SUCCEEDED = "succeeded",
+        PROCESSING = "processing",
+        UNSUCCESSFUL = "requires_payment_method",
+    };
+}
+
 export module Juspay {
 
     export enum PaymentOrderStatus {
