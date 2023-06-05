@@ -34,16 +34,16 @@ It integrates SDK APIs for the following providers:
 
 | Name            | Reference | Description                                    |
 | :-------------- | :-------- | :--------------------------------------------- |
-| API Collection  |           |                                                |
-| API SDK         |           |                                                |
+| API Collection  | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments          |                                                |
+| API SDK         | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id          |                                                |
 | bc-clearpay-sdk | TBP       | NPM package for interaction with Checkout APIs |
 
 ## Klarna
 
 | Name           | Reference      | Description                                |
 | :------------- | :------------- | :----------------------------------------- |
-| API Collection | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments        |                                                |
-| API SDK        | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id |                                                |
+| API Collection |         |                                                |
+| API SDK        |  |                                                |
 | bc-klarna-sdk  | TBP                                                                                 | NPM package for interaction with Checkout APIs |
 
 Use below command for package installation:
