@@ -3,7 +3,7 @@ import { PaymentSourceType as CheckoutPaymentSourceType, PaymentType as Checkout
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 
 // Payments Module
-import { PaymentOperation } from "./operations/PaymentOperation";
+import { PaymentOperation } from "./operations/PaymentOperation/PaymentOperation";
 
 // BetterCommerce Module
 import { CommerceOperation } from "./operations/CommerceOperation";

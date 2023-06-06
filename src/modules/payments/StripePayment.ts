@@ -7,6 +7,12 @@ import { BasePayment } from "../../base/entity/BasePayment";
 
 export class StripePayment extends BasePayment implements IPaymentProvider {
 
+    /**
+     * Create a PaymentIntent. Creates a PaymentIntent object.
+     * API Reference - https://stripe.com/docs/api/payment_intents/create
+     * @param data {Object}
+     * @returns 
+     */
     async initPaymentIntent(data: any): Promise<any> {
 
         try {
@@ -25,6 +31,12 @@ export class StripePayment extends BasePayment implements IPaymentProvider {
         throw new Error("Method not implemented.");
     }
 
+    /**
+     * Retrieve a PaymentIntent. Retrieves the details of a PaymentIntent that has previously been created.
+     * API Reference - https://stripe.com/docs/api/payment_intents/retrieve
+     * @param data {String}
+     * @returns 
+     */
     async getOrderDetails(data: any): Promise<any> {
         try {
             if (super.initSDK()) {

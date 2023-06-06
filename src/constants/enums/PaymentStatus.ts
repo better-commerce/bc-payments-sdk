@@ -1,4 +1,4 @@
-export enum PaymentOrderStatus {
+export enum PaymentStatus {
     PENDING = 0,
     AUTHORIZED = 1,
     PAID = 2,

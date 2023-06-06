@@ -9,9 +9,10 @@ import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { PaymentResponse } from "../modules/better-commerce/PaymentResponse";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
-import { PaymentOrderStatus } from "../constants/enums/PaymentOrderStatus";
+import { PaymentStatus } from "../constants/enums/PaymentStatus";
 import { Checkout, PayPal, PaymentGateway, Stripe } from "../constants/enums/PaymentGateway";
 import { StripePayment } from "../modules/payments/StripePayment";
+import { OrderStatus } from "../constants/enums/OrderStatus";
 
 /**
  * Class {BCOperation}
@@ -51,8 +52,8 @@ export class CommerceOperation implements ICommerceProvider {
                             balanceAmount: orderAmount,
                             isValid: true,
                             status: !isCancelled
-                                ? PaymentOrderStatus.AUTHORIZED
-                                : PaymentOrderStatus.DECLINED,
+                                ? PaymentStatus.AUTHORIZED
+                                : PaymentStatus.DECLINED,
                             authCode: null,
                             issuerUrl: null,
                             paRequest: null,
@@ -86,7 +87,7 @@ export class CommerceOperation implements ICommerceProvider {
                             additionalServiceCharge: additionalServiceCharge,
                         };
                         paymentStatus = {
-                            statusId: PaymentOrderStatus.AUTHORIZED,
+                            statusId: PaymentStatus.AUTHORIZED,
                         }
                     } else {
                         paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
@@ -102,7 +103,7 @@ export class CommerceOperation implements ICommerceProvider {
                             isValid: true,
                             status: !isCancelled
                                 ? paymentStatus?.statusId
-                                : PaymentOrderStatus.DECLINED,
+                                : PaymentStatus.DECLINED,
                             authCode: !isCancelled
                                 ? paymentGatewayOrderTxnId
                                 : null,
@@ -161,8 +162,10 @@ export class CommerceOperation implements ICommerceProvider {
                         const { result: paymentResponseResult } = await PaymentResponse.put(paymentResponseInput, { cookies: data?.extras?.cookies });
                         if (paymentResponseResult) {
                             return isCancelled
-                                ? PaymentOrderStatus.DECLINED
-                                : paymentStatus?.statusId;
+                                ? PaymentStatus.DECLINED
+                                : paymentResponseResult?.orderStatusCode === OrderStatus.APPROVED
+                                    ? PaymentStatus.PAID
+                                    : PaymentStatus.PENDING; //paymentStatus?.statusId
                         }
 
                     }
@@ -175,7 +178,7 @@ export class CommerceOperation implements ICommerceProvider {
 
     private async getPaymentStatus(gateway: string, data: any): Promise<{ statusId: number, purchaseAmount: number }> {
         let purchaseAmount = 0;
-        let statusId = PaymentOrderStatus.PENDING;
+        let statusId = PaymentStatus.PENDING;
 
         switch (gateway?.toLowerCase()) {
 
@@ -183,7 +186,7 @@ export class CommerceOperation implements ICommerceProvider {
 
                 const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
                 if (paypalOrderDetails?.status === PayPal.PaymentOrderStatus.COMPLETED) {
-                    statusId = PaymentOrderStatus.PAID;
+                    statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
                 break;
@@ -192,10 +195,10 @@ export class CommerceOperation implements ICommerceProvider {
 
                 const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
                 if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.PAID) {
-                    statusId = PaymentOrderStatus.PAID;
+                    statusId = PaymentStatus.PAID;
                 } else {
                     if (checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.DECLINED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.CANCELED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.EXPIRED) {
-                        statusId = PaymentOrderStatus.DECLINED;
+                        statusId = PaymentStatus.DECLINED;
                     }
                 }
                 purchaseAmount = checkoutOrderDetails?.amount / 100.0;
@@ -211,7 +214,7 @@ export class CommerceOperation implements ICommerceProvider {
 
                 const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
                 if (stripeOrderDetails?.status?.toLowerCase() === Stripe.PaymentOrderStatus.SUCCEEDED?.toLowerCase()) {
-                    statusId = PaymentOrderStatus.PAID;
+                    statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;
                 break;
