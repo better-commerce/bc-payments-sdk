@@ -58,4 +58,4 @@ export enum OrderStatus {
     REQUEST_A_CALL = 209,
     VERIFY_PAYPAL_EMAIL_ADDRESS = 210,
     DELIVERED = 211,
-}
+};
