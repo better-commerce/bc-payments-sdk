@@ -1,8 +1,8 @@
 // Model Imports
-import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
+import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData"; 
 
 // Other Imports
-import { Order } from "../modules/better-commerce/Order";
+import { Order } from "../modules/better-commerce/Order"; 
 import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
 import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
@@ -15,9 +15,9 @@ import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 
 /**
- * Class {BCOperation}
+ * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
  */
-export class CommerceOperation implements ICommerceProvider {
+export class BetterCommerceOperation implements ICommerceProvider {
 
     async processPayment(data: IPaymentProcessingData): Promise<any> {
 
@@ -185,7 +185,7 @@ export class CommerceOperation implements ICommerceProvider {
             case PaymentGateway.PAYPAL?.toLowerCase():
 
                 const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
-                if (paypalOrderDetails?.status === PayPal.PaymentOrderStatus.COMPLETED) {
+                if (paypalOrderDetails?.status === PayPal.PaymentStatus.COMPLETED) {
                     statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
@@ -194,10 +194,10 @@ export class CommerceOperation implements ICommerceProvider {
             case PaymentGateway.CHECKOUT?.toLowerCase():
 
                 const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
-                if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.PAID) {
+                if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === Checkout.PaymentStatus.PAID) {
                     statusId = PaymentStatus.PAID;
                 } else {
-                    if (checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.DECLINED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.CANCELED || checkoutOrderDetails?.status === Checkout.PaymentOrderStatus.EXPIRED) {
+                    if (checkoutOrderDetails?.status === Checkout.PaymentStatus.DECLINED || checkoutOrderDetails?.status === Checkout.PaymentStatus.CANCELED || checkoutOrderDetails?.status === Checkout.PaymentStatus.EXPIRED) {
                         statusId = PaymentStatus.DECLINED;
                     }
                 }
@@ -213,7 +213,7 @@ export class CommerceOperation implements ICommerceProvider {
             case PaymentGateway.STRIPE?.toLowerCase():
 
                 const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
-                if (stripeOrderDetails?.status?.toLowerCase() === Stripe.PaymentOrderStatus.SUCCEEDED?.toLowerCase()) {
+                if (stripeOrderDetails?.status?.toLowerCase() === Stripe.PaymentStatus.SUCCEEDED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;

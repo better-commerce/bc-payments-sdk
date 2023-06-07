@@ -54,7 +54,7 @@ export class KlarnaPayment extends BasePaymentProvider implements IPaymentProvid
     }
 
     /**
-     * Get order. An order that has the given order id.
+     * Get the details of an order. An order that has the given order id.
      * API Reference - https://docs.klarna.com/api/ordermanagement/#operation/getOrder
      * @param data 
      * @returns 

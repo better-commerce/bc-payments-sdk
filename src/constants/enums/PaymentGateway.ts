@@ -9,7 +9,7 @@ export enum PaymentGateway {
 };
 
 export module PayPal {
-    export enum PaymentOrderStatus {
+    export enum PaymentStatus {
 
         // The order was created with the specified context.
         CREATED = "CREATED",
@@ -32,7 +32,7 @@ export module PayPal {
 };
 
 export module Checkout {
-    export enum PaymentOrderStatus {
+    export enum PaymentStatus {
         PENDING = "Pending",
         AUTHORIZED = "Authorized",
         CARD_VERIFIED = "Card Verified",
@@ -49,12 +49,23 @@ export module Checkout {
 };
 
 export module Stripe {
-    export enum PaymentOrderStatus {
+    export enum PaymentStatus {
         SUCCEEDED = "succeeded",
         PROCESSING = "processing",
         UNSUCCESSFUL = "requires_payment_method",
     };
-}
+};
+
+export module Klarna {
+    export enum PaymentStatus {
+        AUTHORIZED = "AUTHORIZED",
+        PART_CAPTURED = "PART_CAPTURED",
+        CAPTURED = "CAPTURED",
+        CANCELLED = "CANCELLED",
+        EXPIRED = "EXPIRED",
+        CLOSED = "CLOSED",
+    };
+};
 
 export module Juspay {
 
