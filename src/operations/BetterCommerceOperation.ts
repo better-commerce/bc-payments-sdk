@@ -13,6 +13,7 @@ import { PaymentStatus } from "../constants/enums/PaymentStatus";
 import { Checkout, Klarna, PayPal, PaymentGateway, Stripe } from "../constants/enums/PaymentGateway";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
+import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 
 /**
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
@@ -209,7 +210,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentGateway.KLARNA?.toLowerCase():
 
-                const klarnaOrderDetails = await new StripePayment().getOrderDetails(data);
+                const klarnaOrderDetails = await new KlarnaPayment().getOrderDetails(data);
                 if (klarnaOrderDetails?.status?.toLowerCase() === Klarna.PaymentStatus.AUTHORIZED?.toLowerCase() || klarnaOrderDetails?.status?.toLowerCase() === Klarna.PaymentStatus.CAPTURED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 }
