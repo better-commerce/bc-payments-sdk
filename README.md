@@ -8,11 +8,11 @@ It integrates SDK APIs for the following providers:
 
 | Payment Gateway           | Implementation Approach              |
 | :------------- | :------------------------------------------------------- |
-| PayPal           | Redirect Method              |
-| Checkout         | Frame              |
-| Stripe           | Frame              |
+| PayPal           | Client-side Modal Widget              |
+| Checkout         | Client-side Frame              |
+| Stripe           | Client-side Frame              |
 | ClearPay           | Redirect Method              |
-| Klarna           | Redirect Method              |
+| Klarna           | Client-side Modal Widget              |
 
 ## PayPal
 
