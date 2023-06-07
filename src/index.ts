@@ -6,7 +6,7 @@ import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderL
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 
 // Payments Module
-import { PaymentOperation } from "./operations/PaymentOperation/PaymentOperation";
+import { PaymentOperation } from "./operations/PaymentOperation";
 
 // BetterCommerce Module
 import { CommerceOperation } from "./operations/CommerceOperation";

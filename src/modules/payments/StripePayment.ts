@@ -3,9 +3,9 @@ import { Payment } from "bc-stripe-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
-import { BasePayment } from "../../base/entity/BasePayment";
+import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
-export class StripePayment extends BasePayment implements IPaymentProvider {
+export class StripePayment extends BasePaymentProvider implements IPaymentProvider {
 
     /**
      * Create a PaymentIntent. Creates a PaymentIntent object.
@@ -40,8 +40,8 @@ export class StripePayment extends BasePayment implements IPaymentProvider {
     async getOrderDetails(data: any): Promise<any> {
         try {
             if (super.initSDK()) {
-                const intentResult = await new Payment().getDetails(data);
-                return intentResult;
+                const orderDetailsResult = await new Payment().getDetails(data);
+                return orderDetailsResult;
             }
             return null;
         }

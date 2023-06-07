@@ -1,5 +1,5 @@
-import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
-import { BasePaymentOperation } from "../../base/entity/BasePaymentOperation";
+import { IPaymentProvider } from "../base/contracts/IPaymentProvider";
+import { BasePaymentOperation } from "../base/entity/BasePaymentOperation";
 
 /**
  * Class {PaymentOperation} encapsulates generic payment provider operations.

@@ -2,14 +2,14 @@
 import { Payment } from "bc-klarna-sdk";
 
 // Other Imports
-import { BasePayment } from "../../base/entity/BasePayment";
+import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { IKlarnaPaymentProvider } from "../../base/contracts/GatewayProviders/IKlarnaPaymentProvider";
 
 /**
  * Class {KlarnaPayment}
  */
-export class KlarnaPayment extends BasePayment implements IPaymentProvider, IKlarnaPaymentProvider {
+export class KlarnaPayment extends BasePaymentProvider implements IPaymentProvider, IKlarnaPaymentProvider {
 
     /**
      * Initiate a payment. 
@@ -53,7 +53,23 @@ export class KlarnaPayment extends BasePayment implements IPaymentProvider, IKla
         throw new Error("Method not implemented.");
     }
 
+    /**
+     * Get order. An order that has the given order id.
+     * API Reference - https://docs.klarna.com/api/ordermanagement/#operation/getOrder
+     * @param data 
+     * @returns 
+     */
     async getOrderDetails(data: any): Promise<any> {
-        throw new Error("Not Implemented");
+        try {
+            if (super.initSDK()) {
+                const payment = new Payment();
+                const orderDetailsResult = await payment.getDetails(data);
+                return orderDetailsResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 }

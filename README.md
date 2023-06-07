@@ -34,7 +34,7 @@ It integrates SDK APIs for the following providers:
 
 | Name            | Reference                                                       | Description                                             |
 | :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
-| API Collection  | https://stripe.com/docs/payments                          | Integrate with Stripe's various payment services. |
+| Widget Integration  | https://stripe.com/docs/payments/accept-a-payment                          | Integrate with Stripe's various payment services. |
 | API SDK         | https://stripe.com/docs/api |                                                         |
 | bc-checkout-sdk | https://github.com/better-commerce/bc-stripe-sdk      | NPM package for interaction with Stripe APIs          |
 
@@ -44,15 +44,15 @@ It integrates SDK APIs for the following providers:
 | :-------------- | :-------- | :--------------------------------------------- |
 | API Collection  | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments          |                                                |
 | API SDK         | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id          |                                                |
-| bc-clearpay-sdk | TBP       | NPM package for interaction with Checkout APIs |
+| bc-clearpay-sdk | TBP       | NPM package for interaction with ClearPay APIs |
 
 ## Klarna
 
 | Name           | Reference      | Description                                |
 | :------------- | :------------- | :----------------------------------------- |
-| API Collection |         |                                                |
-| API SDK        |  |                                                |
-| bc-klarna-sdk  | TBP                                                                                 | NPM package for interaction with Checkout APIs |
+| Widget Integration |  https://docs.klarna.com/klarna-payments/integrate-with-klarna-payments/       |                                                |
+| API SDK        | https://docs.klarna.com/api |                                                |
+| bc-klarna-sdk  | https://github.com/better-commerce/bc-klarna-sdk         | NPM package for interaction with Klarna APIs |
 
 Use below command for package installation:
 
@@ -155,10 +155,36 @@ const stripeConfig = {
 };
 ```
 
+### Klarna
+
+```
+const klarnaConfig = {
+    systemName: "Klarna",
+    notificationUrl: "<Return_Url>",
+    settings: [{
+        "key": "AccountCode",
+        "value": "<API_User_Id>"
+    },
+    {
+        "key": "Signature",
+        "value": "<API_Password>"
+    },
+    {
+        "key": "UseSandbox",
+        "value": "True"
+    },
+    {
+        "key": "CancelUrl",
+        "value": "<Cancel_Url>"
+    }]
+};
+```
+
+
 ### Initialization
 
 ```
-BCEnvironment.init(paypalConfig || checkoutConfig || stripeConfig);
+BCEnvironment.init(paypalConfig || checkoutConfig || stripeConfig || klarnaConfig);
 BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbox: boolean]);
 ```
 
@@ -167,5 +193,5 @@ BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbo
 ### Get PayPal Order Details
 
 ```
-const result = await new PaymentOperation()("<order_id>");
+const result = await new PaymentOperation().getOrderDetails("<order_id>");
 ```

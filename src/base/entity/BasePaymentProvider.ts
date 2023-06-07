@@ -10,10 +10,9 @@ import { stringToBoolean } from "../../utils/parse-util";
 import { PaymentGateway } from "../../constants/enums/PaymentGateway";
 import { KlarnaEnvironment } from "bc-klarna-sdk";
 
-export abstract class BasePayment {
+export abstract class BasePaymentProvider {
 
     protected initSDK() {
-        //PaymentGateway
 
         const config: any = BCEnvironment.getConfig();
         if (config?.systemName && config?.settings?.length) {

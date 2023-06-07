@@ -1,3 +1,3 @@
-import { PaymentOperation } from "../operations/PaymentOperation/PaymentOperation";
+import { PaymentOperation } from "../operations/PaymentOperation";
 
 export { PaymentOperation as Payment, };

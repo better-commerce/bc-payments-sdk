@@ -2,9 +2,9 @@
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
-import { BasePayment } from "../../base/entity/BasePayment";
+import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
-export class ClearPayPayment extends BasePayment implements IPaymentProvider {
+export class ClearPayPayment extends BasePaymentProvider implements IPaymentProvider {
 
     initPaymentIntent(data: any) {
         throw new Error("Method not implemented.");

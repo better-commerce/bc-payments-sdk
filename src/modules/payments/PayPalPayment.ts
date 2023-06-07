@@ -3,9 +3,9 @@ import { Order } from "bc-paypal-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
-import { BasePayment } from "../../base/entity/BasePayment";
+import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
-export class PayPalPayment extends BasePayment implements IPaymentProvider {
+export class PayPalPayment extends BasePaymentProvider implements IPaymentProvider {
 
     initPaymentIntent(data: any) {
         throw new Error("Method not implemented.");
@@ -26,8 +26,8 @@ export class PayPalPayment extends BasePayment implements IPaymentProvider {
         try {
             if (super.initSDK()) {
                 const order = new Order();
-                const orderResult = await order.get(data);
-                return orderResult;
+                const orderDetailsResult = await order.get(data);
+                return orderDetailsResult;
             }
             return null;
         }

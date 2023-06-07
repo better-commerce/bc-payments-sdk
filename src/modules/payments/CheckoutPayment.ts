@@ -3,9 +3,9 @@ import { Payment } from "bc-checkout-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
-import { BasePayment } from "../../base/entity/BasePayment";
+import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
-export class CheckoutPayment extends BasePayment implements IPaymentProvider {
+export class CheckoutPayment extends BasePaymentProvider implements IPaymentProvider {
 
     initPaymentIntent(data: any) {
         throw new Error("Method not implemented.");
@@ -41,8 +41,8 @@ export class CheckoutPayment extends BasePayment implements IPaymentProvider {
         try {
             if (super.initSDK()) {
                 const payment = new Payment();
-                const paymentRequestResult = await payment.getDetails(data);
-                return paymentRequestResult;
+                const orderDetailsResult = await payment.getDetails(data);
+                return orderDetailsResult;
             }
             return null;
         }
