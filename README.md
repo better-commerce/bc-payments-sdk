@@ -20,7 +20,7 @@ It integrates SDK APIs for the following providers:
 | :------------- | :------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | API Collection | https://developer.paypal.com/api/rest/current-resources/ | Create and manage your site's payment functions using PayPal API collections. |
 | API v2 SDK     | https://developer.paypal.com/docs/api/orders/v2/         |                                                                               |
-| bc-paypal-sdk  | https://github.com/better-commerce/bc-paypal-sdk         | NPM package for interaction with PayPal APIs                                  |
+| NPM Package  | https://github.com/better-commerce/bc-paypal-sdk         | Node.js SDK for interaction with PayPal APIs - @better-commerce/bc-paypal-sdk                                  |
 
 ## Checkout
 
@@ -28,7 +28,7 @@ It integrates SDK APIs for the following providers:
 | :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
 | API Collection  | https://www.checkout.com/docs/payments                          | Integrate with Checkout.com's various payment services. |
 | API SDK         | https://api-reference.checkout.com/#operation/getPaymentDetails |                                                         |
-| bc-checkout-sdk | https://github.com/better-commerce/bc-checkout-sdk      | NPM package for interaction with Checkout APIs          |
+| NPM Package | https://github.com/better-commerce/bc-checkout-sdk      | Node.js SDK for interaction with Checkout APIs - @better-commerce/bc-checkout-sdk          |
 
 ## Stripe
 
@@ -36,7 +36,7 @@ It integrates SDK APIs for the following providers:
 | :-------------- | :-------------------------------------------------------------- | :------------------------------------------------------ |
 | Widget Integration  | https://stripe.com/docs/payments/accept-a-payment                          | Integrate with Stripe's various payment services. |
 | API SDK         | https://stripe.com/docs/api |                                                         |
-| bc-checkout-sdk | https://github.com/better-commerce/bc-stripe-sdk      | NPM package for interaction with Stripe APIs          |
+| NPM Package | https://github.com/better-commerce/bc-stripe-sdk      | Node.js SDK for interaction with Stripe APIs - @better-commerce/bc-checkout-sdk          |
 
 ## ClearPay
 
@@ -44,7 +44,7 @@ It integrates SDK APIs for the following providers:
 | :-------------- | :-------- | :--------------------------------------------- |
 | API Collection  | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments          |                                                |
 | API SDK         | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id          |                                                |
-| bc-clearpay-sdk | TBP       | NPM package for interaction with ClearPay APIs |
+| NPM Package | TBP       | NPM package for interaction with ClearPay APIs - @better-commerce/bc-clearpay-sdk |
 
 ## Klarna
 
@@ -52,7 +52,7 @@ It integrates SDK APIs for the following providers:
 | :------------- | :------------- | :----------------------------------------- |
 | Widget Integration |  https://docs.klarna.com/klarna-payments/integrate-with-klarna-payments/       |                                                |
 | API SDK        | https://docs.klarna.com/api |                                                |
-| bc-klarna-sdk  | https://github.com/better-commerce/bc-klarna-sdk         | NPM package for interaction with Klarna APIs |
+| NPM Package | https://github.com/better-commerce/bc-klarna-sdk         | Node.js SDK for interaction with Klarna APIs - @better-commerce/bc-klarna-sdk |
 
 Use below command for package installation:
 
