@@ -1,8 +1,8 @@
 // Model Imports
-import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData"; 
+import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
 
 // Other Imports
-import { Order } from "../modules/better-commerce/Order"; 
+import { Order } from "../modules/better-commerce/Order";
 import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
 import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
@@ -10,7 +10,7 @@ import { PaymentResponse } from "../modules/better-commerce/PaymentResponse";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentStatus } from "../constants/enums/PaymentStatus";
-import { Checkout, PayPal, PaymentGateway, Stripe } from "../constants/enums/PaymentGateway";
+import { Checkout, Klarna, PayPal, PaymentGateway, Stripe } from "../constants/enums/PaymentGateway";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 
@@ -27,7 +27,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
         if (gateway) {
             let paymentGatewayOrderTxnId = "";
-            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase()) {
+            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.KLARNA?.toLowerCase()) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
             const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
@@ -208,6 +208,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 break;
 
             case PaymentGateway.KLARNA?.toLowerCase():
+
+                const klarnaOrderDetails = await new StripePayment().getOrderDetails(data);
+                if (klarnaOrderDetails?.status?.toLowerCase() === Klarna.PaymentStatus.AUTHORIZED?.toLowerCase() || klarnaOrderDetails?.status?.toLowerCase() === Klarna.PaymentStatus.CAPTURED?.toLowerCase()) {
+                    statusId = PaymentStatus.PAID;
+                }
+                purchaseAmount = parseFloat(klarnaOrderDetails?.order_amount.toString()) / 100.0;
                 break;
 
             case PaymentGateway.STRIPE?.toLowerCase():
