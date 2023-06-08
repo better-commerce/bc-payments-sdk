@@ -4,7 +4,7 @@ import { Defaults } from "../../constants/constants";
 import { RequestMethod } from "../../constants/enums/RequestMethod";
 
 /**
- * Class {PaymentResponse}
+ * Class {Order}
  */
 export class Order {
 

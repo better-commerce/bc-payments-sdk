@@ -4,7 +4,7 @@ import { Defaults } from "../../constants/constants";
 import { RequestMethod } from "../../constants/enums/RequestMethod";
 
 /**
- * Class {PaymentResponse}
+ * Class {PaymentMethod}
  */
 export class PaymentMethod {
 
@@ -15,7 +15,7 @@ export class PaymentMethod {
             currency: data?.currencyCode || BCEnvironment.getDefaultCurrency(),
             basketId: data?.basketId || Defaults.Guid.Value,
         }
-        const paymentResponseResult = await Api.call(`api/v2/commerce/checkout/payment-methods`, RequestMethod.GET, params, headers, cookies);
-        return paymentResponseResult;
+        const paymentMethodsResult = await Api.call(`api/v2/commerce/checkout/payment-methods`, RequestMethod.GET, params, headers, cookies);
+        return paymentMethodsResult;
     }
 }
