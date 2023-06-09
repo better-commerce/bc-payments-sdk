@@ -1,4 +1,5 @@
 export enum PaymentGateway {
+    COD = "cod",
     JUSPAY = "juspay",
     PAYPAL = "paypal",
     CHECKOUT = "checkout",
