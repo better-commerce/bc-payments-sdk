@@ -11,7 +11,7 @@ It integrates SDK APIs for the following providers:
 | PayPal           | Client-side **Modal Widget**              |
 | Checkout         | Client-side **Frame Widget**              |
 | Stripe           | Client-side **Frame Widget**              |
-| ClearPay           |               |
+| ClearPay         |  Client-side **Modal Widget + Redirect**             |
 | Klarna           | Client-side **Modal Widget**              |
 
 ## PayPal
@@ -42,9 +42,9 @@ It integrates SDK APIs for the following providers:
 
 | Name            | Reference | Description                                    |
 | :-------------- | :-------- | :--------------------------------------------- |
-| API Collection  | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments          |                                                |
-| API SDK         | https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id          |                                                |
-| NPM Package | TBP       | NPM package for interaction with ClearPay APIs - @better-commerce/bc-clearpay-sdk |
+| Widget Integration  |  https://developers.clearpay.co.uk/clearpay-online/reference/standard-checkout#popup-method         |                                                |
+| API SDK         | https://developers.clearpay.co.uk/clearpay-online/reference/api-environments          |                                                |
+| NPM Package | https://github.com/better-commerce/bc-clearpay-sdk       | Node.js SDK for interaction with ClearPay APIs - @better-commerce/bc-clearpay-sdk |
 
 ## Klarna
 

@@ -2,6 +2,7 @@
 import { PayPalEnvironment } from "bc-paypal-sdk";
 import { CheckoutEnvironment } from "bc-checkout-sdk";
 import { StripeEnvironment } from "bc-stripe-sdk";
+import { ClearPayEnvironment } from "bc-clearpay-sdk";
 
 // Other Imports
 import { Defaults } from "../../constants/constants";
@@ -52,6 +53,14 @@ export abstract class BasePaymentProvider {
 
                 // Init Env
                 KlarnaEnvironment.init(apiUserName, apiPassword, isSandbox);
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentGateway.CLEAR_PAY.toLowerCase()) {
+
+                const apiUserName = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                const apiPassword = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+
+                // Init Env
+                ClearPayEnvironment.init(apiUserName, apiPassword, isSandbox);
                 return true;
             }
         }
