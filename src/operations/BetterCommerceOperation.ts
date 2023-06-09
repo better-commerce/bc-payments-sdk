@@ -20,6 +20,20 @@ import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
  */
 export class BetterCommerceOperation implements ICommerceProvider {
 
+    /**
+     * Converts the list of items in a basket to an order on the CommerceHub plaform.
+     * @param data 
+     */
+    async convertOrder(data: any): Promise<any> {
+        const createOrderResult = await Checkout.convertOrder(data, { cookies: data?.extras?.cookies });
+        return createOrderResult;
+    }
+
+    /**
+     * Processes the response received from the payment gateway provider for the payment transaction to update the payment response statues on the CommerceHub platform.
+     * @param data 
+     * @returns 
+     */
     async processPayment(data: IPaymentProcessingData): Promise<any> {
 
         let orderModel: any;
