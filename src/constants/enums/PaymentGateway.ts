@@ -67,6 +67,13 @@ export module Klarna {
     };
 };
 
+export module ClearPay {
+    export enum PaymentStatus {
+        APPROVED = "APPROVED",
+        DECLINED = "DECLINED",
+    };
+};
+
 export module Juspay {
 
     export enum PaymentOrderStatus {

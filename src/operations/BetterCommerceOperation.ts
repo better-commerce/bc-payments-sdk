@@ -10,7 +10,7 @@ import { Checkout } from "../modules/better-commerce/Checkout";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentStatus } from "../constants/enums/PaymentStatus";
-import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, PaymentGateway, Stripe as StripeGateway } from "../constants/enums/PaymentGateway";
+import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, PaymentGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway } from "../constants/enums/PaymentGateway";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
@@ -28,9 +28,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
         if (gateway) {
             let paymentGatewayOrderTxnId = "";
-            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.KLARNA?.toLowerCase()) {
+
+            // For PayPal, Checkout, Stripe, Klarna & ClearPay
+            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CLEAR_PAY?.toLowerCase()) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
+
             const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
             if (paymentMethod) {
                 const additionalServiceCharge = paymentMethod?.settings?.length
@@ -43,6 +46,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 if (orderResult) {
                     let paymentStatus: any;
                     const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+
+                    // If this is COD order.
                     if (isCOD) {
                         orderModel = {
                             id: txnOrderId?.split('-')[1],
@@ -91,6 +96,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             statusId: PaymentStatus.AUTHORIZED,
                         }
                     } else {
+
+                        // Call gateway specific SDK API to get the order/payment status.
                         paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
                         orderModel = {
                             id: txnOrderId?.split('-')[1],
@@ -185,6 +192,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentGateway.PAYPAL?.toLowerCase():
 
+                // Get PayPal payment details
                 const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
                 if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.COMPLETED) {
                     statusId = PaymentStatus.PAID;
@@ -194,6 +202,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentGateway.CHECKOUT?.toLowerCase():
 
+                // Get Checkout payment details
                 const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
                 if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.PAID) {
                     statusId = PaymentStatus.PAID;
@@ -205,11 +214,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = checkoutOrderDetails?.amount / 100.0;
                 break;
 
-            case PaymentGateway.CLEAR_PAY?.toLowerCase():
-                break;
-
             case PaymentGateway.KLARNA?.toLowerCase():
 
+                // Get Klarna payment details
                 const klarnaOrderDetails = await new KlarnaPayment().getOrderDetails(data);
                 if (klarnaOrderDetails?.status?.toLowerCase() === KlarnaGateway.PaymentStatus.AUTHORIZED?.toLowerCase() || klarnaOrderDetails?.status?.toLowerCase() === KlarnaGateway.PaymentStatus.CAPTURED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
@@ -219,11 +226,24 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentGateway.STRIPE?.toLowerCase():
 
+                // Get Stripe payment details
                 const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
                 if (stripeOrderDetails?.status?.toLowerCase() === StripeGateway.PaymentStatus.SUCCEEDED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;
+                break;
+
+            case PaymentGateway.CLEAR_PAY?.toLowerCase():
+
+                // Get ClearPay payment details
+                const clearPayOrderDetails = await new StripePayment().getOrderDetails(data);
+                if (clearPayOrderDetails?.status?.toLowerCase() === ClearPayGateway.PaymentStatus.APPROVED?.toLowerCase()) {
+                    statusId = PaymentStatus.PAID;
+                } else {
+                    statusId = PaymentStatus.DECLINED;
+                }
+                purchaseAmount = parseFloat(clearPayOrderDetails?.originalAmount?.amount?.toString());
                 break;
         }
 
