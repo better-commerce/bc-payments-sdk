@@ -26,8 +26,22 @@ export class ClearPayPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    /**
+     * Capture Full Payment. This endpoint performs a payment capture for the full value of the payment plan.
+     * API Reference - https://developers.clearpay.co.uk/clearpay-online/reference/capture-full-payment
+     * @param data 
+     */
     async requestPayment(data: any): Promise<any> {
-        throw new Error("Method not implemented.");
+        try {
+            if (super.initSDK()) {
+                const intentResult = await new Payment().requestPayment(data);
+                return intentResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 
     /**
