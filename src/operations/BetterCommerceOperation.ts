@@ -14,6 +14,7 @@ import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalG
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
+import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 
 /**
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
@@ -251,7 +252,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentGateway.CLEAR_PAY?.toLowerCase():
 
                 // Get ClearPay payment details
-                const clearPayOrderDetails = await new StripePayment().getOrderDetails(data);
+                const clearPayOrderDetails = await new ClearPayPayment().getOrderDetails(data);
                 if (clearPayOrderDetails?.status?.toLowerCase() === ClearPayGateway.PaymentStatus.APPROVED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 } else {
