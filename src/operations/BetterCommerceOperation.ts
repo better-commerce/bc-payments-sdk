@@ -261,7 +261,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = parseFloat(clearPayOrderDetails?.originalAmount?.amount?.toString());
                 break;
         }
-
+        console.log("payment status", { statusId, purchaseAmount });
         return { statusId, purchaseAmount };
     }
 
