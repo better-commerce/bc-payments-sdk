@@ -184,16 +184,20 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         };
                         const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
                         if (paymentResponseResult) {
+
+                            // Get order details
+                            const { result: orderResultPostPaymentResponse }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
+                            console.log("orderResultPostPaymentResponse", orderResultPostPaymentResponse);
+
                             return isCancelled
                                 ? PaymentStatus.DECLINED
-                                : paymentResponseResult?.orderStatusCode === OrderStatus.APPROVED
+                                : (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED)
                                     ? PaymentStatus.PAID
                                     : PaymentStatus.PENDING; //paymentStatus?.statusId
                         }
 
                     }
                 }
-
             }
         }
         return null;

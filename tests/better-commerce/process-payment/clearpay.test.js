@@ -13,29 +13,28 @@ const config = {
         "value": "True"
     }]
 };
-BCEnvironment.init("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=", config);
+BCEnvironment.init("12C2E62B-33B1-4D9B-9782-7F3BB1EDB951", "o6obMjODUNK7QEEK8x4Ir3NfxJaUa5qGDs34SBKhsKo=", config);
 const params = {
     isCOD: false,
-    orderId: "59fd2003-960d-ee11-b1c3-000d3a211cf7",
-    txnOrderId: "318301-1124297",
+    orderId: 'f4f4fcb7-7c0e-ee11-b1c3-000d3a211cf7',
+    txnOrderId: '50061-1124791',
     extras: {
-        token: "003.k86ja38ep9b1om6c2mefu0ij24lovrnh1e32gvkc3ar6fb48",
-        orderId: "400248042590",
-        payerId: "",
-        gateway: "clearpay",
+        token: '003.qq0c8nu3eh7je7sqijc1hrf6hpafcjaqns290qe1mvth6ria',
+        orderId: '400248043538',
+        payerId: '',
+        gateway: 'clearpay',
         isCancelled: false,
         cookies: {
-            deviceId: '094c22aa-e6c6-407c-8e1c-d422b445bee7',
-            accept_cookies: 'accepted',
-            __stripe_mid: 'c85d55a9-1162-45b2-a704-b9c7e8db2cf3fb0bee',
             Currency: 'GBP',
             Language: 'en',
-            Country: 'GB',
-            __stripe_sid: 'bea589ae-0a8d-4d9a-9d7e-1cf6ed17ef0875a8e7',
-            sessionId: 'ddc08bcc-835e-47da-8018-c4364513f9cb',
-            basketId: '44ac0457-fef3-411b-aef5-01a6f8376f18',
-            defaultSession: 'd59b696c-ca0a-4fcc-a07e-476d50b7b0cf',
-            orderId: '59fd2003-960d-ee11-b1c3-000d3a211cf7'
+            deviceId: '749f76b4-b7c7-4b8b-9d21-0c928af47d7b',
+            accept_cookies: 'accepted',
+            __stripe_mid: 'ef826757-f7a1-490c-9d0d-6c4fb4b99ffe7c885d',
+            __stripe_sid: '12e6530d-410a-4da1-ae41-50828c26e9c28c1a2a',
+            defaultSession: 'c9e3e10e-10af-407a-a8dc-adbb83eb1d8f',
+            orderId: 'd7adaff0-7a0e-ee11-b1c3-000d3a211cf7',
+            sessionId: '314085ba-f39b-4cf2-91f0-74c13d67a8fc',
+            basketId: 'cb693fb5-0f5e-449a-99a4-2936cadd3996'
         }
     }
 };
