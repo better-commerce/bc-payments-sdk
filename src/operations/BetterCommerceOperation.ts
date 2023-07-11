@@ -2,6 +2,7 @@
 import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
 
 // Other Imports
+import { B2B } from "../modules/better-commerce/B2B";
 import { Order } from "../modules/better-commerce/Order";
 import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
@@ -10,7 +11,8 @@ import { Checkout } from "../modules/better-commerce/Checkout";
 import { Defaults } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentStatus } from "../constants/enums/PaymentStatus";
-import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, PaymentGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway } from "../constants/enums/PaymentGateway";
+import { PaymentMethodType } from "../constants/enums/PaymentMethodType";
+import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway } from "../constants/enums/PaymentStatus";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
@@ -20,6 +22,16 @@ import { ClearPayPayment } from "../modules/payments/ClearPayPament";
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
  */
 export class BetterCommerceOperation implements ICommerceProvider {
+
+    /**
+     * Get the company details by UserId.
+     * API Reference - https://api20.bettercommerce.io/swagger/ui/index#!/B2B/B2BGetCompanyDetailByUserId
+     * @param data 
+     */
+    async getCompanyDetails(data: any) {
+        const companyDetailsResult = await B2B.getCompanyDetailsByUserId(data, { cookies: data?.extras?.cookies });
+        return companyDetailsResult;
+    }
 
     /**
      * Converts the list of items in a basket to an order on the CommerceHub plaform.
@@ -45,7 +57,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             let paymentGatewayOrderTxnId = "";
 
             // For PayPal, Checkout, Stripe, Klarna & ClearPay
-            if (gateway?.toLowerCase() === PaymentGateway.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentGateway.CLEAR_PAY?.toLowerCase()) {
+            if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase()) {
                 paymentGatewayOrderTxnId = data?.extras?.orderId;
             }
 
@@ -112,8 +124,17 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         }
                     } else {
 
-                        // Call gateway specific SDK API to get the order/payment status.
-                        paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
+                        if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase()) {
+                            paymentStatus = {
+                                statusId: PaymentStatus.PAID,
+                                purchaseAmount: orderAmount
+                            }
+                        } else {
+
+                            // Call gateway specific SDK API to get the order/payment status.
+                            paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
+                        }
+
                         orderModel = {
                             id: txnOrderId?.split('-')[1],
                             cardNo: null,
@@ -209,7 +230,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
         switch (gateway?.toLowerCase()) {
 
-            case PaymentGateway.PAYPAL?.toLowerCase():
+            case PaymentMethodType.PAYPAL?.toLowerCase():
 
                 // Get PayPal payment details
                 const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
@@ -219,7 +240,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
                 break;
 
-            case PaymentGateway.CHECKOUT?.toLowerCase():
+            case PaymentMethodType.CHECKOUT?.toLowerCase():
 
                 // Get Checkout payment details
                 const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
@@ -233,7 +254,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = checkoutOrderDetails?.amount / 100.0;
                 break;
 
-            case PaymentGateway.KLARNA?.toLowerCase():
+            case PaymentMethodType.KLARNA?.toLowerCase():
 
                 // Get Klarna payment details
                 const klarnaOrderDetails = await new KlarnaPayment().getOrderDetails(data);
@@ -243,7 +264,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = parseFloat(klarnaOrderDetails?.order_amount.toString()) / 100.0;
                 break;
 
-            case PaymentGateway.STRIPE?.toLowerCase():
+            case PaymentMethodType.STRIPE?.toLowerCase():
 
                 // Get Stripe payment details
                 const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
@@ -253,7 +274,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;
                 break;
 
-            case PaymentGateway.CLEAR_PAY?.toLowerCase():
+            case PaymentMethodType.CLEAR_PAY?.toLowerCase():
 
                 // Get ClearPay payment details
                 const clearPayOrderDetails = await new ClearPayPayment().getOrderDetails(data);

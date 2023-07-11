@@ -3,7 +3,7 @@ import { IKlarnaPaymentProvider } from "../contracts/GatewayProviders/IKlarnaPay
 import { IPayPalPaymentProvier } from "../contracts/GatewayProviders/IPayPalPaymentProivder";
 import { IStripePaymentProvider } from "../contracts/GatewayProviders/IStripePaymentProvider";
 import { BCEnvironment } from "../../base/config/BCEnvironment";
-import { PaymentGateway } from "../../constants/enums/PaymentGateway";
+import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
 import { CheckoutPayment } from "../../modules/payments/CheckoutPayment";
 import { ClearPayPayment } from "../../modules/payments/ClearPayPament";
 import { KlarnaPayment } from "../../modules/payments/KlarnaPayment";
@@ -22,13 +22,13 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
      */
     public async createOneTimePaymentOrder(data: any): Promise<any> {
         const paymentProvider = this.getPaymentProvider();
-        if (paymentProvider === PaymentGateway.KLARNA) {
+        if (paymentProvider === PaymentMethodType.KLARNA) {
             return await new KlarnaPayment().createOneTimePaymentOrder(data);
         }
         return null;
     }
 
-    protected getPaymentProvider(): PaymentGateway {
+    protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);
         return config?.systemName?.toLowerCase();
@@ -41,15 +41,15 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     protected getObject(): IPaymentProvider {
         let obj: IPaymentProvider;
         const paymentProvider = this.getPaymentProvider();
-        if (paymentProvider === PaymentGateway.PAYPAL) {
+        if (paymentProvider === PaymentMethodType.PAYPAL) {
             obj = new PayPalPayment();
-        } else if (paymentProvider === PaymentGateway.CHECKOUT) {
+        } else if (paymentProvider === PaymentMethodType.CHECKOUT) {
             obj = new CheckoutPayment();
-        } else if (paymentProvider === PaymentGateway.CLEAR_PAY) {
+        } else if (paymentProvider === PaymentMethodType.CLEAR_PAY) {
             obj = new ClearPayPayment();
-        } else if (paymentProvider === PaymentGateway.KLARNA) {
+        } else if (paymentProvider === PaymentMethodType.KLARNA) {
             obj = new KlarnaPayment();
-        } else if (paymentProvider === PaymentGateway.STRIPE) {
+        } else if (paymentProvider === PaymentMethodType.STRIPE) {
             obj = new StripePayment();
         }
         return obj;

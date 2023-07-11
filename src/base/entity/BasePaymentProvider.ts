@@ -8,7 +8,7 @@ import { ClearPayEnvironment } from "bc-clearpay-sdk";
 import { Defaults } from "../../constants/constants";
 import { BCEnvironment } from "../config/BCEnvironment";
 import { stringToBoolean } from "../../utils/parse-util";
-import { PaymentGateway } from "../../constants/enums/PaymentGateway";
+import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
 import { KlarnaEnvironment } from "bc-klarna-sdk";
 
 export abstract class BasePaymentProvider {
@@ -21,7 +21,7 @@ export abstract class BasePaymentProvider {
             const useSandbox = config?.settings?.find((x: any) => x.key === "UseSandbox")?.value || Defaults.String.Value;
             const isSandbox = useSandbox ? stringToBoolean(useSandbox) : false;
 
-            if (config?.systemName?.toLowerCase() === PaymentGateway.PAYPAL.toLowerCase()) {
+            if (config?.systemName?.toLowerCase() === PaymentMethodType.PAYPAL.toLowerCase()) {
 
                 const clientId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const appSecret = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
@@ -29,7 +29,7 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 PayPalEnvironment.init(clientId, appSecret, isSandbox);
                 return true;
-            } else if (config?.systemName?.toLowerCase() === PaymentGateway.CHECKOUT.toLowerCase()) {
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CHECKOUT.toLowerCase()) {
 
                 const clientId = config?.settings?.find((x: any) => x.key === "MotoAccountCode")?.value || Defaults.String.Value;
                 const accessSecret = config?.settings?.find((x: any) => x.key === "MotoSignature")?.value || Defaults.String.Value;
@@ -38,7 +38,7 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 CheckoutEnvironment.initServer(clientId, accessSecret, processingChannelId, isSandbox);
                 return true;
-            } else if (config?.systemName?.toLowerCase() === PaymentGateway.STRIPE.toLowerCase()) {
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.STRIPE.toLowerCase()) {
 
                 const publicKey = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const privateKey = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
@@ -46,7 +46,7 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 StripeEnvironment.init(publicKey, privateKey);
                 return true;
-            } else if (config?.systemName?.toLowerCase() === PaymentGateway.KLARNA.toLowerCase()) {
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.KLARNA.toLowerCase()) {
 
                 const apiUserName = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const apiPassword = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
@@ -54,7 +54,7 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 KlarnaEnvironment.init(apiUserName, apiPassword, isSandbox);
                 return true;
-            } else if (config?.systemName?.toLowerCase() === PaymentGateway.CLEAR_PAY.toLowerCase()) {
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CLEAR_PAY.toLowerCase()) {
 
                 const apiUserName = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const apiPassword = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;

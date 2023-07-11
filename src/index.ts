@@ -5,7 +5,7 @@ import { PaymentIntent as KlarnaPaymentIntentType } from "bc-klarna-sdk/dist/con
 import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderLine";
 import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
-import { PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentGateway";
+import { PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
 
 // Payments Module
 export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants };
