@@ -4,6 +4,7 @@ import { APIException } from "../../../../base/entity/exception/APIException";
 import { AuthenticationException } from "../../../../base/entity/exception/AuthenticationException";
 import { InvalidRequestException } from "../../../../base/entity/exception/InvalidRequestException";
 import { RequestMethod } from "../../../../constants/enums/RequestMethod";
+import { Guid } from "../../../../types/guid";
 
 const SingletonFactory = (function () {
     let accessToken = '';
@@ -90,6 +91,10 @@ const fetcher = async ({
         Country: cookies.Country || BCEnvironment.getDefaultCountry(),
         DeviceId: cookies?.deviceId || "",
         SessionId: cookies?.sessionId || "",
+        CompanyId: cookies?.CompanyId && cookies?.CompanyId != Guid.empty
+            ? cookies?.CompanyId
+            : Guid.empty,
+        ClientIP: cookies?.ClientIP || "",
     };
     const config: any = {
         method: method,
