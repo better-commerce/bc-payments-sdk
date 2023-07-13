@@ -17,6 +17,7 @@ import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
+import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 
 /**
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
@@ -48,6 +49,73 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns 
      */
     async processPayment(data: IPaymentProcessingData): Promise<any> {
+
+        const getPaymentInfoPayload = (paymentInfo: IPaymentInfo) => {
+
+            /* ******
+                Info
+               ******
+               paymentInfo1 is for [pspInformation[]
+               paymentInfo2 is for [paymentIdentifier]
+               paymentInfo3 is for gateway type i.e. Billdesk, Razorpay, etc
+               paymentInfo4 is for [cardType]
+               paymentInfo5 is for [cardIssuer]
+               paymentInfo6 is for [cardBrand]
+               paymentInfo7 is for [chequeNumber]
+               paymentInfo8 is untilized
+            */
+
+            let info: any = {}
+            if (paymentInfo?.paymentInfo1) {
+                info = {
+                    ...info,
+                    paymentInfo1: paymentInfo?.paymentInfo1
+                }
+            }
+            if (paymentInfo?.paymentInfo2) {
+                info = {
+                    ...info,
+                    paymentInfo2: paymentInfo?.paymentInfo2
+                }
+            }
+            if (paymentInfo?.paymentInfo3) {
+                info = {
+                    ...info,
+                    paymentInfo3: paymentInfo?.paymentInfo3
+                }
+            }
+            if (paymentInfo?.paymentInfo4) {
+                info = {
+                    ...info,
+                    paymentInfo4: paymentInfo?.paymentInfo4
+                }
+            }
+            if (paymentInfo?.paymentInfo5) {
+                info = {
+                    ...info,
+                    paymentInfo5: paymentInfo?.paymentInfo5
+                }
+            }
+            if (paymentInfo?.paymentInfo6) {
+                info = {
+                    ...info,
+                    paymentInfo6: paymentInfo?.paymentInfo6
+                }
+            }
+            if (paymentInfo?.paymentInfo7) {
+                info = {
+                    ...info,
+                    paymentInfo7: paymentInfo?.paymentInfo7
+                }
+            }
+            if (paymentInfo?.paymentInfo8) {
+                info = {
+                    ...info,
+                    paymentInfo8: paymentInfo?.paymentInfo8
+                }
+            }
+            return info
+        }
 
         let orderModel: any;
         const isCancelled = data?.extras?.isCancelled ?? false;
@@ -118,6 +186,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             upFrontTerm: '76245369',
                             isPrePaid: false,
                             additionalServiceCharge: additionalServiceCharge,
+                            ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) },
                         };
                         paymentStatus = {
                             statusId: PaymentStatus.AUTHORIZED,
@@ -127,6 +196,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase()) {
                             paymentStatus = {
                                 statusId: PaymentStatus.PAID,
+                                purchaseAmount: orderAmount
+                            }
+                        } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
+                            paymentStatus = {
+                                statusId: PaymentStatus.AUTHORIZED,
                                 purchaseAmount: orderAmount
                             }
                         } else {
@@ -168,12 +242,6 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             info1: '',
                             fraudScore: null,
                             paymentMethod: gateway,
-                            paymentInfo1: "", // (pspInformation)
-                            paymentInfo2: "", // (paymentIdentifier)
-                            paymentInfo3: "", // (gateway i.e. Billdesk, Razorpay, etc)
-                            paymentInfo4: null, // (cardType)
-                            paymentInfo5: null, // (cardIssuer)
-                            paymentInfo6: null, // (cardBrand)
                             cardType: null,
                             operatorId: null,
                             refStoreId: null,
@@ -195,6 +263,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     additionalInfo2: bankOfferDetails?.status,
                                 }
                                 : null,
+                            ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) }
                         };
                     }
 
