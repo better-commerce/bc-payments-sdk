@@ -5,6 +5,7 @@ import { PaymentIntent as KlarnaPaymentIntentType } from "bc-klarna-sdk/dist/con
 import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderLine";
 import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
+import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
 import { PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
 
 // Payments Module
@@ -16,6 +17,9 @@ import { BetterCommerceOperation } from "./operations/BetterCommerceOperation";
 
 // Generic Types
 export { BCEnvironment, APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException };
+
+// BetterCommerce Types
+export { IPaymentInfo };
 
 // Checkout Types
 export { CheckoutPaymentSourceType, CheckoutPaymentType, CheckoutPaymentRequest };

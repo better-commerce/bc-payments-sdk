@@ -17,6 +17,7 @@ import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
+import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 
 /**
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
@@ -49,16 +50,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      */
     async processPayment(data: IPaymentProcessingData): Promise<any> {
 
-        const getPaymentInfoPayload = (paymentInfo: {
-            paymentInfo1?: string | null,
-            paymentInfo2?: string | null,
-            paymentInfo3?: string | null,
-            paymentInfo4?: string | null,
-            paymentInfo5?: string | null,
-            paymentInfo6?: string | null,
-            paymentInfo7?: string | null,
-            paymentInfo8?: string | null,
-        }) => {
+        const getPaymentInfoPayload = (paymentInfo: IPaymentInfo) => {
 
             /* ******
                 Info
