@@ -10,10 +10,10 @@ import { PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/Paym
 
 import { PaymentMethodType } from "./constants";
 import { PaymentMethodTypeId } from "./constants";
+import { getGatewayId, getGatewayName } from "./utils/payment-util";
 
 // Generic Enums
 export { PaymentMethodType, PaymentMethodTypeId };
-
 
 // Payments Module
 export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants };
@@ -42,3 +42,6 @@ export { PaymentOperation };
 
 // Commerce Types
 export { BetterCommerceOperation };
+
+// Generic Methods
+export { getGatewayId, getGatewayName };

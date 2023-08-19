@@ -9,5 +9,5 @@ export enum PaymentMethodTypeId {
     STRIPE = 7,
     ACCOUNT_CREDIT = 8,
     CHEQUE = 9,
-    APPLE_PAY = 10,
+    CHECKOUT_APPLE_PAY = 10,
 }
