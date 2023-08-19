@@ -9,4 +9,5 @@ export enum PaymentMethodType {
     STRIPE = "stripe",
     ACCOUNT_CREDIT = "accountcredit",
     CHEQUE = "cheque",
+    APPLE_PAY = 'applepay',
 };
