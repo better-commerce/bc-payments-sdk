@@ -3,13 +3,14 @@ import { PayPalEnvironment } from "bc-paypal-sdk";
 import { CheckoutEnvironment } from "bc-checkout-sdk";
 import { StripeEnvironment } from "bc-stripe-sdk";
 import { ClearPayEnvironment } from "bc-clearpay-sdk";
+import { KlarnaEnvironment } from "bc-klarna-sdk";
+import { ApplePayEnvironment } from "bc-apple-pay-sdk";
 
 // Other Imports
 import { Defaults } from "../../constants/constants";
 import { BCEnvironment } from "../config/BCEnvironment";
 import { stringToBoolean } from "../../utils/parse-util";
 import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
-import { KlarnaEnvironment } from "bc-klarna-sdk";
 
 export abstract class BasePaymentProvider {
 
@@ -61,6 +62,17 @@ export abstract class BasePaymentProvider {
 
                 // Init Env
                 ClearPayEnvironment.init(apiUserName, apiPassword, isSandbox);
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CHECKOUT_APPLE_PAY.toLowerCase()) {
+
+                const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                const domainName = config?.settings?.find((x: any) => x.key === "UserName")?.value || Defaults.String.Value;
+                const displayName = config?.settings?.find((x: any) => x.key === "Password")?.value || Defaults.String.Value;
+                const pemCert = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+                const keyCert = config?.settings?.find((x: any) => x.key === "MotoSignature")?.value || Defaults.String.Value;
+
+                // Init Env
+                ApplePayEnvironment.init(merchantId, domainName, displayName, pemCert, keyCert, isSandbox)
                 return true;
             }
         }

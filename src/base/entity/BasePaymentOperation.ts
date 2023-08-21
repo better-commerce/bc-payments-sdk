@@ -10,11 +10,13 @@ import { KlarnaPayment } from "../../modules/payments/KlarnaPayment";
 import { PayPalPayment } from "../../modules/payments/PayPalPayment";
 import { StripePayment } from "../../modules/payments/StripePayment";
 import { IPaymentProvider } from "../contracts/IPaymentProvider";
+import { IApplePayPaymentProvider } from "../contracts/GatewayProviders/IApplePayPaymentProvider";
+import { ApplePayPayment } from "../../modules/payments/ApplePayPayment";
 
 /**
  * Class {BasePaymentOperation} defines concrete methods for specific payment operations of all the gateway providers. This also acts as an abstract for {PaymentOperation} class, thereby allowing the {PaymentOperation} class to directly inherit the concrete operation method(s) for all gateway providers. 
  */
-export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider {
+export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider {
 
     /**
      * Specific to {Klarna}, creates a one time payment order.
@@ -24,6 +26,18 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.KLARNA) {
             return await new KlarnaPayment().createOneTimePaymentOrder(data);
+        }
+        return null;
+    }
+
+    /**
+     * Specific to {ApplePay}, validates the payment session.
+     * @param data {Object}
+     */
+    public async validatePaymentSession(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.CHECKOUT_APPLE_PAY) {
+            return await new ApplePayPayment().validatePaymentSession(data);
         }
         return null;
     }

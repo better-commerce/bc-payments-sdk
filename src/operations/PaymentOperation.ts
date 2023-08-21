@@ -35,6 +35,11 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * Create a PaymentIntent. Creates a PaymentIntent object.
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentOrPayout
      * 
+     * ________
+     * ApplePay
+     * ‾‾‾‾‾‾‾‾
+     * <Not Required>
+     * 
      * @param data 
      * @returns 
      */
@@ -77,6 +82,11 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * ______
      * STRIPE
      * ‾‾‾‾‾‾
+     * <Not Required>
+     * 
+     * ________
+     * ApplePay
+     * ‾‾‾‾‾‾‾‾
      * <Not Required>
      * 
      * @param data 
@@ -125,6 +135,11 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * ‾‾‾‾‾‾
      * Retrieve a PaymentIntent. Retrieves the details of a PaymentIntent that has previously been created.
      * API Reference - https://stripe.com/docs/api/payment_intents/retrieve
+     * 
+     * ________
+     * ApplePay
+     * ‾‾‾‾‾‾‾‾
+     * <Not Required>
      * 
      * @param data 
      * @returns 

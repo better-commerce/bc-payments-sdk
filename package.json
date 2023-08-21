@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "1.4.0",
+    "bc-apple-pay-sdk": "^0.0.1",
     "bc-checkout-sdk": "0.0.2",
     "bc-clearpay-sdk": "0.0.3",
     "bc-klarna-sdk": "0.0.4",
