@@ -64,6 +64,16 @@ It integrates SDK APIs for the following providers:
 | Sandbox | https://portal.playground.klarna.com/ | |
 | Live | https://portal.klarna.com/ | |
 
+## ApplePay
+
+| Name           | Reference      | Description                                |
+| :------------- | :------------- | :----------------------------------------- |
+| Widget Integration |  https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api      |                                                |
+| API SDK        | https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api/requesting_an_apple_pay_payment_session |                                                |
+| NPM Package | https://github.com/better-commerce/bc-apple-pay-sdk         | Node.js SDK for interaction with ApplePay - @better-commerce/bc-apple-pay-sdk |
+| Sandbox | https://sandbox.apple-pay-gateway.apple.com/ | |
+| Live | https://apple-pay-gateway.apple.com/ | |
+
 ## Installation
 
 Use below command for package installation:
