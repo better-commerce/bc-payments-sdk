@@ -20,6 +20,9 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
 
     /**
      * Specific to {Klarna}, creates a one time payment order.
+     * 
+     * API Reference - https://docs.klarna.com/klarna-payments/integrate-with-klarna-payments/step-3-create-an-order/create-a-one-time-payment-order/
+     * 
      * @param data {Object}
      */
     public async createOneTimePaymentOrder(data: any): Promise<any> {
@@ -32,6 +35,9 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
 
     /**
      * Specific to {ApplePay}, validates the payment session.
+     * 
+     * API Reference - https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api/providing_merchant_validation
+     * 
      * @param data {Object}
      */
     public async validatePaymentSession(data: any) {
@@ -44,6 +50,9 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
 
     /**
      * Specific to {Checkout}, Exchange card details for a reference token that can be used later to request a card payment. Tokens are single use and expire after 15 minutes.
+     * 
+     * API Reference - https://api-reference.checkout.com/#operation/requestAToken
+     * 
      * @param data {Object}
      */
     public async requestToken(data: any) {
