@@ -68,8 +68,9 @@ export abstract class BasePaymentProvider {
                 const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const domainName = config?.settings?.find((x: any) => x.key === "UserName")?.value || Defaults.String.Value;
                 const displayName = config?.settings?.find((x: any) => x.key === "Password")?.value || Defaults.String.Value;
-                const pemCert = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
-                const keyCert = config?.settings?.find((x: any) => x.key === "MotoSignature")?.value || Defaults.String.Value;
+                const extras: any = BCEnvironment.getExtras();
+                const pemCert = extras?.pemCert;
+                const keyCert = extras?.keyCert;
 
                 // Init Env
                 ApplePayEnvironment.init(merchantId, domainName, displayName, pemCert, keyCert, isSandbox)

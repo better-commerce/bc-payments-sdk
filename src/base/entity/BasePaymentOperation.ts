@@ -42,6 +42,18 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         return null;
     }
 
+    /**
+     * Specific to {Checkout}, Exchange card details for a reference token that can be used later to request a card payment. Tokens are single use and expire after 15 minutes.
+     * @param data {Object}
+     */
+    public async requestToken(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.CHECKOUT) {
+            return await new ApplePayPayment().validatePaymentSession(data);
+        }
+        return null;
+    }
+
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);

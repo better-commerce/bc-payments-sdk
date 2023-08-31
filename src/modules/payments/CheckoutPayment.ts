@@ -13,7 +13,15 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
 
     /**
      * Request a payment or payout. Sends a request for payment or payout.
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentOrPayout
+     * _________________
+     * Checkout ApplePay
+     * ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+     * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Endpoints_2
+     * 
      * @param data {IPaymentRequest}
      * @returns 
      */

@@ -84,10 +84,11 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * ‾‾‾‾‾‾
      * <Not Required>
      * 
-     * ________
-     * ApplePay
-     * ‾‾‾‾‾‾‾‾
-     * <Not Required>
+     * _________________
+     * Checkout ApplePay
+     * ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+     * Request a payment or payout. Sends a request for payment or payout.
+     * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Endpoints_2
      * 
      * @param data 
      * @returns 

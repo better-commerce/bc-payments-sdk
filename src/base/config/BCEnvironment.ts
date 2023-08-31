@@ -68,6 +68,12 @@ export class BCEnvironment {
 
     /**
      *
+     * @property {Object}
+     */
+    static extras: any;
+
+    /**
+     *
      * @property {BCEnvironment}
      */
     static thisObj: any;
@@ -115,6 +121,13 @@ export class BCEnvironment {
         }
         return BCEnvironment.thisObj;
         //}
+    }
+
+    static addExtras(extras: any) {
+        if (extras) {
+            BCEnvironment.extras = extras;
+        }
+        return BCEnvironment.thisObj;
     }
 
     /**
@@ -195,5 +208,13 @@ export class BCEnvironment {
      */
     static getConfig(): Object {
         return BCEnvironment.config;
+    }
+
+    /**
+     *
+     * @return {Object}
+     */
+    static getExtras(): Object {
+        return BCEnvironment.extras;
     }
 }
