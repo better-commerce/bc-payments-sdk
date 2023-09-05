@@ -13,6 +13,7 @@ It integrates SDK APIs for the following providers:
 | Stripe           | Client-side **Frame Widget**              |
 | ClearPay         |  Client-side **Modal Widget + Redirect**             |
 | Klarna           | Client-side **Modal Widget**              |
+| ApplePay           | Client-side **Modal Widget + Redirect**              |
 
 ## PayPal
 
