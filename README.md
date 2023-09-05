@@ -68,6 +68,7 @@ It integrates SDK APIs for the following providers:
 
 | Name           | Reference      | Description                                |
 | :------------- | :------------- | :----------------------------------------- |
+| Setting Up Your Server | https://developer.apple.com/documentation/apple_pay_on_the_web/setting_up_your_server | |
 | Widget Integration |  https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api      |                                                |
 | API SDK        | https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api/requesting_an_apple_pay_payment_session |                                                |
 | NPM Package | https://github.com/better-commerce/bc-apple-pay-sdk         | Node.js SDK for interaction with ApplePay - @better-commerce/bc-apple-pay-sdk |
