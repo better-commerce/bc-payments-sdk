@@ -74,6 +74,7 @@ It integrates SDK APIs for the following providers:
 | NPM Package | https://github.com/better-commerce/bc-apple-pay-sdk         | Node.js SDK for interaction with ApplePay - @better-commerce/bc-apple-pay-sdk |
 | Sandbox | https://sandbox.apple-pay-gateway.apple.com/ | |
 | Live | https://apple-pay-gateway.apple.com/ | |
+| Setting Up Sandbox | https://developer.apple.com/apple-pay/sandbox-testing/ | |
 
 ## Installation
 
