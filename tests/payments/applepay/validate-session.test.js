@@ -24,19 +24,19 @@ const config = {
         },
         {
             key: "Signature",
-            value: "<pem_cert>"
+            value: null
         },
         {
             key: "MotoUserName",
-            value: null
+            value: "ffx.bettercommerce.tech"
         },
         {
             key: "MotoPassword",
-            value: null
+            value: "FFX"
         },
         {
             key: "MotoSignature",
-            value: "<key_cert>"
+            value: null
         },
         {
             key: "MotoAccountCode",
@@ -52,7 +52,7 @@ const config = {
         },
         {
             key: "CancelUrl",
-            value: "/payment-notification/checkoutapplepay/canceled"
+            value: "/payment-notification/checkout/canceled"
         },
         {
             key: "Version",

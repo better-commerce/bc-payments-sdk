@@ -66,8 +66,8 @@ export abstract class BasePaymentProvider {
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CHECKOUT_APPLE_PAY.toLowerCase()) {
 
                 const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
-                const domainName = config?.settings?.find((x: any) => x.key === "UserName")?.value || Defaults.String.Value;
-                const displayName = config?.settings?.find((x: any) => x.key === "Password")?.value || Defaults.String.Value;
+                const domainName = config?.settings?.find((x: any) => x.key === "MotoUserName")?.value || Defaults.String.Value;
+                const displayName = config?.settings?.find((x: any) => x.key === "MotoPassword")?.value || Defaults.String.Value;
                 const extras: any = BCEnvironment.getExtras();
                 const pemCert = extras?.pemCert;
                 const keyCert = extras?.keyCert;
