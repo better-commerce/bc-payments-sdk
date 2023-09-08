@@ -208,7 +208,7 @@ const klarnaConfig = {
 ### ApplePay
 
 ```
-const paypalConfig = {
+const applePayConfig = {
     systemName: "CheckoutApplePay",
     notificationUrl: "<Return_Url>",
     settings: [{
