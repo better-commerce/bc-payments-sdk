@@ -126,6 +126,15 @@ export class BCEnvironment {
     static addExtras(extras: any) {
         if (extras) {
             BCEnvironment.extras = extras;
+            if (extras?.country) {
+                BCEnvironment.defaultCountry = extras?.country;
+            }
+            if (extras?.currency) {
+                BCEnvironment.defaultCurrency = extras?.currency;
+            }
+            if (extras?.language) {
+                BCEnvironment.defaultLanguage = extras?.language;
+            }
         }
         return BCEnvironment.thisObj;
     }
