@@ -12,6 +12,7 @@ import { StripePayment } from "../../modules/payments/StripePayment";
 import { IPaymentProvider } from "../contracts/IPaymentProvider";
 import { IApplePayPaymentProvider } from "../contracts/GatewayProviders/IApplePayPaymentProvider";
 import { ApplePayPayment } from "../../modules/payments/ApplePayPayment";
+import { Logger } from "../../modules/better-commerce/Logger";
 
 /**
  * Class {BasePaymentOperation} defines concrete methods for specific payment operations of all the gateway providers. This also acts as an abstract for {PaymentOperation} class, thereby allowing the {PaymentOperation} class to directly inherit the concrete operation method(s) for all gateway providers. 
@@ -66,6 +67,10 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);
+        Logger.logPayment({
+            data: { data: config },
+            message: `${config?.systemName} | GetPaymentProvider`,
+        }, {})
         return config?.systemName?.toLowerCase();
     }
 

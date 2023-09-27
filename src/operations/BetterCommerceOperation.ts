@@ -35,7 +35,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
     }
 
     /**
-     * Converts the list of items in a basket to an order on the CommerceHub plaform.
+     * Converts the list of items in a basket to an order on the CommerceHub platform.
      * @param data 
      */
     async convertOrder(data: any): Promise<any> {

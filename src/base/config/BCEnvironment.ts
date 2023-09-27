@@ -72,6 +72,8 @@ export class BCEnvironment {
      */
     static extras: any;
 
+    static enableProviderLogging: boolean;
+
     /**
      *
      * @property {BCEnvironment}
@@ -91,6 +93,7 @@ export class BCEnvironment {
         BCEnvironment.defaultCurrency = "GBP";
         BCEnvironment.defaultLanguage = "en-GB";
         BCEnvironment.config = config;
+        BCEnvironment.enableProviderLogging = true;
 
         if (baseAuthUrl) {
             BCEnvironment.baseAuthUrl = baseAuthUrl;
@@ -225,5 +228,9 @@ export class BCEnvironment {
      */
     static getExtras(): Object {
         return BCEnvironment.extras;
+    }
+
+    static getEnableProviderLogging(): boolean {
+        return BCEnvironment.enableProviderLogging;
     }
 }
