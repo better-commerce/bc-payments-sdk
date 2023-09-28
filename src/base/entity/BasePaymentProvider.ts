@@ -53,7 +53,13 @@ export abstract class BasePaymentProvider {
                 const processingChannelId = config?.settings?.find((x: any) => x.key === "MotoUserName")?.value || Defaults.String.Value;
 
                 // Init Env
-                CheckoutEnvironment.initServer(clientId, accessSecret, processingChannelId, isSandbox);
+                CheckoutEnvironment.initServer(clientId, accessSecret, processingChannelId, isSandbox, {
+                    logActivity: (data: any) => {
+                        if (providerLoggingEnabled) {
+                            Logger.logPayment(data, {});
+                        }
+                    }
+                });
 
                 const logData = { data: `CheckoutEnvironment.initServer(${clientId}, ${accessSecret}, ${processingChannelId}, ${isSandbox})` };
                 logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
