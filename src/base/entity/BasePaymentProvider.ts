@@ -42,8 +42,8 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 PayPalEnvironment.init(clientId, appSecret, isSandbox);
 
-                const logData = { data: `PayPalEnvironment.init(${clientId}, ${appSecret}, ${isSandbox})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `PayPalEnvironment.init(${clientId}, ${appSecret}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CHECKOUT.toLowerCase()) {
@@ -61,8 +61,8 @@ export abstract class BasePaymentProvider {
                     }
                 });
 
-                const logData = { data: `CheckoutEnvironment.initServer(${clientId}, ${accessSecret}, ${processingChannelId}, ${isSandbox})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `CheckoutEnvironment.initServer(${clientId}, ${accessSecret}, ${processingChannelId}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.STRIPE.toLowerCase()) {
@@ -73,8 +73,8 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 StripeEnvironment.init(publicKey, privateKey);
 
-                const logData = { data: `StripeEnvironment.init(${publicKey}, ${privateKey})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `StripeEnvironment.init(${publicKey}, ${privateKey})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.KLARNA.toLowerCase()) {
@@ -85,8 +85,8 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 KlarnaEnvironment.init(apiUserName, apiPassword, isSandbox);
 
-                const logData = { data: `KlarnaEnvironment.init(${apiUserName}, ${apiPassword}, ${isSandbox})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `KlarnaEnvironment.init(${apiUserName}, ${apiPassword}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CLEAR_PAY.toLowerCase()) {
@@ -97,8 +97,8 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 ClearPayEnvironment.init(apiUserName, apiPassword, isSandbox);
 
-                const logData = { data: `ClearPayEnvironment.init(${apiUserName}, ${apiPassword}, ${isSandbox})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `ClearPayEnvironment.init(${apiUserName}, ${apiPassword}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.CHECKOUT_APPLE_PAY.toLowerCase()) {
@@ -113,8 +113,8 @@ export abstract class BasePaymentProvider {
                 // Init Env
                 ApplePayEnvironment.init(merchantId, domainName, displayName, pemCert, keyCert, isSandbox);
 
-                const logData = { data: `ApplePayEnvironment.init(${merchantId}, ${domainName}, ${displayName}, ${pemCert}, ${keyCert}, ${isSandbox})` };
-                logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+                //const logData = { data: `ApplePayEnvironment.init(${merchantId}, ${domainName}, ${displayName}, ${pemCert}, ${keyCert}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
                 return true;
             }
