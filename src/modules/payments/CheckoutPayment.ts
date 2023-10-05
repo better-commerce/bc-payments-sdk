@@ -1,14 +1,37 @@
 // Package Imports
-import { Payment } from "bc-checkout-sdk";
+import { Payment, Token } from "bc-checkout-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
+import { ICheckoutPaymentProvider } from "../../base/contracts/GatewayProviders/ICheckoutPaymentProvider";
 
-export class CheckoutPayment extends BasePaymentProvider implements IPaymentProvider {
+export class CheckoutPayment extends BasePaymentProvider implements IPaymentProvider, ICheckoutPaymentProvider {
 
     initPaymentIntent(data: any) {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Generate a token from Apple Pay / Google Pay token
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
+     * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Step_1:_Generate_a_Checkout.com_token_from_the_Apple_Pay_token
+     * @param data 
+     */
+    async requestToken(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const token = new Token();
+                const tokenRequestResult = await token.requestToken(data);
+                return tokenRequestResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 
     /**

@@ -59,7 +59,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     public async requestToken(data: any) {
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.CHECKOUT) {
-            return await new ApplePayPayment().validatePaymentSession(data);
+            return await new CheckoutPayment().requestToken(data);
         }
         return null;
     }
