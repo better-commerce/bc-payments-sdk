@@ -67,10 +67,10 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);
-        Logger.logPayment({
+        /*Logger.logPayment({
             data: { data: config },
             message: `${config?.systemName} | GetPaymentProvider`,
-        }, {})
+        }, {})*/
         return config?.systemName?.toLowerCase();
     }
 
