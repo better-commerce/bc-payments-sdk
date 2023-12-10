@@ -1,5 +1,6 @@
 // Model Imports
 import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProcessingData";
+import { IPaymentHookProcessingData } from "../models/better-commerce/IPaymentHookProcessingData";
 
 // Other Imports
 import { B2B } from "../modules/better-commerce/B2B";
@@ -8,7 +9,7 @@ import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
 import { PayPalPayment } from "../modules/payments/PayPalPayment";
 import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { Checkout } from "../modules/better-commerce/Checkout";
-import { Defaults } from "../constants/constants";
+import { Defaults, PaymentTransactionStatus } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { PaymentStatus } from "../constants/enums/PaymentStatus";
 import { PaymentMethodType } from "../constants/enums/PaymentMethodType";
@@ -18,6 +19,10 @@ import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
+import { PaymentMethodTypeId } from "../constants";
+import { PaymentOrderStatus } from "../constants/enums";
+import { matchStrings, stringToBoolean } from "../utils/parse-util";
+import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
 /**
  * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
@@ -293,7 +298,84 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async getPaymentStatus(gateway: string, data: any): Promise<{ statusId: number, purchaseAmount: number }> {
+    async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
+        let paymentNo;
+        let paymentGatewayOrderTxnId = Defaults.String.Value;
+        const paymentTransactionStatus = getPaymentTransactionStatus(data?.paymentMethodTypeId, data);
+        if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
+            const orderId = getPaymentTransactionOrderId(data?.paymentMethodTypeId, data);
+
+            if (orderId != Defaults.Guid.Value) {
+                const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
+                if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
+
+                    if (data?.paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
+                        paymentGatewayOrderTxnId = data?.data?.id;
+                    }
+
+                    const payments = orderResult?.payments;
+                    if (payments?.length) {
+
+                        // Call gateway specific SDK API to get the order/payment status.
+                        const paymentStatus = await this.getPaymentStatus(data?.paymentMethodType, paymentGatewayOrderTxnId, true);
+                        paymentNo = getPaymentNo(data?.paymentMethodTypeId, paymentStatus?.orderDetails);
+
+                        if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
+                            // Order Refunded
+
+                        } else {
+
+                            if ((paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase()) && paymentStatus?.statusId === PaymentStatus.PENDING) {
+
+                                let statusId = PaymentOrderStatus.DECLINED
+                                const payment = payments?.find(
+                                    (x: any) =>
+                                        x?.id == paymentNo &&
+                                        x?.status == PaymentOrderStatus.PENDING
+                                );
+
+                                if (payment) {
+                                    let result = Defaults.Object.Value;
+                                    const orderValue = paymentStatus?.purchaseAmount;
+                                    const paymentStatusId: number = paymentStatus?.statusId
+                                    if (paymentStatusId === PaymentStatus.PAID) {
+
+                                        result = await this.paymentHookOrderSuccessUpdate(
+                                            data?.paymentMethodType,
+                                            data?.paymentMethodTypeId,
+                                            orderId,
+                                            paymentStatus?.orderDetails,
+                                            statusId,
+                                            orderValue,
+                                            orderResult
+                                        )
+                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
+
+                                        result = await this.paymentHookOrderFailureUpdate(
+                                            data?.paymentMethodType,
+                                            data?.paymentMethodTypeId,
+                                            orderId,
+                                            paymentStatus?.orderDetails,
+                                            statusId,
+                                            orderValue,
+                                            orderResult
+                                        )
+                                    }
+                                    return result;
+                                }
+
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return null;
+    }
+
+    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any }> {
+        let orderDetails: any = Defaults.Object.Value;
         let purchaseAmount = 0;
         let statusId = PaymentStatus.PENDING;
 
@@ -302,7 +384,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.PAYPAL?.toLowerCase():
 
                 // Get PayPal payment details
-                const paypalOrderDetails = await new PayPalPayment().getOrderDetails(data);
+                const paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
                 if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.COMPLETED) {
                     statusId = PaymentStatus.PAID;
                 }
@@ -312,7 +394,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.CHECKOUT?.toLowerCase():
 
                 // Get Checkout payment details
-                const checkoutOrderDetails = await new CheckoutPayment().getOrderDetails(data);
+                const checkoutOrderDetails = orderDetails = await new CheckoutPayment().getOrderDetails(data);
                 if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.PAID) {
                     statusId = PaymentStatus.PAID;
                 } else {
@@ -326,7 +408,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.KLARNA?.toLowerCase():
 
                 // Get Klarna payment details
-                const klarnaOrderDetails = await new KlarnaPayment().getOrderDetails(data);
+                const klarnaOrderDetails = orderDetails = await new KlarnaPayment().getOrderDetails(data);
                 if (klarnaOrderDetails?.status?.toLowerCase() === KlarnaGateway.PaymentStatus.AUTHORIZED?.toLowerCase() || klarnaOrderDetails?.status?.toLowerCase() === KlarnaGateway.PaymentStatus.CAPTURED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 }
@@ -336,7 +418,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.STRIPE?.toLowerCase():
 
                 // Get Stripe payment details
-                const stripeOrderDetails = await new StripePayment().getOrderDetails(data);
+                const stripeOrderDetails = orderDetails = await new StripePayment().getOrderDetails(data);
                 if (stripeOrderDetails?.status?.toLowerCase() === StripeGateway.PaymentStatus.SUCCEEDED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 }
@@ -346,7 +428,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.CLEAR_PAY?.toLowerCase():
 
                 // Get ClearPay payment details
-                const clearPayOrderDetails = await new ClearPayPayment().getOrderDetails(data);
+                const clearPayOrderDetails = orderDetails = await new ClearPayPayment().getOrderDetails(data);
                 if (clearPayOrderDetails?.status?.toLowerCase() === ClearPayGateway.PaymentStatus.APPROVED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 } else {
@@ -356,7 +438,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount });
-        return { statusId, purchaseAmount };
+        return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value };
     }
 
     private async getPaymentMethod(gateway: string, { headers, cookies }: any): Promise<any> {
@@ -371,6 +453,136 @@ export class BetterCommerceOperation implements ICommerceProvider {
         if (paymentMethods?.length) {
             const paymentMethod = paymentMethods?.find((x: any) => x?.systemName?.toLowerCase() === gateway?.toLowerCase());
             return paymentMethod;
+        }
+        return null;
+    }
+
+    private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any) {
+
+        if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
+            const dbOrderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
+
+            if (dbOrderAmount > 0) {
+                let savePspInfo = getIsSavePSPInfo(methodId, order);
+
+                const orderModel = {
+                    id: getPaymentNo(methodId, order),
+                    cardNo: null,
+                    orderNo: getOrderNo(methodId, order),
+                    orderAmount: dbOrderAmount,
+                    paidAmount: orderValue,
+                    balanceAmount: '0.00',
+                    isValid: true,
+                    status: PaymentOrderStatus.PAID,
+                    authCode: getAuthCode(methodId, order),
+                    issuerUrl: null,
+                    paRequest: null,
+                    pspSessionCookie: getSignature(methodId, order),
+                    pspResponseCode: statusId,
+                    pspResponseMessage: getPSPResponseMsg(methodId, order),
+                    paymentGatewayId: methodId,
+                    paymentGateway: methodName,
+                    token: null,
+                    payerId: null,
+                    cvcResult: null,
+                    avsResult: null,
+                    secure3DResult: null,
+                    cardHolderName: null,
+                    issuerCountry: null,
+                    info1: '',
+                    fraudScore: null,
+                    paymentMethod: methodName,
+                    paymentInfo1: getPSPInfo(methodId, order), // (pspInformation)
+                    paymentInfo2: savePspInfo ? getPaymentIdentifier(methodId, order) : null, // (paymentIdentifier)
+                    paymentInfo3: getPSPGatewayInfo(methodId, order), // (pspGatewayInfo)
+                    paymentInfo4: getCardType(methodId, order), // (cardType)
+                    paymentInfo5: getCardIssuer(methodId, order), // (cardIssuer)
+                    paymentInfo6: getCardBrand(methodId, order), // (cardBrand)
+                    cardType: null,
+                    operatorId: null,
+                    refStoreId: null,
+                    tillNumber: null,
+                    externalRefNo: null,
+                    expiryYear: null,
+                    expiryMonth: null,
+                    isMoto: false,
+                    upFrontPayment: false,
+                    upFrontAmount: '0.00',
+                    isPrePaid: false,
+                }
+
+                const paymentResponseInput = {
+                    model: orderModel,
+                    orderId: orderId,
+                };
+                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                return paymentResponseResult;
+            }
+        }
+        return null;
+    }
+
+    private async paymentHookOrderFailureUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any) {
+
+        if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
+            const orderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
+
+            if (orderAmount > 0) {
+                let savePspInfo = getIsSavePSPInfo(methodId, order);
+
+                const orderModel = {
+                    id: getPaymentNo(methodId, order),
+                    cardNo: null,
+                    orderNo: getOrderNo(methodId, order),
+                    orderAmount: orderAmount,
+                    paidAmount: 0,
+                    balanceAmount: '0.00',
+                    isValid: true,
+                    status: statusId,
+                    authCode: getAuthCode(methodId, order),
+                    issuerUrl: null,
+                    paRequest: null,
+                    pspSessionCookie: getSignature(methodId, order),
+                    pspResponseCode: statusId,
+                    pspResponseMessage: getPSPResponseMsg(methodId, order),
+                    paymentGatewayId: methodId,
+                    paymentGateway: methodName,
+                    token: null,
+                    payerId: null,
+                    cvcResult: null,
+                    avsResult: null,
+                    secure3DResult: null,
+                    cardHolderName: null,
+                    issuerCountry: null,
+                    info1: '',
+                    fraudScore: null,
+                    paymentMethod: methodName,
+                    paymentInfo1: getPSPInfo(methodId, order), // (pspInformation)
+                    paymentInfo2: savePspInfo ? getPaymentIdentifier(methodId, order) : null, // (paymentIdentifier)
+                    paymentInfo3: getPSPGatewayInfo(methodId, order), // (pspGatewayInfo)
+                    paymentInfo4: getCardType(methodId, order), // (cardType)
+                    paymentInfo5: getCardIssuer(methodId, order), // (cardIssuer)
+                    paymentInfo6: getCardBrand(methodId, order), // (cardBrand)
+                    cardType: null,
+                    operatorId: null,
+                    refStoreId: null,
+                    tillNumber: null,
+                    externalRefNo: null,
+                    expiryYear: null,
+                    expiryMonth: null,
+                    isMoto: false,
+                    upFrontPayment: false,
+                    upFrontAmount: '0.00',
+                    isPrePaid: false,
+                }
+
+                const paymentResponseInput = {
+                    model: orderModel,
+                    orderId: orderId,
+                };
+                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                return paymentResponseResult;
+            }
         }
         return null;
     }

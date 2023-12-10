@@ -1,4 +1,18 @@
 
+export const matchStrings = (
+    input1: string,
+    input2: string,
+    ignoreCase = false
+) => {
+    if (input1 && input2) {
+        if (ignoreCase) {
+            return input1.toLowerCase() === input2.toLowerCase()
+        }
+        return input1 === input2
+    }
+    return false
+}
+
 /**
  * Parses boolean from string.
  * @param stringValue 

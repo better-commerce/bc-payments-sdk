@@ -5,19 +5,19 @@ const config = {
     notificationUrl: "/payment-notification/checkout",
     settings: [{
         "key": "AccountCode",
-        "value": "pk_sbox_dzxjkk5cfnepqvn2wfqnz732oej"
+        "value": "pk_sbox_cedcpciwvkyqgd5v7mg5ltw4tak"
     }, {
         "key": "Signature",
-        "value": "sk_sbox_sfqi22eviwtbdki3itilxrkgmuc"
+        "value": "sk_sbox_rwcsxwmwji27nhutttyhefv2tqf"
     }, {
         "key": "MotoAccountCode",
-        "value": "ack_ikrzccuhjple7dmn7aozgoaeki"
+        "value": "ack_urnw6g2bmmvehmvnlg37copkhe"
     }, {
         "key": "MotoSignature",
-        "value": "kybvHsoZwlEBSNbR7Id0FyOKyUrggHBFLdDX2gZZ5E6BESRGHtKBN9zN9AG4U-BODolfLDYBXo-voy0-VMBykA"
+        "value": "8NjqH1tpGAAL0YVOb26-wSq5q0Q0RzG4tkXLnQW4jf9E5oVTFLEq_BFOYEzIBGyWm5JM_vEOzcOR9C_UNrOhdw"
     }, {
         "key": "MotoUserName",
-        "value": "pc_ptat6wn535wetjzlnbsmuims7m"
+        "value": "pc_vpjtxbgcap5elpq65wtxtr3gg4"
     }, {
         "key": "UseSandbox",
         "value": "True"
@@ -26,7 +26,7 @@ const config = {
         "value": "/payment-notification/checkout/canceled"
     }]
 };
-BCEnvironment.init("ack_ikrzccuhjple7dmn7aozgoaeki", "kybvHsoZwlEBSNbR7Id0FyOKyUrggHBFLdDX2gZZ5E6BESRGHtKBN9zN9AG4U-BODolfLDYBXo-voy0-VMBykA", config);
-new PaymentOperation().getOrderDetails("pay_pnrjrwewym6edlf7wiojsgsg7i").then(response => {
+BCEnvironment.init("ack_urnw6g2bmmvehmvnlg37copkhe", "8NjqH1tpGAAL0YVOb26-wSq5q0Q0RzG4tkXLnQW4jf9E5oVTFLEq_BFOYEzIBGyWm5JM_vEOzcOR9C_UNrOhdw", config);
+new PaymentOperation().getOrderDetails("pay_v7v462x5nwuujlleqvx4rx62dy").then(response => {
     console.log(JSON.stringify(response));
 });
