@@ -1,5 +1,5 @@
 // Package Imports
-import { Payment, Token } from "bc-checkout-sdk";
+import { Payment, PaymentContext, Token } from "bc-checkout-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
@@ -74,6 +74,44 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
                 const payment = new Payment();
                 const orderDetailsResult = await payment.getDetails(data);
                 return orderDetailsResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Request a Payment Context. Send an Payment Context request.
+     * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
+     * @param data {Object}
+     */
+    async createPaymentContext(data: any) {
+        try {
+            if (super.initSDK()) {
+                const paymentContext = new PaymentContext();
+                const paymentContextRequestResult = await paymentContext.request(data);
+                return paymentContextRequestResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Get Payment Context details. Returns all the Payment Context details.
+     * API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
+     * @param data {String}
+     */
+    async getPaymentContext(data: any) {
+        try {
+            if (super.initSDK()) {
+                const paymentContext = new PaymentContext();
+                const paymentContextDetailsResult = await paymentContext.getDetails(data);
+                return paymentContextDetailsResult;
             }
             return null;
         }

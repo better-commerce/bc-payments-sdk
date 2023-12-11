@@ -64,6 +64,32 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         return null;
     }
 
+    /**
+     * Specific to {Checkout},Sends an Payment Context request.
+     * 
+     * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
+     * 
+     * @param data 
+     */
+    public async createPaymentContext(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.CHECKOUT) {
+            return await new CheckoutPayment().createPaymentContext(data);
+        }
+        return null;
+    }
+
+    /**
+     * Specific to {Checkout},Returns all the Payment Context details.
+     * @param data 
+     * 
+     *  API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
+     * 
+     */
+    public async getPaymentContext(data: any) {
+        throw new Error("Method not implemented.");
+    }
+
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);
