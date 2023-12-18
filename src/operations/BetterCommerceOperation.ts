@@ -301,69 +301,73 @@ export class BetterCommerceOperation implements ICommerceProvider {
     async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
         let paymentNo;
         let paymentGatewayOrderTxnId = Defaults.String.Value;
-        const paymentTransactionStatus = getPaymentTransactionStatus(data?.paymentMethodTypeId, data);
+        const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
+        const paymentTransactionStatus = getPaymentTransactionStatus(paymentMethodTypeId, hookData);
+        //console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
         if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
-            const orderId = getPaymentTransactionOrderId(data?.paymentMethodTypeId, data);
+            const orderId = getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+            //console.log('--- orderId ---', orderId)
 
             if (orderId != Defaults.Guid.Value) {
                 const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
+                //console.log('--- orderResult ---', orderResult)
                 if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
 
-                    if (data?.paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
-                        paymentGatewayOrderTxnId = data?.data?.id;
+                    if (paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
+                        paymentGatewayOrderTxnId = hookData?.data?.id;
                     }
+                    //console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
 
                     const payments = orderResult?.payments;
                     if (payments?.length) {
 
                         // Call gateway specific SDK API to get the order/payment status.
-                        const paymentStatus = await this.getPaymentStatus(data?.paymentMethodType, paymentGatewayOrderTxnId, true);
-                        paymentNo = getPaymentNo(data?.paymentMethodTypeId, paymentStatus?.orderDetails);
+                        const paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true);
+                        //console.log('--- paymentStatus ---', paymentStatus)
+                        paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
+                        //console.log('--- paymentNo ---', paymentNo)
 
                         if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
                             // Order Refunded
 
                         } else {
 
-                            if ((paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase()) && paymentStatus?.statusId === PaymentStatus.PENDING) {
+                            const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
+                            let statusId = PaymentOrderStatus.DECLINED
+                            const payment = payments?.find(
+                                (x: any) =>
+                                    x?.id == paymentNo &&
+                                    x?.status == PaymentOrderStatus.PENDING
+                            );
 
-                                let statusId = PaymentOrderStatus.DECLINED
-                                const payment = payments?.find(
-                                    (x: any) =>
-                                        x?.id == paymentNo &&
-                                        x?.status == PaymentOrderStatus.PENDING
-                                );
-
-                                if (payment) {
-                                    let result = Defaults.Object.Value;
-                                    const orderValue = paymentStatus?.purchaseAmount;
-                                    const paymentStatusId: number = paymentStatus?.statusId
-                                    if (paymentStatusId === PaymentStatus.PAID) {
-
-                                        result = await this.paymentHookOrderSuccessUpdate(
-                                            data?.paymentMethodType,
-                                            data?.paymentMethodTypeId,
-                                            orderId,
-                                            paymentStatus?.orderDetails,
-                                            statusId,
-                                            orderValue,
-                                            orderResult
-                                        )
-                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
-
-                                        result = await this.paymentHookOrderFailureUpdate(
-                                            data?.paymentMethodType,
-                                            data?.paymentMethodTypeId,
-                                            orderId,
-                                            paymentStatus?.orderDetails,
-                                            statusId,
-                                            orderValue,
-                                            orderResult
-                                        )
-                                    }
-                                    return result;
+                            if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
+                                let result = Defaults.Object.Value;
+                                const orderValue = paymentStatus?.purchaseAmount;
+                                const paymentStatusId: number = paymentStatus?.statusId
+                                if (paymentStatusId === PaymentStatus.PAID) {
+                                    //console.log('--- SuccessUpdate ---')
+                                    result = await this.paymentHookOrderSuccessUpdate(
+                                        paymentMethodType,
+                                        paymentMethodTypeId,
+                                        orderId,
+                                        paymentStatus?.orderDetails,
+                                        statusId,
+                                        orderValue,
+                                        orderResult
+                                    )
+                                } else if (paymentStatusId == PaymentStatus.DECLINED) {
+                                    //console.log('--- FailureUpdate ---')
+                                    result = await this.paymentHookOrderFailureUpdate(
+                                        paymentMethodType,
+                                        paymentMethodTypeId,
+                                        orderId,
+                                        paymentStatus?.orderDetails,
+                                        statusId,
+                                        orderValue,
+                                        orderResult
+                                    )
                                 }
-
+                                return result;
                             }
                         }
                     }
@@ -515,6 +519,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
+                console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                 return paymentResponseResult;
             }
@@ -580,6 +585,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
+                console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                 return paymentResponseResult;
             }
