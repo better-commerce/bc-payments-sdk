@@ -4,16 +4,16 @@ const config = {
     systemName: "Paypal",
     settings: [{
         "key": "AccountCode",
-        "value": "AT3ftGisLykS3-fzXAPXuT6QKBbOS8HLPuv9Xo6GVEGMGnNSrjORUcAhou1sfrF-_189ISIRyO7pWQok"
+        "value": "Abmm0QobMHZ177_hLxPwcoA37YmZ_nRviQsaakTLKFxDwIfYDdVIxLJ7FyTynqnUHDaqgkvCXJc42OHi"
     }, {
         "key": "Signature",
-        "value": "EE7JVUNBFA0rS5iqyNxHlIzJ07wpunxF7uYGr4WjChaWC2mWkyi3kjdLxLBVz43OB-sjWQdgdmVK--CD"
+        "value": "EESdeU6fvYaxeoj_KSf3pTMLdBX6T3ecE7LjK_ADnykHZes2iiFettVLTBoutmjgOovHu2QKJwgDGsjO"
     }, {
         "key": "UseSandbox",
-        "value": "True"
+        "value": "False"
     }]
 };
-BCEnvironment.init("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=", config);
-new PaymentOperation().getOrderDetails("30Y2289006605445H").then(response => {
+BCEnvironment.init("12c2e62b-33b1-4d9b-9782-7f3bb1edb951", "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=", config);
+new PaymentOperation().getOrderDetails("8JK79652MS4471922").then(response => {
     console.log(JSON.stringify(response));
 });

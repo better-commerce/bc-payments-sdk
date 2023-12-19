@@ -45,3 +45,7 @@ export const tryParseJson = (json: any) => {
     return null;
 };
 
+export const groupMatch = (input: string, regExp: RegExp) => {
+    const matches = regExp.exec(input);
+    return matches;
+}

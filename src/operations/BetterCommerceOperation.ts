@@ -302,30 +302,50 @@ export class BetterCommerceOperation implements ICommerceProvider {
         let paymentNo;
         let paymentGatewayOrderTxnId = Defaults.String.Value;
         const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
+
+        // Read transaction type from the incoming hook data.
         const paymentTransactionStatus = getPaymentTransactionStatus(paymentMethodTypeId, hookData);
-        //console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
+        console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
+
+        // If web hook transaction is applicable for further processing.
         if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
-            const orderId = getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
-            //console.log('--- orderId ---', orderId)
+            let orderId;
+            if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
+                const details: string = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+                console.log('--- details ---', details)
+                if (details) {
+                    orderId = details?.split(',')[0];
+                    paymentNo = details?.split(',')[1];
+                }
+            } else {
+                orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+            }
+
+            console.log('--- orderId ---', orderId)
 
             if (orderId != Defaults.Guid.Value) {
                 const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
-                //console.log('--- orderResult ---', orderResult)
+                console.log('--- orderResult ---', orderResult)
                 if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
 
                     if (paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
                         paymentGatewayOrderTxnId = hookData?.data?.id;
+                    } else if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
+                        paymentGatewayOrderTxnId = hookData?.resource?.supplementary_data?.related_ids?.order_id;
                     }
-                    //console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
+                    console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
 
                     const payments = orderResult?.payments;
                     if (payments?.length) {
 
                         // Call gateway specific SDK API to get the order/payment status.
                         const paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true);
-                        //console.log('--- paymentStatus ---', paymentStatus)
-                        paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
-                        //console.log('--- paymentNo ---', paymentNo)
+                        console.log('--- paymentStatus ---', paymentStatus)
+
+                        if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL) {
+                            paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
+                        }
+                        console.log('--- paymentNo ---', paymentNo)
 
                         if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
                             // Order Refunded
@@ -345,7 +365,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 const orderValue = paymentStatus?.purchaseAmount;
                                 const paymentStatusId: number = paymentStatus?.statusId
                                 if (paymentStatusId === PaymentStatus.PAID) {
-                                    //console.log('--- SuccessUpdate ---')
+                                    console.log('--- SuccessUpdate ---')
                                     result = await this.paymentHookOrderSuccessUpdate(
                                         paymentMethodType,
                                         paymentMethodTypeId,
@@ -356,7 +376,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         orderResult
                                     )
                                 } else if (paymentStatusId == PaymentStatus.DECLINED) {
-                                    //console.log('--- FailureUpdate ---')
+                                    console.log('--- FailureUpdate ---')
                                     result = await this.paymentHookOrderFailureUpdate(
                                         paymentMethodType,
                                         paymentMethodTypeId,
@@ -520,8 +540,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     orderId: orderId,
                 };
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
-                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
-                return paymentResponseResult;
+                //const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                //return paymentResponseResult;
             }
         }
         return null;
@@ -586,8 +606,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     orderId: orderId,
                 };
                 console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
-                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
-                return paymentResponseResult;
+                //const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                //return paymentResponseResult;
             }
         }
         return null;

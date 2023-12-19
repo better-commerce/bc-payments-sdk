@@ -1,7 +1,11 @@
+// Package Imports
+import { PayPalPayment } from "../modules/payments/PayPalPayment"
+
 // Other Imports
-import { matchStrings, stringToBoolean } from "./parse-util"
+import { groupMatch, matchStrings, stringToBoolean } from "./parse-util"
 import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
-import { Checkout, Defaults, PaymentTransactionStatus } from "../constants/constants"
+import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
+import { BCEnvironment } from "../base/config/BCEnvironment"
 
 export const getGatewayId = (gatewayName: string) => {
     if (matchStrings(gatewayName, PaymentMethodType.PAYPAL, true)) {
@@ -66,16 +70,63 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
         } else if (data?.data?.response_summary === Checkout.ResponseSummaryType.DECLINED) {
             return PaymentTransactionStatus.TXN_FAILED;
         }
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        if (data?.event_type === Paypal.EventType.PAYMENT_CAPTURED) {
+            return PaymentTransactionStatus.TXN_CHARGED;
+        } else if (data?.event_type === Paypal.EventType.PAYMENT_AUTHENTICATION_FAILED) {
+            return PaymentTransactionStatus.TXN_FAILED;
+        }
     }
     return PaymentTransactionStatus.NONE;
 }
 
-export const getPaymentTransactionOrderId = (methodId: number, data: any): string => {
+export const getPaymentTransactionOrderId = async (methodId: number, data: any): Promise<string> => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return data?.data?.metadata?.udf1;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        console.log('--- data ---', JSON.stringify(data))
+        const payPalOrderId = data?.resource?.supplementary_data?.related_ids?.order_id;
+        console.log('--- payPalOrderId ---', payPalOrderId)
+        if (payPalOrderId) {
+            const { extras } = data
+            const { clientId, sharedSecret, config, authUrl, baseUrl } = extras
+            BCEnvironment.init(clientId, sharedSecret, config, authUrl, baseUrl);
+            const paypalOrderDetails = await new PayPalPayment().getOrderDetails(payPalOrderId);
+            console.log('--- paypalOrderDetails ---', JSON.stringify(paypalOrderDetails))
+            if (paypalOrderDetails?.purchase_units?.length) {
+                const description = paypalOrderDetails?.purchase_units[0]?.description;
+                console.log('--- description ---', description)
+                if (description) {
+                    return parseOrderId(description)?.trim() || Defaults.String.Value;
+                }
+            }
+        }
     }
-    return Defaults.String.Value;
+    return Promise.resolve(Defaults.String.Value);
 }
+
+/*export const getPaymentTransactionOrderNo = async (methodId: number, data: any): Promise<string> => {
+    if (methodId == PaymentMethodTypeId.PAYPAL) {
+        console.log('--- data ---', JSON.stringify(data))
+        const payPalOrderId = data?.resource?.supplementary_data?.related_ids?.order_id;
+        console.log('--- payPalOrderId ---', payPalOrderId)
+        if (payPalOrderId) {
+            const { extras } = data
+            const { clientId, sharedSecret, config, authUrl, baseUrl } = extras
+            BCEnvironment.init(clientId, sharedSecret, config, authUrl, baseUrl);
+            const paypalOrderDetails = await new PayPalPayment().getOrderDetails(payPalOrderId);
+            console.log('--- paypalOrderDetails ---', JSON.stringify(paypalOrderDetails))
+            if (paypalOrderDetails?.purchase_units?.length) {
+                const description = paypalOrderDetails?.purchase_units[0]?.description;
+                console.log('--- description ---', description)
+                if (description) {
+                    return parseOrderPaymentNo(description)?.trim() || Defaults.String.Value;
+                }
+            }
+        }
+    }
+    return Promise.resolve(Defaults.String.Value);
+}*/
 
 export const getOrderNo = (methodId: number, data: any): number => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
@@ -198,6 +249,15 @@ export const getCardBrand = (methodId: number, data: any): string => {
         return matchStrings(data?.udf5, 'card', true)
             ? data?.card?.card_brand
             : null;
+    }
+    return Defaults.String.Value;
+}
+
+const parseOrderId = (input: string): string => {
+    const matches = groupMatch(input?.trim(), RegularExpression.ORDER_BASKET_ID_MATCH);
+    console.log('--- matches ---', JSON.stringify(matches));
+    if (matches?.length >= 3) {
+        return `${matches[1]},${matches[3]}`
     }
     return Defaults.String.Value;
 }

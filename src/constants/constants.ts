@@ -16,6 +16,10 @@ export module Defaults {
     }
 }
 
+export module RegularExpression {
+    export const ORDER_BASKET_ID_MATCH = /Order (.*?) for basket (.*?) for orderId (.*?)$/g
+}
+
 export enum PaymentTransactionStatus {
     NONE = 'None',
     TXN_CHARGED = 'TXN_CHARGED',
@@ -27,6 +31,7 @@ export module Checkout {
     export enum EventType {
         PAYMENT_APPROVED = 'payment_approved',
         PAYMENT_CAPTURED = 'payment_captured',
+        PAYMENT_AUTHENTICATION_FAILED = 'payment_authentication_failed',
     }
 
     export enum ResponseSummaryType {
@@ -35,6 +40,19 @@ export module Checkout {
         SOFT_DECLINE = 'Soft Decline',
         HARD_DECLINE = 'Hard Decline',
         RISK_RESPONSES = 'Risk Responses',
+    }
+}
+
+export module Paypal {
+
+    export enum EventType {
+        PAYMENT_CAPTURED = 'PAYMENT.CAPTURE.COMPLETED',
+        PAYMENT_REFUNDED = 'PAYMENT.REFUND.COMPLETED',
+        PAYMENT_AUTHENTICATION_FAILED = 'PAYMENT.AUTHORIZATION.VOIDED',
+    }
+
+    export enum ResourceType {
+        CAPTURE = 'capture',
     }
 }
 
