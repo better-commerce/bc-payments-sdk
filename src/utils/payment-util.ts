@@ -128,7 +128,7 @@ export const getPaymentTransactionOrderId = async (methodId: number, data: any):
     return Promise.resolve(Defaults.String.Value);
 }*/
 
-export const getOrderNo = (methodId: number, data: any): number => {
+export const getOrderNo = (methodId: number, data: any, extras?: any): number => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return data?.metadata?.udf4.split('-')[0];
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
@@ -137,7 +137,7 @@ export const getOrderNo = (methodId: number, data: any): number => {
     return Defaults.Int.Value;
 }
 
-export const getPaymentNo = (methodId: number, data: any): string => {
+export const getPaymentNo = (methodId: number, data: any, extras?: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return data?.metadata?.udf4.split('-')[1];
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
@@ -149,6 +149,8 @@ export const getPaymentNo = (methodId: number, data: any): string => {
 export const getAuthCode = (methodId: number, data: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return data?.id;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        return data?.id;
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.txn_id;
     }
@@ -158,6 +160,8 @@ export const getAuthCode = (methodId: number, data: any): string => {
 export const getSignature = (methodId: number, data: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return `scheme_id=${data?.scheme_id || Defaults.String.Value}&acquirer_transaction_id=${data?.processing?.acquirer_transaction_id || Defaults.String.Value}&retrieval_reference_number=${data?.processing?.retrieval_reference_number || Defaults.String.Value}&merchant_category_code=${data?.processing?.merchant_category_code || Defaults.String.Value}&scheme_merchant_id=${data?.processing?.scheme_merchant_id || Defaults.String.Value}`;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        return `id=${data?.id}`
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.content?.txn?.payment_gateway_response?.epg_txn_id;
     }
@@ -167,6 +171,8 @@ export const getSignature = (methodId: number, data: any): string => {
 export const getPSPResponseMsg = (methodId: number, data: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return `id=${data?.id || Defaults.String.Value}&status=${data?.status || Defaults.String.Value}`;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        return `id=${data?.id || Defaults.String.Value}`;
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.content?.txn?.status;
     }
@@ -177,6 +183,8 @@ export const getIsSavePSPInfo = (methodId: number, data: any): boolean => {
 
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return true;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        return false;
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         const payGatewayId = data?.udf4;
         if (payGatewayId) {
@@ -213,6 +221,8 @@ export const getPSPGatewayInfo = (methodId: number, data: any): string => {
 
     if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.txn_detail?.gateway;
+    } else if (methodId == PaymentMethodTypeId.PAYPAL) {
+        return PaymentMethodType.PAYPAL;
     }
     return Defaults.String.Value;
 }

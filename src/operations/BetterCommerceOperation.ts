@@ -299,7 +299,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
     }
 
     async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
-        let paymentNo;
+        let paymentNo, orderNo;
         let paymentGatewayOrderTxnId = Defaults.String.Value;
         const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
 
@@ -315,6 +315,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 console.log('--- details ---', details)
                 if (details) {
                     orderId = details?.split(',')[0];
+                    orderNo = details?.split(',')[0];
                     paymentNo = details?.split(',')[1];
                 }
             } else {
@@ -373,7 +374,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         paymentStatus?.orderDetails,
                                         statusId,
                                         orderValue,
-                                        orderResult
+                                        orderResult,
+                                        {
+                                            paymentNo,
+                                            orderNo
+                                        }
                                     )
                                 } else if (paymentStatusId == PaymentStatus.DECLINED) {
                                     console.log('--- FailureUpdate ---')
@@ -384,7 +389,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         paymentStatus?.orderDetails,
                                         statusId,
                                         orderValue,
-                                        orderResult
+                                        orderResult,
+                                        {
+                                            paymentNo,
+                                            orderNo
+                                        }
                                     )
                                 }
                                 return result;
@@ -481,7 +490,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any) {
+    private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any) {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
             const dbOrderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
@@ -490,9 +499,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 let savePspInfo = getIsSavePSPInfo(methodId, order);
 
                 const orderModel = {
-                    id: getPaymentNo(methodId, order),
+                    id: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.paymentNo : getPaymentNo(methodId, order),
                     cardNo: null,
-                    orderNo: getOrderNo(methodId, order),
+                    orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
                     orderAmount: dbOrderAmount,
                     paidAmount: orderValue,
                     balanceAmount: '0.00',
@@ -540,14 +549,14 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     orderId: orderId,
                 };
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
-                //const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
-                //return paymentResponseResult;
+                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                return paymentResponseResult;
             }
         }
         return null;
     }
 
-    private async paymentHookOrderFailureUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any) {
+    private async paymentHookOrderFailureUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any) {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
             const orderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
@@ -556,9 +565,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 let savePspInfo = getIsSavePSPInfo(methodId, order);
 
                 const orderModel = {
-                    id: getPaymentNo(methodId, order),
+                    id: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.paymentNo : getPaymentNo(methodId, order),
                     cardNo: null,
-                    orderNo: getOrderNo(methodId, order),
+                    orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
                     orderAmount: orderAmount,
                     paidAmount: 0,
                     balanceAmount: '0.00',
@@ -606,8 +615,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     orderId: orderId,
                 };
                 console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
-                //const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
-                //return paymentResponseResult;
+                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                return paymentResponseResult;
             }
         }
         return null;
