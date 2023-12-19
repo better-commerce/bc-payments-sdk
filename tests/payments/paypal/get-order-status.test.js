@@ -14,6 +14,6 @@ const config = {
     }]
 };
 BCEnvironment.init("12c2e62b-33b1-4d9b-9782-7f3bb1edb951", "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=", config);
-new PaymentOperation().getOrderDetails("8JK79652MS4471922").then(response => {
+new PaymentOperation().getOrderDetails("7NY41469B3143064L").then(response => {
     console.log(JSON.stringify(response));
 });

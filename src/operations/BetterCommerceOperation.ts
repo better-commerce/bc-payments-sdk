@@ -377,7 +377,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         orderResult,
                                         {
                                             paymentNo,
-                                            orderNo
+                                            orderNo,
+                                            hookData,
                                         }
                                     )
                                 } else if (paymentStatusId == PaymentStatus.DECLINED) {
@@ -392,7 +393,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         orderResult,
                                         {
                                             paymentNo,
-                                            orderNo
+                                            orderNo,
+                                            hookData,
                                         }
                                     )
                                 }
@@ -510,7 +512,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     authCode: getAuthCode(methodId, order),
                     issuerUrl: null,
                     paRequest: null,
-                    pspSessionCookie: getSignature(methodId, order),
+                    pspSessionCookie: getSignature(methodId, order, extras?.hookData),
                     pspResponseCode: statusId,
                     pspResponseMessage: getPSPResponseMsg(methodId, order),
                     paymentGatewayId: methodId,
@@ -576,7 +578,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     authCode: getAuthCode(methodId, order),
                     issuerUrl: null,
                     paRequest: null,
-                    pspSessionCookie: getSignature(methodId, order),
+                    pspSessionCookie: getSignature(methodId, order, extras?.hookData),
                     pspResponseCode: statusId,
                     pspResponseMessage: getPSPResponseMsg(methodId, order),
                     paymentGatewayId: methodId,

@@ -157,11 +157,17 @@ export const getAuthCode = (methodId: number, data: any): string => {
     return Defaults.String.Value;
 }
 
-export const getSignature = (methodId: number, data: any): string => {
+export const getSignature = (methodId: number, data: any, hookData: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return `scheme_id=${data?.scheme_id || Defaults.String.Value}&acquirer_transaction_id=${data?.processing?.acquirer_transaction_id || Defaults.String.Value}&retrieval_reference_number=${data?.processing?.retrieval_reference_number || Defaults.String.Value}&merchant_category_code=${data?.processing?.merchant_category_code || Defaults.String.Value}&scheme_merchant_id=${data?.processing?.scheme_merchant_id || Defaults.String.Value}`;
     } else if (methodId == PaymentMethodTypeId.PAYPAL) {
-        return `id=${data?.id}`
+        return JSON.stringify({
+            token: `${hookData?.resource?.id}`,
+            orderId: `${data?.id}`,
+            payerId: `${data?.payer?.payerId}`,
+            gateway: `${PaymentMethodTypeId.PAYPAL}`,
+            isCancelled: false
+        });
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.content?.txn?.payment_gateway_response?.epg_txn_id;
     }
