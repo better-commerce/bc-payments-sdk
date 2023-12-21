@@ -54,246 +54,250 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns 
      */
     async processPayment(data: IPaymentProcessingData): Promise<any> {
+        try {
+            const getPaymentInfoPayload = (paymentInfo: IPaymentInfo) => {
 
-        const getPaymentInfoPayload = (paymentInfo: IPaymentInfo) => {
+                /* ******
+                    Info
+                   ******
+                   paymentInfo1 is for [pspInformation[]
+                   paymentInfo2 is for [paymentIdentifier]
+                   paymentInfo3 is for gateway type i.e. Billdesk, Razorpay, etc
+                   paymentInfo4 is for [cardType]
+                   paymentInfo5 is for [cardIssuer]
+                   paymentInfo6 is for [cardBrand]
+                   paymentInfo7 is for [chequeNumber]
+                   paymentInfo8 is untilized
+                */
 
-            /* ******
-                Info
-               ******
-               paymentInfo1 is for [pspInformation[]
-               paymentInfo2 is for [paymentIdentifier]
-               paymentInfo3 is for gateway type i.e. Billdesk, Razorpay, etc
-               paymentInfo4 is for [cardType]
-               paymentInfo5 is for [cardIssuer]
-               paymentInfo6 is for [cardBrand]
-               paymentInfo7 is for [chequeNumber]
-               paymentInfo8 is untilized
-            */
-
-            let info: any = {}
-            if (paymentInfo?.paymentInfo1) {
-                info = {
-                    ...info,
-                    paymentInfo1: paymentInfo?.paymentInfo1
+                let info: any = {}
+                if (paymentInfo?.paymentInfo1) {
+                    info = {
+                        ...info,
+                        paymentInfo1: paymentInfo?.paymentInfo1
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo2) {
-                info = {
-                    ...info,
-                    paymentInfo2: paymentInfo?.paymentInfo2
+                if (paymentInfo?.paymentInfo2) {
+                    info = {
+                        ...info,
+                        paymentInfo2: paymentInfo?.paymentInfo2
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo3) {
-                info = {
-                    ...info,
-                    paymentInfo3: paymentInfo?.paymentInfo3
+                if (paymentInfo?.paymentInfo3) {
+                    info = {
+                        ...info,
+                        paymentInfo3: paymentInfo?.paymentInfo3
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo4) {
-                info = {
-                    ...info,
-                    paymentInfo4: paymentInfo?.paymentInfo4
+                if (paymentInfo?.paymentInfo4) {
+                    info = {
+                        ...info,
+                        paymentInfo4: paymentInfo?.paymentInfo4
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo5) {
-                info = {
-                    ...info,
-                    paymentInfo5: paymentInfo?.paymentInfo5
+                if (paymentInfo?.paymentInfo5) {
+                    info = {
+                        ...info,
+                        paymentInfo5: paymentInfo?.paymentInfo5
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo6) {
-                info = {
-                    ...info,
-                    paymentInfo6: paymentInfo?.paymentInfo6
+                if (paymentInfo?.paymentInfo6) {
+                    info = {
+                        ...info,
+                        paymentInfo6: paymentInfo?.paymentInfo6
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo7) {
-                info = {
-                    ...info,
-                    paymentInfo7: paymentInfo?.paymentInfo7
+                if (paymentInfo?.paymentInfo7) {
+                    info = {
+                        ...info,
+                        paymentInfo7: paymentInfo?.paymentInfo7
+                    }
                 }
-            }
-            if (paymentInfo?.paymentInfo8) {
-                info = {
-                    ...info,
-                    paymentInfo8: paymentInfo?.paymentInfo8
+                if (paymentInfo?.paymentInfo8) {
+                    info = {
+                        ...info,
+                        paymentInfo8: paymentInfo?.paymentInfo8
+                    }
                 }
-            }
-            return info
-        }
-
-        let orderModel: any;
-        const isCancelled = data?.extras?.isCancelled ?? false;
-        const gateway = data?.extras?.gateway || Defaults.String.Value;
-
-        if (gateway) {
-            let paymentGatewayOrderTxnId = "";
-
-            // For PayPal, Checkout, Stripe, Klarna & ClearPay
-            if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase()) {
-                paymentGatewayOrderTxnId = data?.extras?.orderId;
+                return info
             }
 
-            const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
-            if (paymentMethod) {
-                const additionalServiceCharge = paymentMethod?.settings?.length
-                    ? paymentMethod?.settings?.find((x: any) => x?.key === "AdditionalServiceCharge")?.value || "0"
-                    : "0";
+            let orderModel: any;
+            const isCancelled = data?.extras?.isCancelled ?? false;
+            const gateway = data?.extras?.gateway || Defaults.String.Value;
 
-                const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
-                const { result: orderResult }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
-                const { headers, cookies, ...rest } = data?.extras;
-                if (orderResult) {
-                    let paymentStatus: any;
-                    const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+            if (gateway) {
+                let paymentGatewayOrderTxnId = "";
 
-                    // If this is COD order.
-                    if (isCOD) {
-                        orderModel = {
-                            id: txnOrderId?.split('-')[1],
-                            cardNo: null,
-                            orderNo: parseInt(txnOrderId?.split('-')[0]),
-                            orderAmount: orderAmount,
-                            paidAmount: 0.0,
-                            balanceAmount: orderAmount,
-                            isValid: true,
-                            status: !isCancelled
-                                ? PaymentStatus.AUTHORIZED
-                                : PaymentStatus.DECLINED,
-                            authCode: null,
-                            issuerUrl: null,
-                            paRequest: null,
-                            pspSessionCookie: null,
-                            pspResponseCode: null,
-                            pspResponseMessage: null,
-                            paymentGatewayId: paymentMethod?.id,
-                            paymentGateway: paymentMethod?.systemName,
-                            token: null,
-                            payerId: null,
-                            cvcResult: null,
-                            avsResult: null,
-                            secure3DResult: null,
-                            cardHolderName: null,
-                            issuerCountry: null,
-                            info1: '',
-                            fraudScore: null,
-                            paymentMethod: gateway,
-                            cardType: null,
-                            operatorId: null,
-                            refStoreId: null,
-                            tillNumber: null,
-                            externalRefNo: null,
-                            expiryYear: null,
-                            expiryMonth: null,
-                            isMoto: true,
-                            upFrontPayment: false,
-                            upFrontAmount: '0.00',
-                            upFrontTerm: '76245369',
-                            isPrePaid: false,
-                            additionalServiceCharge: additionalServiceCharge,
-                            ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) },
-                        };
-                        paymentStatus = {
-                            statusId: PaymentStatus.AUTHORIZED,
-                        }
-                    } else {
+                // For PayPal, Checkout, Stripe, Klarna & ClearPay
+                if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase()) {
+                    paymentGatewayOrderTxnId = data?.extras?.orderId;
+                }
 
-                        if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase()) {
-                            paymentStatus = {
-                                statusId: PaymentStatus.PAID,
-                                purchaseAmount: orderAmount
-                            }
-                        } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
+                const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
+                if (paymentMethod) {
+                    const additionalServiceCharge = paymentMethod?.settings?.length
+                        ? paymentMethod?.settings?.find((x: any) => x?.key === "AdditionalServiceCharge")?.value || "0"
+                        : "0";
+
+                    const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
+                    const { result: orderResult }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
+                    const { headers, cookies, ...rest } = data?.extras;
+                    if (orderResult) {
+                        let paymentStatus: any;
+                        const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+
+                        // If this is COD order.
+                        if (isCOD) {
+                            orderModel = {
+                                id: txnOrderId?.split('-')[1],
+                                cardNo: null,
+                                orderNo: parseInt(txnOrderId?.split('-')[0]),
+                                orderAmount: orderAmount,
+                                paidAmount: 0.0,
+                                balanceAmount: orderAmount,
+                                isValid: true,
+                                status: !isCancelled
+                                    ? PaymentStatus.AUTHORIZED
+                                    : PaymentStatus.DECLINED,
+                                authCode: null,
+                                issuerUrl: null,
+                                paRequest: null,
+                                pspSessionCookie: null,
+                                pspResponseCode: null,
+                                pspResponseMessage: null,
+                                paymentGatewayId: paymentMethod?.id,
+                                paymentGateway: paymentMethod?.systemName,
+                                token: null,
+                                payerId: null,
+                                cvcResult: null,
+                                avsResult: null,
+                                secure3DResult: null,
+                                cardHolderName: null,
+                                issuerCountry: null,
+                                info1: '',
+                                fraudScore: null,
+                                paymentMethod: gateway,
+                                cardType: null,
+                                operatorId: null,
+                                refStoreId: null,
+                                tillNumber: null,
+                                externalRefNo: null,
+                                expiryYear: null,
+                                expiryMonth: null,
+                                isMoto: true,
+                                upFrontPayment: false,
+                                upFrontAmount: '0.00',
+                                upFrontTerm: '76245369',
+                                isPrePaid: false,
+                                additionalServiceCharge: additionalServiceCharge,
+                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) },
+                            };
                             paymentStatus = {
                                 statusId: PaymentStatus.AUTHORIZED,
-                                purchaseAmount: orderAmount
                             }
                         } else {
 
-                            // Call gateway specific SDK API to get the order/payment status.
-                            paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
-                        }
-
-                        orderModel = {
-                            id: txnOrderId?.split('-')[1],
-                            cardNo: null,
-                            orderNo: parseInt(txnOrderId?.split('-')[0]),
-                            orderAmount: orderAmount,
-                            paidAmount: !isCancelled
-                                ? paymentStatus?.purchaseAmount
-                                : 0,
-                            balanceAmount: '0.00',
-                            isValid: true,
-                            status: !isCancelled
-                                ? paymentStatus?.statusId
-                                : PaymentStatus.DECLINED,
-                            authCode: !isCancelled
-                                ? paymentGatewayOrderTxnId
-                                : null,
-                            issuerUrl: null,
-                            paRequest: null,
-                            pspSessionCookie: JSON.stringify({ ...rest }),
-                            pspResponseCode: null,
-                            pspResponseMessage: null,
-                            paymentGatewayId: paymentMethod?.id,
-                            paymentGateway: paymentMethod?.systemName,
-                            token: null,
-                            payerId: null,
-                            cvcResult: null,
-                            avsResult: null,
-                            secure3DResult: null,
-                            cardHolderName: null,
-                            issuerCountry: null,
-                            info1: '',
-                            fraudScore: null,
-                            paymentMethod: gateway,
-                            cardType: null,
-                            operatorId: null,
-                            refStoreId: null,
-                            tillNumber: null,
-                            externalRefNo: null,
-                            expiryYear: null,
-                            expiryMonth: null,
-                            isMoto: false,
-                            upFrontPayment: false,
-                            upFrontAmount: '0.00',
-                            isPrePaid: !isCOD,
-
-                            discountedTotal: bankOfferDetails?.discountedTotal ?? 0,
-                            externalPromoCode: bankOfferDetails?.voucherCode ?? null,
-                            externalVoucher: bankOfferDetails?.voucherCode
-                                ? {
-                                    code: bankOfferDetails?.offerCode,
-                                    additionalInfo1: bankOfferDetails?.value,
-                                    additionalInfo2: bankOfferDetails?.status,
+                            if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase()) {
+                                paymentStatus = {
+                                    statusId: PaymentStatus.PAID,
+                                    purchaseAmount: orderAmount
                                 }
-                                : null,
-                            ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) }
-                        };
-                    }
+                            } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
+                                paymentStatus = {
+                                    statusId: PaymentStatus.AUTHORIZED,
+                                    purchaseAmount: orderAmount
+                                }
+                            } else {
 
-                    if (orderModel) {
-                        const paymentResponseInput = {
-                            model: orderModel,
-                            orderId: orderId,
-                        };
-                        const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
-                        if (paymentResponseResult) {
+                                // Call gateway specific SDK API to get the order/payment status.
+                                paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
+                            }
 
-                            // Get order details
-                            const { result: orderResultPostPaymentResponse }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
-                            console.log("orderResultPostPaymentResponse", orderResultPostPaymentResponse);
+                            orderModel = {
+                                id: txnOrderId?.split('-')[1],
+                                cardNo: null,
+                                orderNo: parseInt(txnOrderId?.split('-')[0]),
+                                orderAmount: orderAmount,
+                                paidAmount: !isCancelled
+                                    ? paymentStatus?.purchaseAmount
+                                    : 0,
+                                balanceAmount: '0.00',
+                                isValid: true,
+                                status: !isCancelled
+                                    ? paymentStatus?.statusId
+                                    : PaymentStatus.DECLINED,
+                                authCode: !isCancelled
+                                    ? paymentGatewayOrderTxnId
+                                    : null,
+                                issuerUrl: null,
+                                paRequest: null,
+                                pspSessionCookie: JSON.stringify({ ...rest }),
+                                pspResponseCode: null,
+                                pspResponseMessage: null,
+                                paymentGatewayId: paymentMethod?.id,
+                                paymentGateway: paymentMethod?.systemName,
+                                token: null,
+                                payerId: null,
+                                cvcResult: null,
+                                avsResult: null,
+                                secure3DResult: null,
+                                cardHolderName: null,
+                                issuerCountry: null,
+                                info1: '',
+                                fraudScore: null,
+                                paymentMethod: gateway,
+                                cardType: null,
+                                operatorId: null,
+                                refStoreId: null,
+                                tillNumber: null,
+                                externalRefNo: null,
+                                expiryYear: null,
+                                expiryMonth: null,
+                                isMoto: false,
+                                upFrontPayment: false,
+                                upFrontAmount: '0.00',
+                                isPrePaid: !isCOD,
 
-                            return isCancelled
-                                ? PaymentStatus.DECLINED
-                                : (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED)
-                                    ? PaymentStatus.PAID
-                                    : PaymentStatus.PENDING; //paymentStatus?.statusId
+                                discountedTotal: bankOfferDetails?.discountedTotal ?? 0,
+                                externalPromoCode: bankOfferDetails?.voucherCode ?? null,
+                                externalVoucher: bankOfferDetails?.voucherCode
+                                    ? {
+                                        code: bankOfferDetails?.offerCode,
+                                        additionalInfo1: bankOfferDetails?.value,
+                                        additionalInfo2: bankOfferDetails?.status,
+                                    }
+                                    : null,
+                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) }
+                            };
                         }
 
+                        if (orderModel) {
+                            const paymentResponseInput = {
+                                model: orderModel,
+                                orderId: orderId,
+                            };
+                            //console.log('---- paymentResponseInput ----', JSON.stringify(paymentResponseInput))
+                            const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
+                            if (paymentResponseResult) {
+
+                                // Get order details
+                                const { result: orderResultPostPaymentResponse }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
+                                console.log("---- orderResultPostPaymentResponse ----", orderResultPostPaymentResponse);
+
+                                return isCancelled
+                                    ? PaymentStatus.DECLINED
+                                    : (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED)
+                                        ? PaymentStatus.PAID
+                                        : PaymentStatus.PENDING; //paymentStatus?.statusId
+                            }
+
+                        }
                     }
                 }
             }
+        } catch (error: any) {
+            return { hasError: true, error };
         }
         return null;
     }
