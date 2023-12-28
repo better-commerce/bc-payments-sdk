@@ -3,6 +3,7 @@ import { IPaymentProcessingData } from "../models/better-commerce/IPaymentProces
 import { IPaymentHookProcessingData } from "../models/better-commerce/IPaymentHookProcessingData";
 
 // Other Imports
+import { Logger } from "../modules/better-commerce/Logger";
 import { B2B } from "../modules/better-commerce/B2B";
 import { Order } from "../modules/better-commerce/Order";
 import { PaymentMethod } from "../modules/better-commerce/PaymentMethod";
@@ -21,7 +22,7 @@ import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 import { PaymentMethodTypeId } from "../constants";
 import { PaymentOrderStatus } from "../constants/enums";
-import { matchStrings, stringToBoolean } from "../utils/parse-util";
+import { matchStrings } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
 /**
@@ -297,118 +298,124 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
             }
         } catch (error: any) {
-            return { hasError: true, error };
+            Logger.logPayment(error, { headers: {}, cookies: {} })
+            return { hasError: true, error: error }
         }
         return null;
     }
 
     async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
-        let paymentNo, orderNo;
-        let paymentGatewayOrderTxnId = Defaults.String.Value;
-        const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
+        try {
+            let paymentNo, orderNo;
+            let paymentGatewayOrderTxnId = Defaults.String.Value;
+            const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
 
-        // Read transaction type from the incoming hook data.
-        const paymentTransactionStatus = getPaymentTransactionStatus(paymentMethodTypeId, hookData);
-        console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
+            // Read transaction type from the incoming hook data.
+            const paymentTransactionStatus = getPaymentTransactionStatus(paymentMethodTypeId, hookData);
+            console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
 
-        // If web hook transaction is applicable for further processing.
-        if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
-            let orderId;
-            if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
-                const details: string = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
-                console.log('--- details ---', details)
-                if (details) {
-                    orderId = details?.split(',')[0];
-                    orderNo = details?.split(',')[0];
-                    paymentNo = details?.split(',')[1];
-                }
-            } else {
-                orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
-            }
-
-            console.log('--- orderId ---', orderId)
-
-            if (orderId != Defaults.Guid.Value) {
-                const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
-                console.log('--- orderResult ---', orderResult)
-                if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
-
-                    if (paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
-                        paymentGatewayOrderTxnId = hookData?.data?.id;
-                    } else if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
-                        paymentGatewayOrderTxnId = hookData?.resource?.supplementary_data?.related_ids?.order_id;
+            // If web hook transaction is applicable for further processing.
+            if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
+                let orderId;
+                if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
+                    const details: string = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+                    console.log('--- details ---', details)
+                    if (details) {
+                        orderId = details?.split(',')[0];
+                        orderNo = details?.split(',')[0];
+                        paymentNo = details?.split(',')[1];
                     }
-                    console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
+                } else {
+                    orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+                }
 
-                    const payments = orderResult?.payments;
-                    if (payments?.length) {
+                console.log('--- orderId ---', orderId)
 
-                        // Call gateway specific SDK API to get the order/payment status.
-                        const paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true);
-                        console.log('--- paymentStatus ---', paymentStatus)
+                if (orderId != Defaults.Guid.Value) {
+                    const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
+                    console.log('--- orderResult ---', orderResult)
+                    if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
 
-                        if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL) {
-                            paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
+                        if (paymentMethodTypeId === PaymentMethodTypeId.CHECKOUT) {
+                            paymentGatewayOrderTxnId = hookData?.data?.id;
+                        } else if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
+                            paymentGatewayOrderTxnId = hookData?.resource?.supplementary_data?.related_ids?.order_id;
                         }
-                        console.log('--- paymentNo ---', paymentNo)
+                        console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
 
-                        if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
-                            // Order Refunded
+                        const payments = orderResult?.payments;
+                        if (payments?.length) {
 
-                        } else {
+                            // Call gateway specific SDK API to get the order/payment status.
+                            const paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true);
+                            console.log('--- paymentStatus ---', paymentStatus)
 
-                            const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
-                            let statusId = PaymentOrderStatus.DECLINED
-                            const payment = payments?.find(
-                                (x: any) =>
-                                    x?.id == paymentNo &&
-                                    x?.status == PaymentOrderStatus.PENDING
-                            );
+                            if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL) {
+                                paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
+                            }
+                            console.log('--- paymentNo ---', paymentNo)
 
-                            if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
-                                let result = Defaults.Object.Value;
-                                const orderValue = paymentStatus?.purchaseAmount;
-                                const paymentStatusId: number = paymentStatus?.statusId
-                                if (paymentStatusId === PaymentStatus.PAID) {
-                                    console.log('--- SuccessUpdate ---')
-                                    result = await this.paymentHookOrderSuccessUpdate(
-                                        paymentMethodType,
-                                        paymentMethodTypeId,
-                                        orderId,
-                                        paymentStatus?.orderDetails,
-                                        statusId,
-                                        orderValue,
-                                        orderResult,
-                                        {
-                                            paymentNo,
-                                            orderNo,
-                                            hookData,
-                                        }
-                                    )
-                                } else if (paymentStatusId == PaymentStatus.DECLINED) {
-                                    console.log('--- FailureUpdate ---')
-                                    result = await this.paymentHookOrderFailureUpdate(
-                                        paymentMethodType,
-                                        paymentMethodTypeId,
-                                        orderId,
-                                        paymentStatus?.orderDetails,
-                                        statusId,
-                                        orderValue,
-                                        orderResult,
-                                        {
-                                            paymentNo,
-                                            orderNo,
-                                            hookData,
-                                        }
-                                    )
+                            if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
+                                // Order Refunded
+
+                            } else {
+
+                                const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
+                                let statusId = PaymentOrderStatus.DECLINED
+                                const payment = payments?.find(
+                                    (x: any) =>
+                                        x?.id == paymentNo &&
+                                        x?.status == PaymentOrderStatus.PENDING
+                                );
+
+                                if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
+                                    let result = Defaults.Object.Value;
+                                    const orderValue = paymentStatus?.purchaseAmount;
+                                    const paymentStatusId: number = paymentStatus?.statusId
+                                    if (paymentStatusId === PaymentStatus.PAID) {
+                                        console.log('--- SuccessUpdate ---')
+                                        result = await this.paymentHookOrderSuccessUpdate(
+                                            paymentMethodType,
+                                            paymentMethodTypeId,
+                                            orderId,
+                                            paymentStatus?.orderDetails,
+                                            statusId,
+                                            orderValue,
+                                            orderResult,
+                                            {
+                                                paymentNo,
+                                                orderNo,
+                                                hookData,
+                                            }
+                                        )
+                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
+                                        console.log('--- FailureUpdate ---')
+                                        result = await this.paymentHookOrderFailureUpdate(
+                                            paymentMethodType,
+                                            paymentMethodTypeId,
+                                            orderId,
+                                            paymentStatus?.orderDetails,
+                                            statusId,
+                                            orderValue,
+                                            orderResult,
+                                            {
+                                                paymentNo,
+                                                orderNo,
+                                                hookData,
+                                            }
+                                        )
+                                    }
+                                    return result;
                                 }
-                                return result;
                             }
                         }
                     }
-                }
 
+                }
             }
+        } catch (error: any) {
+            Logger.logPayment(error, { headers: {}, cookies: {} })
+            return { hasError: true, error: error }
         }
         return null;
     }
