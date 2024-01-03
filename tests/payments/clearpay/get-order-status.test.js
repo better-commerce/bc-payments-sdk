@@ -4,17 +4,17 @@ const config = {
     systemName: "ClearPay",
     settings: [{
         "key": "AccountCode",
-        "value": "400124147"
+        "value": "400140419"
     }, {
         "key": "Signature",
-        "value": "dd3d92ae8ccee3b9e3f15e3876d7a11fa255a9985b22ba2ec9848bb1e59b1159046152fe5c16b97b61adb01e5157e0ed13b9285380f521ef0ab05133f0808242"
+        "value": "949355ac3a40d869c14a7e48d4e819135c0e9ed5bef882c3cea5c245bb1a15daa0351226cfcc3c76e4ce4fd11609d2498465da36d183376d510dacf0ef15e503"
     }, {
         "key": "UseSandbox",
-        "value": "True"
+        "value": "False"
     }]
 };
-BCEnvironment.init("505c82a3-3493-493b-b359-a881b8414bf5", "wHfsCPUlgUX/I8d0xJbAaz9Fy67BN2Vh8k6T4AFqrUw=", config);
-new PaymentOperation().getOrderDetails("400248042590")
+BCEnvironment.init("12c2e62b-33b1-4d9b-9782-7f3bb1edb951", "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=", config);
+new PaymentOperation().getOrderDetails("400344842137")
     .then(response => {
         console.log(JSON.stringify(response));
     });
