@@ -219,7 +219,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 id: txnOrderId?.split('-')[1],
                                 cardNo: null,
                                 orderNo: parseInt(txnOrderId?.split('-')[0]),
-                                orderAmount: orderAmount,
+                                orderAmount: 0, // Always send orderAmount = 0
                                 paidAmount: !isCancelled
                                     ? paymentStatus?.purchaseAmount
                                     : 0,
@@ -430,9 +430,29 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.PAYPAL?.toLowerCase():
 
                 // Get PayPal payment details
-                const paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
-                if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.COMPLETED) {
+                let paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
+
+                try {
+                    Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                } catch (error: any) {
+                    // Bypass error incurred due to logging.
+                }
+
+                // Call get payment status once again if status received is uncaptured.
+                if (!(paypalOrderDetails?.status === PayPalGateway.PaymentStatus.COMPLETED || paypalOrderDetails?.status === PayPalGateway.PaymentStatus.APPROVED || paypalOrderDetails?.status === PayPalGateway.PaymentStatus.VOIDED)) {
+                    paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
+
+                    try {
+                        Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                    } catch (error: any) {
+                        // Bypass error incurred due to logging.
+                    }
+                }
+
+                if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.COMPLETED || paypalOrderDetails?.status === PayPalGateway.PaymentStatus.APPROVED) {
                     statusId = PaymentStatus.PAID;
+                } else if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.VOIDED) {
+                    statusId = PaymentStatus.DECLINED;
                 }
                 purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
                 break;
