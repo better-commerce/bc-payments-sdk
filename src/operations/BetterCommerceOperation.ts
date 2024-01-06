@@ -454,7 +454,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 } else if (paypalOrderDetails?.status === PayPalGateway.PaymentStatus.VOIDED) {
                     statusId = PaymentStatus.DECLINED;
                 }
-                purchaseAmount = parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString());
+                purchaseAmount = paypalOrderDetails?.purchase_units?.length
+                    ? parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString() || Defaults.Int.Value.toString())
+                    : Defaults.Int.Value;
                 break;
 
             case PaymentMethodType.CHECKOUT?.toLowerCase():
