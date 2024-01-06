@@ -95,7 +95,7 @@ BCEnvironment.init("12c2e62b-33b1-4d9b-9782-7f3bb1edb951", "uQGiyIjmc2/FQDA27lIh
 
 const params =
 
-    { "isCOD": false, "orderId": "aab73c97-339c-ee11-b907-6045bdd08d83", "txnOrderId": "5002139-11889", "extras": { "token": "7GL0119292229294T", "orderId": "7JB18899JK813960P", "payerId": "MU9KRJVNJBJG4", "gateway": "paypal", "isCancelled": false } }
+    { "isCOD": false, "orderId": "f756bb90-b3a6-ee11-b907-6045bdd08d83", "txnOrderId": "5009862-21348", "extras": { "token": "59K98659X44662920", "orderId": "5KH481465S7344920", "payerId": "NHNQATUZJH43E", "gateway": "paypal", "isCancelled": false } }
 
 new BetterCommerceOperation().processPayment(params)
     .then(response => {

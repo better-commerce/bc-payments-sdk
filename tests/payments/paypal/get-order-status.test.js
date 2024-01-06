@@ -13,7 +13,11 @@ const config = {
         "value": "False"
     }]
 };
-BCEnvironment.init("12c2e62b-33b1-4d9b-9782-7f3bb1edb951", "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=", config);
-new PaymentOperation().getOrderDetails("5Y483246BM306951E").then(response => {
+const orderId = "5KH481465S7344920";
+const clientId = "12c2e62b-33b1-4d9b-9782-7f3bb1edb951"
+const sharedSecret = "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=";
+BCEnvironment.init(clientId, sharedSecret, config);
+
+new PaymentOperation().getOrderDetails(orderId).then(response => {
     console.log(JSON.stringify(response));
 });
