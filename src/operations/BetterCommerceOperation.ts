@@ -279,8 +279,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 orderId: orderId,
                             };
                             //console.log('---- paymentResponseInput ----', JSON.stringify(paymentResponseInput))
+                            await Logger.logPayment({ data: orderModel, message: `${gateway?.toLowerCase()} | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                             const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
                             if (paymentResponseResult) {
+
+                                await Logger.logPayment({ data: paymentResponseResult, message: `${gateway?.toLowerCase()} | UpdatePaymentResponse API20 Response` }, { headers: {}, cookies: {} })
 
                                 // Get order details
                                 const { result: orderResultPostPaymentResponse }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
@@ -288,7 +291,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 return isCancelled
                                     ? PaymentStatus.DECLINED
-                                    : (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED)
+                                    : ((gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() && paymentStatus?.statusId === PaymentStatus.PAID) || (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED))
                                         ? PaymentStatus.PAID
                                         : PaymentStatus.PENDING; //paymentStatus?.statusId
                             }
@@ -298,7 +301,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
             }
         } catch (error: any) {
-            Logger.logPayment(error, { headers: {}, cookies: {} })
+            await Logger.logPayment(error, { headers: {}, cookies: {} })
             return { hasError: true, error: error }
         }
         return null;
@@ -414,7 +417,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
             }
         } catch (error: any) {
-            Logger.logPayment(error, { headers: {}, cookies: {} })
+            await Logger.logPayment(error, { headers: {}, cookies: {} })
             return { hasError: true, error: error }
         }
         return null;
@@ -433,7 +436,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 let paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
 
                 try {
-                    Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                    await Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
                 } catch (error: any) {
                     // Bypass error incurred due to logging.
                 }
@@ -443,7 +446,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     paypalOrderDetails = orderDetails = await new PayPalPayment().getOrderDetails(data);
 
                     try {
-                        Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                        await Logger.logPayment({ data: paypalOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
                     } catch (error: any) {
                         // Bypass error incurred due to logging.
                     }

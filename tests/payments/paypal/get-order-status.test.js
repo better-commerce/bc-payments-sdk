@@ -13,7 +13,7 @@ const config = {
         "value": "False"
     }]
 };
-const orderId = "5KH481465S7344920";
+const orderId = "87W98172EL194900Y";
 const clientId = "12c2e62b-33b1-4d9b-9782-7f3bb1edb951"
 const sharedSecret = "uQGiyIjmc2/FQDA27lIhx90M7PoK8byMItbQnYdfm7M=";
 BCEnvironment.init(clientId, sharedSecret, config);
