@@ -6,8 +6,7 @@ import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderL
 import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
-import { PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
-import { PaymentOrderStatus } from "./constants/enums";
+import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
 
 import { PaymentMethodType } from "./constants";
 import { PaymentMethodTypeId } from "./constants";
@@ -17,7 +16,7 @@ import { getGatewayId, getGatewayName } from "./utils/payment-util";
 export { PaymentMethodType, PaymentMethodTypeId };
 
 // Payments Module
-export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, PaymentOrderStatus };
+export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, PaymentStatus, };
 import { PaymentOperation } from "./operations/PaymentOperation";
 
 // BetterCommerce Module

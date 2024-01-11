@@ -21,7 +21,6 @@ import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 import { PaymentMethodTypeId } from "../constants";
-import { PaymentOrderStatus } from "../constants/enums";
 import { matchStrings } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
@@ -364,11 +363,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             } else {
 
                                 const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
-                                let statusId = PaymentOrderStatus.DECLINED
+                                let statusId = PaymentStatus.DECLINED
                                 const payment = payments?.find(
                                     (x: any) =>
                                         x?.id == paymentNo &&
-                                        x?.status == PaymentOrderStatus.PENDING
+                                        x?.status == PaymentStatus.PENDING
                                 );
 
                                 if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
@@ -544,7 +543,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     paidAmount: orderValue,
                     balanceAmount: '0.00',
                     isValid: true,
-                    status: PaymentOrderStatus.PAID,
+                    status: PaymentStatus.PAID,
                     authCode: getAuthCode(methodId, order),
                     issuerUrl: null,
                     paRequest: null,
