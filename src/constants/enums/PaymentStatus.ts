@@ -15,6 +15,9 @@ export enum PaymentStatus {
   REQUEST_TO_CANCEL_PRE_AUTH = 13,
   PROBLEM_IN_CANCEL_PRE_AUTH = 14,
   PO_RECEIVED = 15,
+  DUPLICATE_REQUEST = 16,
+  INITIATED = 17,
+  RETRY_REFUND = 18,
 };
 
 export module PayPal {

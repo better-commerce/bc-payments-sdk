@@ -466,7 +466,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                 // Get Checkout payment details
                 const checkoutOrderDetails = orderDetails = await new CheckoutPayment().getOrderDetails(data);
-                if (checkoutOrderDetails?.approved || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.PAID) {
+                if (checkoutOrderDetails?.approved || (checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.PAID || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.CAPTURED)) {
                     statusId = PaymentStatus.PAID;
                 } else {
                     if (checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.DECLINED || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.CANCELED || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.EXPIRED) {
