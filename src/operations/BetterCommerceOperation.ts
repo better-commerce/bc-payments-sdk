@@ -228,7 +228,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     ? paymentStatus?.statusId
                                     : PaymentStatus.DECLINED,
                                 authCode: !isCancelled
-                                    ? paymentGatewayOrderTxnId
+                                    ? (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase()) ? data?.extras?.token : paymentGatewayOrderTxnId
                                     : null,
                                 issuerUrl: null,
                                 paRequest: null,

@@ -150,7 +150,8 @@ export const getAuthCode = (methodId: number, data: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
         return data?.id;
     } else if (methodId == PaymentMethodTypeId.PAYPAL) {
-        return data?.id;
+        //return data?.id;
+        return data?.purchase_units?.[0].payments?.captures?.[0].id || Defaults.String.Value;
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.txn_id;
     }
