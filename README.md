@@ -29,7 +29,7 @@ It integrates SDK APIs for the following providers:
 
 | Name           | Reference                                                       | Description                                                                       |
 | :------------- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
-| API Collection | https://www.checkout.com/docs/payments                          | Integrate with Checkout.com's various payment services.                           |
+| Widget Integration | [https://www.checkout.com/docs/payments](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/frames-reference)                          | Integrate with Checkout.com's frames.                           |
 | API SDK        | https://api-reference.checkout.com/#operation/getPaymentDetails |                                                                                   |
 | NPM Package    | https://github.com/better-commerce/bc-checkout-sdk              | Node.js SDK for interaction with Checkout APIs - @better-commerce/bc-checkout-sdk |
 | Dashboard - Sandbox        | https://dashboard.sandbox.checkout.com/                         |                                                                                   |
