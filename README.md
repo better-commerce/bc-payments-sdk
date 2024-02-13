@@ -65,7 +65,7 @@ It integrates SDK APIs for the following providers:
 | Dashboard - Sandbox            | https://portal.playground.klarna.com/                                   |                                                                               |
 | Dashboard - Live               | https://portal.klarna.com/                                              |                                                                               |
 
-## ApplePay
+## Checkout ApplePay
 
 | Name                   | Reference                                                                                                               | Description                                                                   |
 | :--------------------- | :---------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
