@@ -65,7 +65,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
-     * Specific to {Checkout},Sends an Payment Context request.
+     * Specific to {Checkout}, Sends an Payment Context request.
      * 
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
      * 
@@ -75,6 +75,21 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.CHECKOUT) {
             return await new CheckoutPayment().createPaymentContext(data);
+        }
+        return null;
+    }
+
+    /**
+     * Specific to {Checkout}, Creates a Klarna session for a customer.
+     * 
+     * API Reference - https://www.checkout.com/docs/previous/payments/payment-methods/invoice-and-pay-later/klarna#Create_a_session
+     * 
+     * @param data 
+     */
+    public async createSession(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.CHECKOUT) {
+            return await new CheckoutPayment().createSession(data);
         }
         return null;
     }

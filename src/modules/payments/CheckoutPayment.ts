@@ -1,5 +1,5 @@
 // Package Imports
-import { Payment, PaymentContext, Token } from "bc-checkout-sdk";
+import { Payment, PaymentContext, Session, Token } from "bc-checkout-sdk";
 
 // Other Imports
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
@@ -64,6 +64,9 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
 
     /**
      * Get payment details. Returns the details of the payment with the specified identifier string.
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/getPaymentDetails
      * @param data {String}
      * @returns 
@@ -84,6 +87,9 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
 
     /**
      * Request a Payment Context. Send an Payment Context request.
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
      * @param data {Object}
      */
@@ -103,6 +109,9 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
 
     /**
      * Get Payment Context details. Returns all the Payment Context details.
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
      * @param data {String}
      */
@@ -112,6 +121,28 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
                 const paymentContext = new PaymentContext();
                 const paymentContextDetailsResult = await paymentContext.getDetails(data);
                 return paymentContextDetailsResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Create a session. Creates a Klarna session for a customer.
+     * ________
+     * CHECKOUT
+     * ‾‾‾‾‾‾‾‾
+     * API Reference - https://www.checkout.com/docs/previous/payments/payment-methods/invoice-and-pay-later/klarna#Create_a_session
+     * @param data {Object}
+     */
+    async createSession(data: any) {
+        try {
+            if (super.initSDK()) {
+                const session = new Session();
+                const sessionCreateResult = await session.create(data);
+                return sessionCreateResult;
             }
             return null;
         }
