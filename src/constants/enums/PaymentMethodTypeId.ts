@@ -10,4 +10,5 @@ export enum PaymentMethodTypeId {
     ACCOUNT_CREDIT = 8,
     CHEQUE = 9,
     CHECKOUT_APPLE_PAY = 10,
+    CHECKOUT_KLARNA = 11,
 }

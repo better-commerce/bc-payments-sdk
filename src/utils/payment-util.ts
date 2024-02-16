@@ -24,14 +24,14 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.STRIPE
     } else if (matchStrings(gatewayName, PaymentMethodType.COD, true)) {
         return PaymentMethodTypeId.COD
-    } else if (
-        matchStrings(gatewayName, PaymentMethodType.ACCOUNT_CREDIT, true)
-    ) {
+    } else if (matchStrings(gatewayName, PaymentMethodType.ACCOUNT_CREDIT, true)) {
         return PaymentMethodTypeId.ACCOUNT_CREDIT
     } else if (matchStrings(gatewayName, PaymentMethodType.CHEQUE, true)) {
         return PaymentMethodTypeId.CHEQUE
     } else if (matchStrings(gatewayName, PaymentMethodType.CHECKOUT_APPLE_PAY, true)) {
         return PaymentMethodTypeId.CHECKOUT_APPLE_PAY
+    } else if (matchStrings(gatewayName, PaymentMethodType.CHECKOUT_KLARNA, true)) {
+        return PaymentMethodTypeId.CHECKOUT_KLARNA
     }
     return -1
 }
@@ -59,6 +59,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.CHEQUE
     } else if (id === PaymentMethodTypeId.CHECKOUT_APPLE_PAY) {
         return PaymentMethodType.CHECKOUT_APPLE_PAY
+    } else if (id === PaymentMethodTypeId.CHECKOUT_KLARNA) {
+        return PaymentMethodType.CHECKOUT_KLARNA
     }
     return -1
 }

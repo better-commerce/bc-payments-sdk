@@ -10,4 +10,5 @@ export enum PaymentMethodType {
     ACCOUNT_CREDIT = "accountcredit",
     CHEQUE = "cheque",
     CHECKOUT_APPLE_PAY = 'checkoutapplepay',
+    CHECKOUT_KLARNA = 'checkoutklarna',
 };
