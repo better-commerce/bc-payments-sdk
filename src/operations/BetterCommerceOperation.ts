@@ -469,6 +469,13 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                 // Get Checkout payment details
                 const checkoutOrderDetails = orderDetails = await new CheckoutPayment().getOrderDetails(data);
+
+                try {
+                    await Logger.logPayment({ data: checkoutOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                } catch (error: any) {
+                    // Bypass error incurred due to logging.
+                }
+
                 if (checkoutOrderDetails?.approved || (checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.PAID || checkoutOrderDetails?.status === CheckoutGateway.PaymentStatus.CAPTURED)) {
                     statusId = PaymentStatus.PAID;
                 } else {
@@ -503,6 +510,13 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                 // Get ClearPay payment details
                 const clearPayOrderDetails = orderDetails = await new ClearPayPayment().getOrderDetails(data);
+
+                try {
+                    await Logger.logPayment({ data: clearPayOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                } catch (error: any) {
+                    // Bypass error incurred due to logging.
+                }
+
                 if (clearPayOrderDetails?.status?.toLowerCase() === ClearPayGateway.PaymentStatus.APPROVED?.toLowerCase()) {
                     statusId = PaymentStatus.PAID;
                 } else {
