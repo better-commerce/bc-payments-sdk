@@ -67,9 +67,13 @@ export const getGatewayName = (id: number) => {
 
 export const getPaymentTransactionStatus = (methodId: number, data: any): string => {
     if (methodId == PaymentMethodTypeId.CHECKOUT) {
-        if (data?.data?.response_summary === Checkout.ResponseSummaryType.APPROVED) {
-            return PaymentTransactionStatus.TXN_CHARGED;
-        } else if (data?.data?.response_summary === Checkout.ResponseSummaryType.DECLINED) {
+        if (data?.type?.toLowerCase() === Checkout.EventType.PAYMENT_CAPTURED?.toLowerCase()) {
+            if (data?.data?.response_summary === Checkout.ResponseSummaryType.APPROVED) {
+                return PaymentTransactionStatus.TXN_CHARGED;
+            } else if (data?.data?.response_summary === Checkout.ResponseSummaryType.DECLINED) {
+                return PaymentTransactionStatus.TXN_FAILED;
+            }
+        } else if (data?.type?.toLowerCase() === Checkout.EventType.PAYMENT_AUTHENTICATION_FAILED?.toLowerCase()) {
             return PaymentTransactionStatus.TXN_FAILED;
         }
     } else if (methodId == PaymentMethodTypeId.PAYPAL) {
