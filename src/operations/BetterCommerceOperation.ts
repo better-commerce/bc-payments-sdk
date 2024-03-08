@@ -324,8 +324,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     console.log('--- details ---', details)
                     if (details) {
                         orderId = details?.split(',')[0];
-                        orderNo = details?.split(',')[0];
-                        paymentNo = details?.split(',')[1];
+                        const paymentNoDetails = details?.split(',')[1];
+                        if (paymentNoDetails && paymentNoDetails?.split('-')?.length) {
+                            orderNo = paymentNoDetails?.split('-')[0];
+                            paymentNo = paymentNoDetails?.split('-')[1];
+                        }
                     }
                 } else {
                     orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
@@ -369,6 +372,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         x?.id == paymentNo &&
                                         x?.status == PaymentStatus.PENDING
                                 );
+                                console.log('--- payment ---', payment)
 
                                 if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
                                     let result = Defaults.Object.Value;
@@ -585,6 +589,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
+                await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                 return paymentResponseResult;
@@ -651,6 +656,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
+                await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                 return paymentResponseResult;

@@ -273,7 +273,7 @@ export const getCardBrand = (methodId: number, data: any): string => {
 }
 
 const parseOrderId = (input: string): string => {
-    const matches = groupMatch(input?.trim(), RegularExpression.ORDER_BASKET_ID_MATCH);
+    const matches = groupMatch(input?.trim(), new RegExp(RegularExpression.ORDER_BASKET_ID_MATCH));
     console.log('--- matches ---', JSON.stringify(matches));
     if (matches?.length >= 3) {
         return `${matches[1]},${matches[3]}`
