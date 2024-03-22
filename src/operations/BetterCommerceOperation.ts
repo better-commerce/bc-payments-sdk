@@ -290,9 +290,14 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 return isCancelled
                                     ? PaymentStatus.DECLINED
+                                    : ((paymentStatus?.statusId === PaymentStatus.PAID || paymentStatus?.statusId === PaymentStatus.AUTHORIZED) || (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED))
+                                        ? PaymentStatus.PAID
+                                        : PaymentStatus.PENDING;
+                                /*return isCancelled
+                                    ? PaymentStatus.DECLINED
                                     : ((gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() && paymentStatus?.statusId === PaymentStatus.PAID) || (orderResultPostPaymentResponse?.id && orderResultPostPaymentResponse?.orderStatusCode === OrderStatus.APPROVED))
                                         ? PaymentStatus.PAID
-                                        : PaymentStatus.PENDING; //paymentStatus?.statusId
+                                        : PaymentStatus.PENDING;*/
                             }
 
                         }
