@@ -2,14 +2,21 @@ import { Api } from "./api";
 import { RequestMethod } from "../../constants/enums/RequestMethod";
 
 /**
- * Class {Checkout}
+ * Class {Checkout} contains methods that can be used to interact with the Checkout 
+ * module on the CommerceHub platform.
+ * 
+ * The methods in this class can be used to convert a basket into an order, 
+ * update the payment response for a given order, and more.
  */
 export class Checkout {
 
+    
     /**
-     * Convert basket into an order.
+     * Converts a basket into an order on the CommerceHub platform.
      * API Reference - https://api20.bettercommerce.io/swagger/ui/index#!/Checkout/CheckoutConvertBasket
-     * @param data 
+     * @param data - The data which contains the basket id
+     * @param {Object} options - The options object that contains headers and cookies
+     * @returns The order details response from the CommerceHub platform
      */
     static async convertOrder(data: any, { headers, cookies }: any): Promise<any> {
         console.log("createOrderInput", { ...data, ...{ headers, cookies } });
@@ -18,11 +25,13 @@ export class Checkout {
         return createOrderResult;
     }
 
+    
     /**
-     * Update order payment response received from payment gateway.
+     * Updates the payment response in the database based on the payment response data.
      * API Reference - https://api20.bettercommerce.io/swagger/ui/index#!/Checkout/CheckoutUpdatePaymentResponse
-     * @param data 
-     * @returns 
+     * @param data - The data which contains the payment response data
+     * @param {Object} options - The options object that contains headers and cookies
+     * @returns The payment response result from the CommerceHub platform
      */
     static async updatePaymentResponse(data: any, { headers, cookies }: any): Promise<any> {
         console.log("paymentResponseInput", { ...data, ...{ headers, cookies } });

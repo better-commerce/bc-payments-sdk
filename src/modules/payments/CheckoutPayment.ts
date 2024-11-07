@@ -6,6 +6,15 @@ import { IPaymentProvider } from "../../base/contracts/IPaymentProvider"
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 import { ICheckoutPaymentProvider } from "../../base/contracts/GatewayProviders/ICheckoutPaymentProvider";
 
+/**
+ * Class {CheckoutPayment} is a concrete implementation of a payment provider.
+ * It provides a set of methods that can be used to interact with the Checkout payment gateway.
+ * 
+ * @class CheckoutPayment
+ * @extends {BasePaymentProvider}
+ * @implements {IPaymentProvider}
+ * @implements {ICheckoutPaymentProvider}
+ */
 export class CheckoutPayment extends BasePaymentProvider implements IPaymentProvider, ICheckoutPaymentProvider {
 
     initPaymentIntent(data: any) {
@@ -13,12 +22,16 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
     }
 
     /**
-     * Generate a token from Apple Pay / Google Pay token
+     * Requests a token from Checkout.com. Tokens are single use and expire after 15 minutes.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
      * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Step_1:_Generate_a_Checkout.com_token_from_the_Apple_Pay_token
-     * @param data 
+     * 
+     * @param data {Object}
+     * @returns A promise that resolves to the result of the token request
+     *          or an object with error details if an error occurs.
      */
     async requestToken(data: any): Promise<any> {
         try {
@@ -34,8 +47,10 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Request a payment or payout. Sends a request for payment or payout.
+     * Requests a payment or payout from Checkout.com.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
@@ -45,8 +60,9 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
      * ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
      * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Endpoints_2
      * 
-     * @param data {IPaymentRequest}
-     * @returns 
+     * @param data {Object}
+     * @returns A promise that resolves to the result of the payment request
+     *          or an object with error details if an error occurs.
      */
     async requestPayment(data: any): Promise<any> {
         try {
@@ -62,14 +78,22 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Get payment details. Returns the details of the payment with the specified identifier string.
+     * Retrieves the details of an order from Checkout.com.
+     * 
+     * This method attempts to retrieve the order details with the provided data.
+     * If successful, it returns the result of the order details request.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/getPaymentDetails
-     * @param data {String}
-     * @returns 
+     * 
+     * @param data - The order ID required by Checkout.com.
+     * @returns A promise that resolves to the result of the order details request
+     *          or an object with error details if an error occurs.
      */
     async getOrderDetails(data: any): Promise<any> {
         try {
@@ -85,13 +109,23 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Request a Payment Context. Send an Payment Context request.
+     * Creates a payment context using Checkout.com.
+     * 
+     * This method initializes the SDK and attempts to create a payment context
+     * with the provided data. If successful, it returns the result of the context
+     * creation. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
-     * @param data {Object}
+     * 
+     * @param data - The payment context data required by Checkout.com.
+     * @returns A promise that resolves to the result of the payment context creation
+     *          or an object with error details if an error occurs.
      */
     async createPaymentContext(data: any) {
         try {
@@ -107,13 +141,23 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Get Payment Context details. Returns all the Payment Context details.
+     * Retrieves the payment context details from Checkout.com.
+     * 
+     * This method attempts to retrieve the payment context details with the provided data.
+     * If successful, it returns the result of the payment context details request.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
      * API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
-     * @param data {String}
+     * 
+     * @param data - The payment context data required by Checkout.com.
+     * @returns A promise that resolves to the result of the payment context details request
+     *          or an object with error details if an error occurs.
      */
     async getPaymentContext(data: any) {
         try {
@@ -129,13 +173,23 @@ export class CheckoutPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Create a session. Creates a Klarna session for a customer.
+     * Creates a session for a customer using Checkout.com.
+     * 
+     * This method attempts to create a session with the provided data.
+     * If successful, it returns the result of the session creation.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
      * API Reference - https://www.checkout.com/docs/previous/payments/payment-methods/invoice-and-pay-later/klarna#Create_a_session
-     * @param data {Object}
+     *  
+     * @param data - The session data required by Checkout.com.
+     * @returns A promise that resolves to the result of the session creation
+     *          or an object with error details if an error occurs.
      */
     async createSession(data: any) {
         try {

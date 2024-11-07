@@ -5,13 +5,29 @@ import { Payment } from "bc-clearpay-sdk";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
+/**
+ * Class {ClearPayPayment} is a concrete implementation of a payment provider.
+ * It provides a set of methods that can be used to interact with the Clearpay payment gateway.
+ * 
+ * @class ClearPayPayment
+ * @extends {BasePaymentProvider}
+ * @implements {IPaymentProvider}
+ */
 export class ClearPayPayment extends BasePaymentProvider implements IPaymentProvider {
 
     /**
-     * Initiate a payment. This endpoint creates a checkout that is used to initiate the Clearpay payment process. Clearpay uses the information in the order request to assist with the consumer’s pre-approval process.
+     * Initiates a payment intent using the Clearpay payment gateway.
+     * 
+     * This method initializes the SDK and attempts to create a payment intent
+     * with the provided data. If successful, it returns the result of the intent
+     * creation. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * API Reference - https://developers.clearpay.co.uk/clearpay-online/reference/create-checkout
-     * @param data {IPaymentIntent}
-     * @returns 
+     * 
+     * @param data - The payment intent data required by Clearpay.
+     * @returns A promise that resolves to the result of the payment intent creation
+     *          or an object with error details if an error occurs.
      */
     async initPaymentIntent(data: any): Promise<any> {
         try {
@@ -26,10 +42,20 @@ export class ClearPayPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Capture Full Payment. This endpoint performs a payment capture for the full value of the payment plan.
+     * Requests a payment or payout from Clearpay.
+     * 
+     * This method initializes the SDK and attempts to request a payment or payout
+     * with the provided data. If successful, it returns the result of the request.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * API Reference - https://developers.clearpay.co.uk/clearpay-online/reference/capture-full-payment
-     * @param data 
+     * 
+     * @param data - The payment data required by Clearpay.
+     * @returns A promise that resolves to the result of the payment request
+     *          or an object with error details if an error occurs.
      */
     async requestPayment(data: any): Promise<any> {
         try {
@@ -44,11 +70,20 @@ export class ClearPayPayment extends BasePaymentProvider implements IPaymentProv
         }
     }
 
+    
     /**
-     * Get Payment By Order ID. This endpoint retrieves an individual payment along with its order details.
+     * Retrieves the details of an order from Clearpay.
+     * 
+     * This method attempts to retrieve the order details with the provided data.
+     * If successful, it returns the result of the order details request.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * API Reference - https://developers.clearpay.co.uk/clearpay-online/reference/get-payment-by-order-id
-     * @param data {String}
-     * @returns 
+     * 
+     * @param data - The order ID required by Clearpay.
+     * @returns A promise that resolves to the result of the order details request
+     *          or an object with error details if an error occurs.
      */
     async getOrderDetails(data: any): Promise<any> {
         try {
