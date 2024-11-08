@@ -5,13 +5,33 @@ import { Payment } from "bc-stripe-sdk";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
+/**
+ * Class {StripePayment} extends {BasePaymentProvider} and implements {IPaymentProvider}.
+ * It provides the concrete implementation of the Stripe payment provider.
+ * 
+ * @class StripePayment
+ * @extends BasePaymentProvider
+ * @implements IPaymentProvider
+ * 
+ * @remark
+ * This class is responsible for initializing the Stripe SDK and providing the concrete 
+ * implementation of the Stripe payment provider methods.
+ */
 export class StripePayment extends BasePaymentProvider implements IPaymentProvider {
 
     /**
-     * Create a PaymentIntent. Creates a PaymentIntent object.
+     * Initializes a payment intent using the Stripe payment gateway.
+     * 
+     * This method initializes the SDK and attempts to create a payment intent
+     * with the provided data. If successful, it returns the result of the intent
+     * creation. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * API Reference - https://stripe.com/docs/api/payment_intents/create
-     * @param data {Object}
-     * @returns 
+     * 
+     * @param data - The payment intent data required by Stripe.
+     * @returns A promise that resolves to the result of the payment intent creation
+     *          or an object with error details if an error occurs.
      */
     async initPaymentIntent(data: any): Promise<any> {
 
@@ -32,10 +52,18 @@ export class StripePayment extends BasePaymentProvider implements IPaymentProvid
     }
 
     /**
-     * Retrieve a PaymentIntent. Retrieves the details of a PaymentIntent that has previously been created.
+     * Retrieves the details of an order from Stripe.
+     * 
+     * This method attempts to retrieve the order details with the provided data.
+     * If successful, it returns the result of the order details request.
+     * If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
      * API Reference - https://stripe.com/docs/api/payment_intents/retrieve
-     * @param data {String}
-     * @returns 
+     * 
+     * @param data - The order ID required by Stripe.
+     * @returns A promise that resolves to the result of the order details request
+     *          or an object with error details if an error occurs.
      */
     async getOrderDetails(data: any): Promise<any> {
         try {

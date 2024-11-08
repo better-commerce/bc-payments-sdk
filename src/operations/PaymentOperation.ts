@@ -2,11 +2,21 @@ import { IPaymentProvider } from "../base/contracts/IPaymentProvider";
 import { BasePaymentOperation } from "../base/entity/BasePaymentOperation";
 
 /**
- * Class {PaymentOperation} encapsulates generic payment provider operations.
+ * Class {PaymentOperation} contains the payment operation methods for all the gateway providers.
+ * 
+ * @class PaymentOperation
+ * @extends {BasePaymentOperation}
+ * @implements {IPaymentProvider}
  */
 export class PaymentOperation extends BasePaymentOperation implements IPaymentProvider {
-
+    
     /**
+     * Initiates a payment intent using the appropriate payment provider.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `initPaymentIntent` method 
+     * with the provided data. If successful, it returns the result of the payment intent initialization. 
+     * Otherwise, it catches any errors that occur during the process and returns an error object.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
@@ -40,8 +50,8 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * ‾‾‾‾‾‾‾‾
      * <Not Required>
      * 
-     * @param data 
-     * @returns 
+     * @param data - The payment intent data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment intent initialization or an error object in case of a failure.
      */
     async initPaymentIntent(data: any): Promise<any> {
         try {
@@ -56,7 +66,13 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
         return null;
     }
 
+ 
     /**
+     * Requests a payment or payout from the appropriate payment provider.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `requestPayment` method 
+     * with the provided data. If successful, it returns the result of the payment request. Otherwise, it catches any errors that occur during the process and returns an error object.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
@@ -90,8 +106,8 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * Request a payment or payout. Sends a request for payment or payout.
      * API Reference - https://www.checkout.com/docs/payments/add-payment-methods/apple-pay#Endpoints_2
      * 
-     * @param data 
-     * @returns 
+     * @param data - The payment data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment request or an error object in case of a failure.
      */
     async requestPayment(data: any): Promise<any> {
         try {
@@ -106,7 +122,10 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
         return null;
     }
 
+    
     /**
+     * Get order details. Returns the details of an order based on the order ID.
+     * 
      * ________
      * CHECKOUT
      * ‾‾‾‾‾‾‾‾
@@ -141,9 +160,9 @@ export class PaymentOperation extends BasePaymentOperation implements IPaymentPr
      * ApplePay
      * ‾‾‾‾‾‾‾‾
      * <Not Required>
-     * 
-     * @param data 
-     * @returns 
+     *
+     * @param data - The order ID required by the payment provider.
+     * @returns A promise that resolves to the result of the order details request or an error object in case of a failure.
      */
     async getOrderDetails(data: any): Promise<any> {
         try {

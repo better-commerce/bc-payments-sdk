@@ -25,14 +25,17 @@ import { matchStrings } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
 /**
- * Class {BetterCommerceOperation} enacapsulates all generic BetterCommerce operations.
+ * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
+ * It contains methods for getting order details, creating orders, updating orders, getting payment methods, processing payments and more.
+ * @implements {ICommerceProvider}
  */
 export class BetterCommerceOperation implements ICommerceProvider {
 
     /**
-     * Get the company details by UserId.
+     * Retrieves the company details by user id. This method is used to get the company details which is linked to the user
      * API Reference - https://api20.bettercommerce.io/swagger/ui/index#!/B2B/B2BGetCompanyDetailByUserId
-     * @param data 
+     * @param data - The data which contains the user id
+     * @returns The company details
      */
     async getCompanyDetails(data: any) {
         const companyDetailsResult = await B2B.getCompanyDetailsByUserId(data, { cookies: data?.extras?.cookies });
@@ -40,18 +43,30 @@ export class BetterCommerceOperation implements ICommerceProvider {
     }
 
     /**
-     * Converts the list of items in a basket to an order on the CommerceHub platform.
-     * @param data 
+     * Converts a basket into an order on the CommerceHub platform.
+     * API Reference - https://api20.bettercommerce.io/swagger/ui/index#!/Checkout/CheckoutConvertBasket
+     * @param data - The data which contains the basket id
+     * @returns The order details response from the CommerceHub platform
      */
     async convertOrder(data: any): Promise<any> {
         const createOrderResult = await Checkout.convertOrder(data, { cookies: data?.extras?.cookies });
         return createOrderResult;
     }
 
+    
     /**
-     * Processes the response received from the payment gateway provider for the payment transaction to update the payment response statues on the CommerceHub platform.
-     * @param data 
-     * @returns 
+     * Processes a payment based on the provided payment data.
+     * 
+     * This method handles different payment gateways, including PayPal, Checkout,
+     * Stripe, Klarna, and ClearPay. It retrieves payment method details, constructs
+     * the order model with payment information, and updates the payment response.
+     * The method also handles Cash on Delivery (COD) orders and different payment
+     * statuses such as authorized, paid, declined, and pending.
+     * 
+     * @param data - The payment processing data, including order details, payment
+     * method, extras, and more.
+     * @returns A promise that resolves to the payment status or an error object
+     * if an error occurs during the payment process.
      */
     async processPayment(data: IPaymentProcessingData): Promise<any> {
         try {
@@ -311,6 +326,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
+    /**
+     * Process the payment hook.
+     * @param {IPaymentHookProcessingData} data The payment hook processing data.
+     * @returns {Promise<any>} The promise of the processed payment hook result.
+     */
     async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
         try {
             let paymentNo, orderNo;
@@ -431,6 +451,20 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
+    /**
+     * Retrieves the payment status for a given payment gateway and transaction data.
+     * 
+     * This method interacts with specific payment gateway SDKs to obtain the order or payment status.
+     * It supports various payment gateways including PayPal, Checkout, Klarna, Stripe, and ClearPay.
+     * The method determines the payment status based on the gateway-specific response and calculates
+     * the purchase amount from the order details.
+     * 
+     * @param gateway - The name of the payment gateway used for the transaction.
+     * @param data - The transaction data required to fetch the payment status from the gateway.
+     * @param returnOrderDetails - Flag indicating whether to return order details in the response.
+     * @returns A promise that resolves to an object containing the status ID, purchase amount, and
+     * optionally the order details if `returnOrderDetails` is true.
+     */
     private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any }> {
         let orderDetails: any = Defaults.Object.Value;
         let purchaseAmount = 0;
@@ -534,6 +568,13 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value };
     }
 
+    /**
+     * Retrieves a payment method based on the provided gateway and headers/cookies.
+     * 
+     * @param gateway - The name of the payment gateway to retrieve the payment method for.
+     * @param { headers, cookies } - The headers and cookies to use while retrieving the payment method.
+     * @returns A promise that resolves to the retrieved payment method or null if the payment method could not be found.
+     */
     private async getPaymentMethod(gateway: string, { headers, cookies }: any): Promise<any> {
 
         const data = {
@@ -550,6 +591,18 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
+    /**
+     * Updates the payment response in the database after a successful payment hook.
+     * @param methodName - The name of the payment method.
+     * @param methodId - The id of the payment method.
+     * @param orderId - The id of the order.
+     * @param order - The order object.
+     * @param statusId - The id of the payment status.
+     * @param orderValue - The value of the order.
+     * @param bcOrder - The order object from the BC database.
+     * @param extras - Additional data that may be required for updating the payment response.
+     * @returns A promise that resolves to the updated payment response or null if the payment response could not be updated.
+     */
     private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any) {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
@@ -617,6 +670,24 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
+    /**
+     * Handles the update of payment response in the case of a failed payment hook.
+     * 
+     * This method constructs the order model with payment information for a failed
+     * payment and updates the payment response in the database. It checks if the
+     * order ID matches with the BC order ID and processes the update if the order
+     * amount is valid.
+     * 
+     * @param methodName - The name of the payment method.
+     * @param methodId - The ID of the payment method.
+     * @param orderId - The ID of the order.
+     * @param order - The order object containing payment details.
+     * @param statusId - The ID indicating the status of the payment.
+     * @param orderValue - The value of the order.
+     * @param bcOrder - The order object from the BC database.
+     * @param extras - Additional data that may be required for updating the payment response.
+     * @returns A promise that resolves to the updated payment response or null if the update could not be processed.
+     */
     private async paymentHookOrderFailureUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any) {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {

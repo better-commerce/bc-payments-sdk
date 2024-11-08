@@ -5,6 +5,7 @@ import { StripeEnvironment } from "bc-stripe-sdk";
 import { ClearPayEnvironment } from "bc-clearpay-sdk";
 import { KlarnaEnvironment } from "bc-klarna-sdk";
 import { ApplePayEnvironment } from "bc-apple-pay-sdk";
+import { JuspayEnv } from "bc-juspay-sdk";
 
 // Other Imports
 import { Defaults } from "../../constants/constants";
@@ -13,10 +14,40 @@ import { stringToBoolean } from "../../utils/parse-util";
 import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
 import { Logger } from "../../modules/better-commerce/Logger";
 
+/**
+ * Abstract class {BasePaymentProvider} is the base class for all payment providers.
+ *
+ * Payment providers are responsible for providing the concrete implementation of the
+ * payment provider methods.
+ *
+ * This class provides the following methods that can be overridden by the concrete
+ * implementation classes:
+ *
+ * - {initSDK}: Initializes the SDK for the payment provider.
+ * - {initPaymentIntent}: Initializes the payment intent for the payment provider.
+ * - {requestToken}: Requests a token from the payment provider.
+ * - {requestPayment}: Requests a payment from the payment provider.
+ *
+ * @abstract
+ * @category Payment Provider
+ */
 export abstract class BasePaymentProvider {
 
+    /**
+     * Initializes the SDK for the given payment provider.
+     *
+     * @protected
+     * @return {boolean} True if the SDK was initialized successfully, false otherwise.
+     */
     protected initSDK() {
 
+        /**
+         * Logs the payment activity to the logging service, if enabled.
+         *
+         * @param {boolean} providerLoggingEnabled - True if logging is enabled for the provider.
+         * @param {Object} data - The data associated with the payment.
+         * @param {string} logMessage - The message to log.
+         */
         const logActivity = (providerLoggingEnabled: boolean, data: any, logMessage: string) => {
 
             if (providerLoggingEnabled) {
@@ -116,6 +147,21 @@ export abstract class BasePaymentProvider {
                 //const logData = { data: `ApplePayEnvironment.init(${merchantId}, ${domainName}, ${displayName}, ${pemCert}, ${keyCert}, ${isSandbox})` };
                 //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
 
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.JUSPAY.toLowerCase()) {
+                const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                const apiKey = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+                const sandboxUrl = config?.settings?.find((x: any) => x.key === "TestUrl")?.value || Defaults.String.Value;
+                const liveUrl = config?.settings?.find((x: any) => x.key === "ProductionUrl")?.value || Defaults.String.Value;
+                const useSandbox = config?.settings?.find((x: any) => x.key === "UseSandbox")?.value || Defaults.String.Value;
+                const baseUrl = stringToBoolean(useSandbox) ? sandboxUrl : liveUrl;
+                let extras: any = BCEnvironment.getExtras();
+                const returnUrl = `${extras?.origin}${config?.notificationUrl}`;
+
+                // Init Env
+                extras = { ...extras, returnUrl, };
+                JuspayEnv.init();
+                JuspayEnv.withCredentials(merchantId, apiKey, baseUrl, undefined, undefined, extras);
                 return true;
             }
         }

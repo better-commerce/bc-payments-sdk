@@ -28,12 +28,34 @@ export enum PaymentTransactionStatus {
 }
 
 export module Checkout {
+
+    /**
+     * Enum {EventType} contains the list of events that can be triggered by Checkout.
+     *
+     * These events represent different stages in a payment process, such as when
+     * a payment is approved, captured, or fails authentication.
+     *
+     * @ordinal {string} PAYMENT_APPROVED - The payment was approved by the system.
+     * @ordinal {string} PAYMENT_CAPTURED - The payment was successfully captured.
+     * @ordinal {string} PAYMENT_AUTHENTICATION_FAILED - The payment authentication failed, possibly requiring user intervention.
+     */
     export enum EventType {
         PAYMENT_APPROVED = 'payment_approved',
         PAYMENT_CAPTURED = 'payment_captured',
         PAYMENT_AUTHENTICATION_FAILED = 'payment_authentication_failed',
     }
 
+    /**
+     * Enum {EventType} contains the list of events that can be triggered by Checkout.
+     *
+     * @enum {string}
+     * @readonly
+     * @memberof Checkout
+     *
+     * @ordinal {string} PAYMENT_APPROVED - The payment was approved.
+     * @ordinal {string} PAYMENT_CAPTURED - The payment was captured.
+     * @ordinal {string} PAYMENT_AUTHENTICATION_FAILED - The payment authentication failed.
+     */
     export enum ResponseSummaryType {
         APPROVED = 'Approved',
         DECLINED = 'Declined',

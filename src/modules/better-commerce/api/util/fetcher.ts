@@ -52,6 +52,20 @@ const SingletonFactory = (function () {
         (err) => Promise.reject(err)
     );
 
+    /**
+     * Creates an interceptor that will catch 401 errors and try to refresh the
+     * token by calling the token endpoint with the client credentials.
+     *
+     * If the token refresh is successful, it will retry the original request with
+     * the new access token. If the token refresh fails, it will reject the promise
+     * with the error.
+     *
+     * The interceptor will be ejected after a 401 error is caught to prevent
+     * infinite loops in case the token refresh also returns a 401 error.
+     *
+     * This interceptor will be recreated after the promise returned by this
+     * function is resolved or rejected.
+     */
     function createAxiosResponseInterceptor() {
         const interceptor = axiosInstance.interceptors.response.use(
             (response: any) => response,
@@ -97,15 +111,24 @@ const axiosInstance = SingletonFactory.axiosInstance;
 
 Object.freeze(axiosInstance)
 
-const fetcher = async ({
-    url = '',
-    method = 'post',
-    data = {},
-    params = {},
-    headers = {},
-    cookies = {},
-    baseUrl = "",
-}: any) => {
+/**
+ * Makes an HTTP request using the specified parameters and returns the response data or an error object.
+ *
+ * @param {string} url - The endpoint URL for the request.
+ * @param {string} method - The HTTP method to use (e.g., 'post', 'get').
+ * @param {object} data - The data to send in the request body (for POST/PUT requests).
+ * @param {object} params - The URL parameters to include in the request.
+ * @param {object} headers - The headers to include in the request.
+ * @param {object} cookies - Cookies to use for setting additional headers like Currency, Language, etc.
+ * @param {string} baseUrl - The base URL to use if not specified in the environment config.
+ *
+ * @returns {Promise<any>} The response data if the request is successful, or an error object if it fails.
+ *
+ * @throws {InvalidRequestException} If the response status is 400 or 404.
+ * @throws {AuthenticationException} If the response status is 401.
+ * @throws {APIException} For any other non-2xx response status.
+ */
+const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, headers = {}, cookies = {}, baseUrl = "", }: any) => {
     const computedUrl = new URL(url, baseUrl || BCEnvironment.getBaseApiUrl());
     const newConfig = {
         Currency: cookies.Currency || BCEnvironment.getDefaultCurrency(),
@@ -118,11 +141,7 @@ const fetcher = async ({
             : Guid.empty,
         ClientIP: cookies?.ClientIP || "",
     };
-    const config: any = {
-        method: method,
-        url: computedUrl.href,
-        headers: { ...headers, ...newConfig },
-    };
+    const config: any = { method: method, url: computedUrl.href, headers: { ...headers, ...newConfig }, };
 
     if (Object.keys(params).length) {
         config.params = params;

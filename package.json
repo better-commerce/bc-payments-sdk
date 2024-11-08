@@ -14,6 +14,7 @@
     "bc-apple-pay-sdk": "^0.0.2",
     "bc-checkout-sdk": "0.2.1",
     "bc-clearpay-sdk": "0.0.3",
+    "bc-juspay-sdk": "0.4.9",
     "bc-klarna-sdk": "0.0.4",
     "bc-paypal-sdk": "0.0.3",
     "bc-stripe-sdk": "0.0.3",
