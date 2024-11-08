@@ -14,6 +14,7 @@ import { IApplePayPaymentProvider } from "../contracts/GatewayProviders/IApplePa
 import { ApplePayPayment } from "../../modules/payments/ApplePayPayment";
 import { JuspayPayment } from "../../modules/payments/JuspayPayment";
 import { Logger } from "../../modules/better-commerce/Logger";
+import { IJuspayPaymentProvider } from "../contracts/GatewayProviders/IJuspayPaymentProvider";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -30,7 +31,7 @@ import { Logger } from "../../modules/better-commerce/Logger";
  * @abstract
  * @category Payment Operation
  */
-export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider {
+export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider {
 
     /**
      * Creates a one time payment order.
@@ -153,6 +154,48 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
      */
     public async getPaymentContext(data: any) {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+     * Retrieves the payment methods available for the current payment provider.
+     * Specific to {Juspay}, Retrieves the payment methods available for the merchant from Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `getPaymentMethods` method 
+     * with the provided data. If successful, it returns the result of the payment methods request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/payment-methods
+     * 
+     * @param data - The payment method data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment methods request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async getPaymentMethods(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().getPaymentMethods(data);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the customer details from the current payment provider.
+     * Specific to {Juspay}, Retrieves the customer details from Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `getCustomer` method 
+     * with the provided data. If successful, it returns the result of the customer details request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/getcustomer
+     * 
+     * @param data - The customer ID required by the payment provider.
+     * @returns A promise that resolves to the result of the customer details request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async getCustomer(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().getCustomer(data);
+        }
+        return null;
     }
 
     /**
