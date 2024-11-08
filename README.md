@@ -14,6 +14,7 @@ It integrates SDK APIs for the following providers:
 | ClearPay        | Client-side **Modal Widget + Redirect** |
 | Klarna          | Client-side **Modal Widget**            |
 | ApplePay        | Client-side **Modal Widget + Redirect** |
+| Juspay          | Client-side **Custom Widget + Redirect** |
 
 ## PayPal
 
@@ -76,6 +77,16 @@ It integrates SDK APIs for the following providers:
 | Sandbox Url               | https://sandbox.apple-pay-gateway.apple.com/                                                                            |                                                                               |
 | Live Url                  | https://apple-pay-gateway.apple.com/                                                                                    |                                                                               |
 | Setting Up Sandbox     | https://developer.apple.com/apple-pay/sandbox-testing/                                                                  |                                                                               |
+
+## Juspay
+
+| Name           | Reference                                                                                     | Description                                                                   |
+| :------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| API Collection | https://docs.juspay.io/api-reference/docs/express-checkout/postman-collection                                      | A Postman collection with the tools you’ll need to test the server-side component of your integration. |
+| Express Checkout SDK     | https://docs.juspay.io/api-reference/docs/express-checkout/introduction                                              |                                                                               |
+| NPM Package    | https://github.com/better-commerce/bc-juspay-sdk                                              | Node.js SDK for interaction with Juspay APIs - @better-commerce/bc-juspay-sdk |
+| Dashboard - Sandbox        | https://sandbox.portal.juspay.in/ |                                                                               |
+| Dashboard - Live           | https://portal.juspay.in/                               |                                                                               |
 
 ## Installation
 
