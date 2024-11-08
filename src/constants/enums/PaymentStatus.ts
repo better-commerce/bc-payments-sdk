@@ -1,3 +1,31 @@
+/**
+ * Enum {PaymentStatus} contains the list of payment statuses for a payment operation.
+ *
+ * These statuses are used to represent the current state of a payment operation.
+ *
+ * @enum {number}
+ * @readonly
+ * @memberof Payment
+ * @ordinal {number} PENDING - Payment is in progress.
+ * @ordinal {number} AUTHORIZED - Payment was authorized by the payment provider.
+ * @ordinal {number} PAID - Payment was successfully paid.
+ * @ordinal {number} DECLINED - Payment was declined by the payment provider.
+ * @ordinal {number} CANCELLED - Payment was cancelled.
+ * @ordinal {number} CANCELLED_BY_PSP - Payment was cancelled by the payment service provider.
+ * @ordinal {number} REFUNDED - Payment was refunded.
+ * @ordinal {number} CHARGING - Payment is being charged.
+ * @ordinal {number} VOIDED - Payment was voided.
+ * @ordinal {number} REQUIRE_PRE_AUTH - Pre-authorization is required for the payment.
+ * @ordinal {number} PROBLEM_IN_REFUND - There was a problem refunding the payment.
+ * @ordinal {number} PROBLEM_IN_POST_AUTH - There was a problem performing the post-authorization process.
+ * @ordinal {number} AWAITING_POST_AUTH_RESPONSE - The payment is waiting for a response from the post-authorization process.
+ * @ordinal {number} REQUEST_TO_CANCEL_PRE_AUTH - There was a request to cancel the pre-authorization.
+ * @ordinal {number} PROBLEM_IN_CANCEL_PRE_AUTH - There was a problem cancelling the pre-authorization.
+ * @ordinal {number} PO_RECEIVED - The purchase order was received.
+ * @ordinal {number} DUPLICATE_REQUEST - The payment request was a duplicate.
+ * @ordinal {number} INITIATED - The payment was initiated.
+ * @ordinal {number} RETRY_REFUND - The payment refund should be retried.
+ */
 export enum PaymentStatus {
   PENDING = 0,
   AUTHORIZED = 1,
@@ -21,6 +49,16 @@ export enum PaymentStatus {
 };
 
 export module PayPal {
+
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a PayPal payment operation.
+   *
+   * These statuses are used to represent the current state of a PayPal payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof PayPal
+   */
   export enum PaymentStatus {
 
     // The order was created with the specified context.
@@ -44,6 +82,16 @@ export module PayPal {
 };
 
 export module Checkout {
+
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a Checkout payment operation.
+   *
+   * These statuses are used to represent the current state of a Checkout payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof Checkout
+   */
   export enum PaymentStatus {
     PENDING = "Pending",
     AUTHORIZED = "Authorized",
@@ -61,6 +109,16 @@ export module Checkout {
 };
 
 export module Stripe {
+
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a Stripe payment operation.
+   *
+   * These statuses are used to represent the current state of a Stripe payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof Stripe
+   */
   export enum PaymentStatus {
     SUCCEEDED = "succeeded",
     PROCESSING = "processing",
@@ -69,6 +127,23 @@ export module Stripe {
 };
 
 export module Klarna {
+
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a Klarna payment operation.
+   *
+   * These statuses are used to represent the current state of a Klarna payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof Klarna
+   *
+   * @ordinal {string} AUTHORIZED - The payment method has been authorized.
+   * @ordinal {string} PART_CAPTURED - A partial capture has been taken.
+   * @ordinal {string} CAPTURED - A full capture has been taken.
+   * @ordinal {string} CANCELLED - The payment has been cancelled.
+   * @ordinal {string} EXPIRED - The payment has expired.
+   * @ordinal {string} CLOSED - The payment has been closed.
+   */
   export enum PaymentStatus {
     AUTHORIZED = "AUTHORIZED",
     PART_CAPTURED = "PART_CAPTURED",
@@ -80,6 +155,19 @@ export module Klarna {
 };
 
 export module ClearPay {
+
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a ClearPay payment operation.
+   *
+   * These statuses are used to represent the current state of a ClearPay payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof ClearPay
+   *
+   * @ordinal {string} APPROVED - The payment was approved.
+   * @ordinal {string} DECLINED - The payment was declined.
+   */
   export enum PaymentStatus {
     APPROVED = "APPROVED",
     DECLINED = "DECLINED",
@@ -88,6 +176,25 @@ export module ClearPay {
 
 export module Juspay {
 
+  /**
+   * Enum {PaymentStatus} contains the list of payment statuses for a Juspay payment operation.
+   *
+   * These statuses are used to represent the current state of a Juspay payment operation.
+   *
+   * @enum {string}
+   * @readonly
+   * @memberof Juspay
+   *
+   * @property {string} AUTHORIZATION_FAILED - The authorization of the payment failed.
+   * @property {string} AUTHENTICATION_FAILED - The authentication of the payment failed.
+   * @property {string} PENDING - The payment is pending.
+   * @property {string} VBV_SUCCESSFUL - The VBV (Verified by Visa) authentication of the payment was successful.
+   * @property {string} CHARGED - The payment was charged.
+   * @property {string} JUSPAY_DECLINED - The payment was declined by Juspay.
+   * @property {string} AUTO_REFUNDED - The payment was automatically refunded.
+   * @property {string} CAPTURE_FAILED - The capture of the payment failed.
+   * @property {string} NOT_FOUND - The payment was not found.
+   */
   export enum PaymentOrderStatus {
     AUTHORIZATION_FAILED = "AUTHORIZATION_FAILED",
     AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED", // UPI

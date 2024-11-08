@@ -7,6 +7,19 @@ import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 import { IJuspayPaymentProvider } from '../../base/contracts/GatewayProviders/IJuspayPaymentProvider';
 import { JuspayPaymentType } from '../../constants/enums';
 
+/**
+ * Class {JuspayPayment} is a concrete implementation of a payment provider.
+ * It provides a set of methods that can be used to interact with the Juspay payment gateway.
+ *
+ * @class JuspayPayment
+ * @extends {BasePaymentProvider}
+ * @implements {IPaymentProvider}
+ * @implements {IJuspayPaymentProvider}
+ * 
+ * @remark
+ * This class is responsible for initializing the Juspay SDK and providing the 
+ * concrete implementation of the Juspay payment provider methods.
+ */
 export class JuspayPayment extends BasePaymentProvider implements IPaymentProvider, IJuspayPaymentProvider {
 
     /**

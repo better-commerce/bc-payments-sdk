@@ -1,3 +1,31 @@
+/**
+ * Enum representing the various statuses of an order.
+ * 
+ * @enum {number}
+ * @ordinal {number} UNKNOWN - The status of the order is unknown.
+ * @ordinal {number} INCOMPLETE - The order is incomplete.
+ * @ordinal {number} PREORDERUNTRUSTED - The preorder is in an untrusted state.
+ * @ordinal {number} PROCESSING - The order is being processed.
+ * @ordinal {number} COMPLETE - The order is complete.
+ * @ordinal {number} CANCELLED - The order has been cancelled.
+ * @ordinal {number} PENDING - The order is pending.
+ * @ordinal {number} APPROVED - The order has been approved.
+ * @ordinal {number} SENT_TO_WAREHOSE - The order has been sent to the warehouse.
+ * @ordinal {number} ACCEPTED_IN_WAREHOUSE - The order has been accepted in the warehouse.
+ * @ordinal {number} AWAITING_SETTLEMENT - The order is awaiting settlement.
+ * @ordinal {number} ORDER_SETTLED - The order has been settled.
+ * @ordinal {number} DISPATCH - The order is ready for dispatch.
+ * @ordinal {number} PREORDER_APPROVED - The preorder has been approved.
+ * @ordinal {number} READY_TO_DISPATCH - The order is ready to be dispatched.
+ * @ordinal {number} PARTIALLY_DESPATCHED - The order has been partially dispatched.
+ * @ordinal {number} ACCEPTED - The order has been accepted.
+ * @ordinal {number} CREATE - The order is in creation state.
+ * @ordinal {number} AWAITING_CUSTOMER_FEEDBACK - The order is awaiting feedback from the customer.
+ * @ordinal {number} REFUNDED - The order has been refunded.
+ * @ordinal {number} RETURNED_BY_WAREHOUSE - The order has been returned by the warehouse.
+ * @ordinal {number} AWAITING_STOCK - The order is awaiting stock.
+ * @ordinal {number} WAIT_FOR_STOCK - The order is waiting for stock.
+ */
 export enum OrderStatus {
     UNKNOWN = 0,
     INCOMPLETE = 1,
