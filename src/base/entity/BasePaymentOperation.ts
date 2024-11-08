@@ -12,19 +12,40 @@ import { StripePayment } from "../../modules/payments/StripePayment";
 import { IPaymentProvider } from "../contracts/IPaymentProvider";
 import { IApplePayPaymentProvider } from "../contracts/GatewayProviders/IApplePayPaymentProvider";
 import { ApplePayPayment } from "../../modules/payments/ApplePayPayment";
+import { JuspayPayment } from "../../modules/payments/JuspayPayment";
 import { Logger } from "../../modules/better-commerce/Logger";
 
 /**
- * Class {BasePaymentOperation} defines concrete methods for specific payment operations of all the gateway providers. This also acts as an abstract for {PaymentOperation} class, thereby allowing the {PaymentOperation} class to directly inherit the concrete operation method(s) for all gateway providers. 
+ * Abstract class {BasePaymentOperation} is the base class for all payment operations 
+ * and defines the concrete methods for specific payment operations of all the gateway providers.
+ *
+ * Payment operations are responsible for creating payment orders, retrieving payment methods, processing payments and more.
+ * This class provides the following methods that can be overridden by the concrete implementation classes:
+ *
+ * - {createOneTimePaymentOrder}: Creates a one time payment order.
+ * - {getPaymentMethods}: Retrieves the payment methods for the current customer.
+ * - {processPayment}: Processes a payment.
+ * - {processPaymentHook}: Processes a payment hook.
+ *
+ * @abstract
+ * @category Payment Operation
  */
 export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider {
 
     /**
+     * Creates a one time payment order.
      * Specific to {Klarna}, creates a one time payment order.
+     * 
+     * This method retrieves the payment provider and checks if it is of type `KLARNA`.
+     * If so, it calls the `createOneTimePaymentOrder` method of `KlarnaPayment` with the provided data.
+     * If the payment provider is not `KLARNA`, it returns null.
+     * 
      * 
      * API Reference - https://docs.klarna.com/klarna-payments/integrate-with-klarna-payments/step-3-create-an-order/create-a-one-time-payment-order/
      * 
-     * @param data {Object}
+     * @param data - The payment intent data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment intent creation
+     *          or an object with error details if an error occurs.
      */
     public async createOneTimePaymentOrder(data: any): Promise<any> {
         const paymentProvider = this.getPaymentProvider();
@@ -35,11 +56,17 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Validates the payment session using the Apple Pay SDK.
      * Specific to {ApplePay}, validates the payment session.
+     * 
+     * This method retrieves the payment provider and checks if it is of type `CHECKOUT_APPLE_PAY`.
+     * If so, it calls the `validatePaymentSession` method of `ApplePayPayment` with the provided data.
+     * If the payment provider is not `CHECKOUT_APPLE_PAY`, it returns null.
      * 
      * API Reference - https://developer.apple.com/documentation/apple_pay_on_the_web/apple_pay_js_api/providing_merchant_validation
      * 
-     * @param data {Object}
+     * @param data The Apple Pay session validation data.
+     * @returns The result of the payment session validation. If the validation is successful, the result is the validated session object. Otherwise, the result is an error object with the error message.
      */
     public async validatePaymentSession(data: any) {
         const paymentProvider = this.getPaymentProvider();
@@ -50,11 +77,18 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Requests a token from the appropriate payment provider.
      * Specific to {Checkout}, Exchange card details for a reference token that can be used later to request a card payment. Tokens are single use and expire after 15 minutes.
+     * 
+     * This method retrieves the payment provider and checks if it is of type `CHECKOUT`.
+     * If so, it calls the `requestToken` method of `CheckoutPayment` with the provided data.
+     * If the payment provider is not `CHECKOUT`, it returns null.
      * 
      * API Reference - https://api-reference.checkout.com/#operation/requestAToken
      * 
-     * @param data {Object}
+     * @param data {Object} - The data required for requesting a token.
+     * @returns A promise that resolves to the result of the token request
+     *          or null if the payment provider is not `CHECKOUT`.
      */
     public async requestToken(data: any) {
         const paymentProvider = this.getPaymentProvider();
@@ -65,11 +99,16 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
-     * Specific to {Checkout}, Sends an Payment Context request.
+     * Creates a payment context for the current payment provider.
+     * Specific to {Checkout}, creates a payment context.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `createPaymentContext` method 
+     * with the provided data. If successful, it returns the result of the payment context creation. Otherwise, it catches any errors that occur during the process and returns an error object.
      * 
      * API Reference - https://api-reference.checkout.com/#operation/requestAPaymentContext
      * 
-     * @param data 
+     * @param data {Object} - The payment context data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment context creation or an error object in case of a failure.
      */
     public async createPaymentContext(data: any) {
         const paymentProvider = this.getPaymentProvider();
@@ -80,11 +119,16 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Creates a session for a customer using the appropriate payment provider.
      * Specific to {Checkout}, Creates a Klarna session for a customer.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `createSession` method 
+     * with the provided data. If successful, it returns the result of the session creation. Otherwise, it catches any errors that occur during the process and returns an error object.
      * 
      * API Reference - https://www.checkout.com/docs/previous/payments/payment-methods/invoice-and-pay-later/klarna#Create_a_session
      * 
-     * @param data 
+     * @param data {Object} - The session data required by the payment provider.
+     * @returns A promise that resolves to the result of the session creation or an error object in case of a failure.
      */
     public async createSession(data: any) {
         const paymentProvider = this.getPaymentProvider();
@@ -95,16 +139,33 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Retrieves the payment context details for the current payment provider.
      * Specific to {Checkout},Returns all the Payment Context details.
-     * @param data 
      * 
-     *  API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
+     * This method should be implemented by subclasses to fetch payment context
+     * details using the provided data. It throws an error if not implemented.
      * 
+     * API Reference - https://api-reference.checkout.com/#operation/getPaymentContext
+     * 
+     * @param data - The payment context data required by the payment provider.
+     * @returns A promise that resolves to the result of the payment context details request
+     *          or an object with error details if an error occurs.
      */
     public async getPaymentContext(data: any) {
         throw new Error("Method not implemented.");
     }
 
+    /**
+     * Retrieves the payment provider type from the configuration.
+     * 
+     * This method accesses the current configuration to determine the 
+     * payment provider being used. It logs the configuration details for 
+     * debugging purposes and returns the provider's system name in 
+     * lowercase form.
+     * 
+     * @protected
+     * @returns {PaymentMethodType} The payment provider type in lowercase.
+     */
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
         console.log("getObject() config", config);
@@ -115,9 +176,16 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         return config?.systemName?.toLowerCase();
     }
 
+
     /**
-     * Generic abstract factory helper to determine the payment gateway provider.
-     * @returns 
+     * Retrieves an instance of the payment provider based on the configured payment method type.
+     * 
+     * This method determines the appropriate payment provider by calling `getPaymentProvider`.
+     * It then creates and returns an instance of the corresponding payment provider class.
+     * Supported payment methods include PayPal, Checkout, ClearPay, Klarna, Stripe, and Juspay.
+     * 
+     * @returns {IPaymentProvider} An instance of a payment provider corresponding to the
+     * configured payment method type.
      */
     protected getObject(): IPaymentProvider {
         let obj: IPaymentProvider;
@@ -132,6 +200,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new KlarnaPayment();
         } else if (paymentProvider === PaymentMethodType.STRIPE) {
             obj = new StripePayment();
+        } else if (paymentProvider === PaymentMethodType.JUSPAY) {
+            obj = new JuspayPayment();
         }
         return obj;
     }
