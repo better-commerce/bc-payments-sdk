@@ -199,6 +199,216 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Creates a customer in the current payment provider.
+     * Specific to {Juspay}, creates a customer in Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `createCustomer` method 
+     * with the provided data. If successful, it returns the result of the create customer request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/createcustomer
+     * 
+     * @param data - The customer data required by the payment provider.
+     * @returns A promise that resolves to the result of the create customer request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async createCustomer(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().createCustomer(data);
+        }
+        return null;
+    }
+
+    /**
+     * Creates an order in the current payment provider.
+     * Specific to {Juspay}, creates an order in Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `createOrder` method 
+     * with the provided data. If successful, it returns the result of the create order request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/create-order-api
+     * 
+     * @param data - The order data required by the payment provider.
+     * @returns A promise that resolves to the result of the create order request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async createOrder(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().createOrder(data);
+        }
+        return null;
+    }
+
+    /**
+     * Updates an order in the current payment provider.
+     * Specific to {Juspay}, updates an order in Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `updateOrder` method 
+     * with the provided data. If successful, it returns the result of the update order request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/update-order-api
+     * 
+     * @param data - The order data required by the payment provider.
+     * @returns A promise that resolves to the result of the update order request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async updateOrder(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().updateOrder(data);
+        }
+        return null;
+    }
+    
+    /**
+     * Retrieves the card information for the current payment provider.
+     * Specific to {Juspay}, Retrieves the card information for the current payment provider.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `getCardInfo` method 
+     * with the provided data. If successful, it returns the result of the card information request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/card-info
+     * 
+     * @param data - The card data required by the payment provider.
+     * @returns A promise that resolves to the result of the card information request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async getCardInfo(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().getCardInfo(data);
+        }
+        return null;
+    }
+
+    /**
+     * Tokenizes a card using the current payment provider.
+     * Specific to {Juspay}, exchanges card details for a token.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `tokenizeCard` method 
+     * with the provided data. If successful, it returns the result of the tokenization request. Otherwise, it returns null.
+     * 
+     * API Reference - https://juspay.io/in/docs/api-reference/docs/express-checkout/tokenize
+     * 
+     * @param data - The card data required by the payment provider.
+     * @returns A promise that resolves to the result of the tokenization request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async tokenizeCard(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().tokenizeCard(data);
+        }
+        return null;
+    }
+
+    /**
+     * Saves a card using the current payment provider.
+     * Specific to {Juspay}, Saves a card to Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `saveCard` method 
+     * with the provided data. If successful, it returns the result of the save card request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/add-card
+     * 
+     * @param data - The card data required by the payment provider.
+     * @returns A promise that resolves to the result of the save card request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async saveCard(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().saveCard(data);
+        }
+        return null;
+    }
+
+    /**
+     * Deletes a card using the current payment provider.
+     * Specific to {Juspay}, Deletes a card from Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `deleteCard` method 
+     * with the provided data. If successful, it returns the result of the delete card request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/delete-card
+     * 
+     * @param data - The card data required by the payment provider.
+     * @returns A promise that resolves to the result of the delete card request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async deleteCard(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().deleteCard(data);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the cards associated with the current payment provider.
+     * Specific to {Juspay}, Retrieves the cards associated with the merchant from Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `getCards` method 
+     * with the provided data. If successful, it returns the result of the cards request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/list-stored-cards
+     * 
+     * @param data - The card data required by the payment provider.
+     * @returns A promise that resolves to the result of the cards request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async getCards(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().getCards(data);
+        }
+        return null;
+    }
+
+    /**
+     * Verifies a VPA using the current payment provider.
+     * Specific to {Juspay}, verifies a VPA with Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `verifyVPA` method 
+     * with the provided data. If successful, it returns the result of the verification request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/verify-vpa
+     * 
+     * @param data - The VPA data required by the payment provider.
+     * @returns A promise that resolves to the result of the verification request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async verifyVPA(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().verifyVPA(data);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the offers associated with the current payment provider.
+     * Specific to {Juspay}, Retrieves the offers associated with the merchant from Juspay.
+     * 
+     * The method attempts to retrieve a payment provider object and then calls its `getOffers` method 
+     * with the provided data. If successful, it returns the result of the offers request. Otherwise, it returns null.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/offer-list
+     * 
+     * @param data - The offer data required by the payment provider.
+     * @returns A promise that resolves to the result of the offers request
+     *          or null if the payment provider is not {Juspay}.
+     */
+    public async getOffers(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.JUSPAY) {
+            return await new JuspayPayment().getOffers(data);
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the payment provider type from the configuration.
      * 
      * This method accesses the current configuration to determine the 

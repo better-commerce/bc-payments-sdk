@@ -87,8 +87,285 @@ export class JuspayPayment extends BasePaymentProvider implements IPaymentProvid
     async getCustomer(data: any): Promise<any> {
         try {
             if (super.initSDK()) {
-                const paymentMethods = await ExpressCheckout.Customer.get(data);
-                return paymentMethods;
+                const customerDetails = await ExpressCheckout.Customer.get(data);
+                return customerDetails;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Creates a customer in Juspay.
+     * 
+     * This method initializes the SDK and attempts to create a customer
+     * with the provided data. If successful, it returns the result of the 
+     * create customer request. If the SDK initialization fails, it returns null. 
+     * In case of an error during the process, it returns an object containing 
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/createcustomer
+     * 
+     * @param data - The customer data required by Juspay.
+     * @returns A promise that resolves to the result of the create customer request
+     *          or an object with error details if an error occurs.
+     */
+    async createCustomer(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const createCustomerResult = await ExpressCheckout.Customer.create(data);
+                return createCustomerResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Creates an order in Juspay.
+     * 
+     * This method initializes the SDK and attempts to create an order
+     * with the provided data. If successful, it returns the result of the 
+     * create order request. If the SDK initialization fails, it returns null. 
+     * In case of an error during the process, it returns an object containing 
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/create-order-api
+     * 
+     * @param data - The order data required by Juspay.
+     * @returns A promise that resolves to the result of the create order request
+     *          or an object with error details if an error occurs.
+     */
+    async createOrder(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const createOrderResult = await ExpressCheckout.Order.create(data);
+                return createOrderResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Updates an order in Juspay.
+     * 
+     * This method initializes the SDK and attempts to update an order
+     * with the provided data. If successful, it returns the result of the
+     * update order request. If the SDK initialization fails, it returns null.
+     * In case of an error during the process, it returns an object containing
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/update-order-api
+     * 
+     * @param data - The order data required by Juspay.
+     * @returns A promise that resolves to the result of the update order request
+     *          or an object with error details if an error occurs.
+     */
+    async updateOrder(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const updateOrderResult = await ExpressCheckout.Order.update(data);
+                return updateOrderResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+    
+    /**
+     * Retrieves the card information from Juspay.
+     * 
+     * This method initializes the SDK and attempts to retrieve the card information
+     * with the provided data. If successful, it returns the result of the card information
+     * request. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/card-info
+     * 
+     * @param data - The card data required by Juspay.
+     * @returns A promise that resolves to the result of the card information request
+     *          or an object with error details if an error occurs.
+     */
+    async getCardInfo(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const cardInfo = await ExpressCheckout.Card.binInfo(data);
+                return cardInfo;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Tokenizes a card using Juspay.
+     * 
+     * This method initializes the SDK and attempts to tokenize a card
+     * with the provided data. If successful, it returns the result of the 
+     * tokenization request. If the SDK initialization fails, it returns null. 
+     * In case of an error during the process, it returns an object containing 
+     * the error details.
+     * 
+     * API Reference - https://juspay.io/in/docs/api-reference/docs/express-checkout/tokenize
+     * 
+     * @param data - The card data required by Juspay.
+     * @returns A promise that resolves to the result of the tokenization request
+     *          or an object with error details if an error occurs.
+     */
+    async tokenizeCard(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const tokenizeCardResult = await ExpressCheckout.Card.tokenize(data);
+                return tokenizeCardResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Saves a card using Juspay.
+     * 
+     * This method initializes the SDK and attempts to save a card
+     * with the provided data. If successful, it returns the result of the
+     * save card request. If the SDK initialization fails, it returns null.
+     * In case of an error during the process, it returns an object containing
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/add-card
+     * 
+     * @param data - The card data required by Juspay.
+     * @returns A promise that resolves to the result of the save card request
+     *          or an object with error details if an error occurs.
+     */
+    async saveCard(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const addCardResult = await ExpressCheckout.Card.create(data);
+                return addCardResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Deletes a card using Juspay.
+     * 
+     * This method initializes the SDK and attempts to delete a card
+     * with the provided data. If successful, it returns the result of the
+     * delete card request. If the SDK initialization fails, it returns null.
+     * In case of an error during the process, it returns an object containing
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/delete-card
+     * 
+     * @param data - The card data required by Juspay.
+     * @returns A promise that resolves to the result of the delete card request
+     *          or an object with error details if an error occurs.
+     */
+    async deleteCard(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const deleteCardResult = await ExpressCheckout.Card.delete(data);
+                return deleteCardResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Retrieves the cards associated with the merchant from Juspay.
+     * 
+     * This method initializes the SDK and attempts to retrieve the cards
+     * with the provided data. If successful, it returns the result of the cards
+     * request. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/list-stored-cards
+     * 
+     * @param data - The card data required by Juspay.
+     * @returns A promise that resolves to the result of the cards request
+     *          or an object with error details if an error occurs.
+     */
+    async getCards(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const listStoredCardsResult = await ExpressCheckout.Card.listAll(data);
+                return listStoredCardsResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Verifies a VPA using Juspay.
+     * 
+     * This method initializes the SDK and attempts to verify a VPA
+     * with the provided data. If successful, it returns the result of the 
+     * verification request. If the SDK initialization fails, it returns null. 
+     * In case of an error during the process, it returns an object containing 
+     * the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/verify-vpa
+     * 
+     * @param data - The VPA data required by Juspay.
+     * @returns A promise that resolves to the result of the verification request
+     *          or an object with error details if an error occurs.
+     */
+    async verifyVPA(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const listStoredCardsResult = await ExpressCheckout.UPI.verifyVPA(data);
+                return listStoredCardsResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Retrieves the offers associated with the merchant from Juspay.
+     * 
+     * This method initializes the SDK and attempts to retrieve the offers
+     * with the provided data. If successful, it returns the result of the offers
+     * request. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
+     * API Reference - https://docs.juspay.io/api-reference/docs/express-checkout/offer-list
+     * 
+     * @param data - The offer data required by Juspay.
+     * @returns A promise that resolves to the result of the offers request
+     *          or an object with error details if an error occurs.
+     */
+    async getOffers(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const listStoredCardsResult = await ExpressCheckout.Offers.list(data);
+                return listStoredCardsResult;
             }
             return null;
         }
