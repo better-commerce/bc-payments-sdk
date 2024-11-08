@@ -5,11 +5,60 @@ import { ExpressCheckout } from 'bc-juspay-sdk'
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 import { IJuspayPaymentProvider } from '../../base/contracts/GatewayProviders/IJuspayPaymentProvider';
+import { JuspayPaymentType } from '../../constants/enums';
 
 export class JuspayPayment extends BasePaymentProvider implements IPaymentProvider, IJuspayPaymentProvider {
 
-    initPaymentIntent(data: any) {
-        throw new Error("Method not implemented.");
+    /**
+     * Initializes a payment intent using the Juspay payment gateway.
+     * 
+     * This method initializes the SDK and attempts to create a payment intent
+     * with the provided data. If successful, it returns the result of the intent
+     * creation. If the SDK initialization fails, it returns null. In case of an 
+     * error during the process, it returns an object containing the error details.
+     * 
+     * API Reference
+     * - Card: https://docs.juspay.io/api-reference/docs/express-checkout/credit--debit-card-transaction
+     * - UPI: https://docs.juspay.io/api-reference/docs/express-checkout/upi-transaction
+     * - Net Banking: https://docs.juspay.io/api-reference/docs/express-checkout/netbanking-payment
+     * - Wallet: https://docs.juspay.io/api-reference/docs/express-checkout/wallet-payment
+     * 
+     * @param data - The payment intent data required by Juspay.
+     * @returns A promise that resolves to the result of the payment intent creation
+     *          or an object with error details if an error occurs.
+     */
+    async initPaymentIntent(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                if (data?.paymentMode) {
+                    let paymentResult: any;
+                    const { paymentMode, ...rest } = data
+                    switch (data?.paymentMode) {
+
+                        case JuspayPaymentType.CARD:
+                            paymentResult = await ExpressCheckout.Payment.creditDebitCardPayment({ ...rest })
+                            break;
+
+                        case JuspayPaymentType.UPI:
+                            paymentResult = await ExpressCheckout.Payment.upiIntentPayment({ ...rest })
+                            break;
+
+                        case JuspayPaymentType.NET_BANKING:
+                            paymentResult = await ExpressCheckout.Payment.netbankingPayment({ ...rest })
+                            break;
+
+                        case JuspayPaymentType.WALLET:
+                            paymentResult = await ExpressCheckout.Payment.walletPayment({ ...rest })
+                            break;
+                    }
+                    return paymentResult
+                }
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 
     requestPayment(data: any) {
