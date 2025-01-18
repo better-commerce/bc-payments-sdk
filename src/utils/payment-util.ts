@@ -7,6 +7,24 @@ import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
 import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
 import { BCEnvironment } from "../base/config/BCEnvironment"
 
+export const gatewayNameToIdMap = new Map<string, number>(
+    Object.entries(PaymentMethodType).map(([key, value]) => [
+        value.toLowerCase(),
+        PaymentMethodTypeId[key as keyof typeof PaymentMethodTypeId],
+    ])
+);
+
+export const idToGatewayNameMap = new Map<number, string>(
+    Object.entries(PaymentMethodTypeId)
+        .filter(([key, value]) => typeof value === 'number') // Filter out string keys (TS enum quirk)
+        .map(([key, value]) => [value as number, PaymentMethodType[key as keyof typeof PaymentMethodType]])
+);
+
+/*export const getGatewayId = (gatewayName: string): number => {
+    const normalizedGatewayName = gatewayName.toLowerCase();
+    return gatewayNameToIdMap.get(normalizedGatewayName) ?? -1;
+};*/
+
 /**
  * Given a gateway name, returns the corresponding gateway ID.
  * @param gatewayName - The name of the payment gateway.
@@ -37,9 +55,15 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.CHECKOUT_APPLE_PAY
     } else if (matchStrings(gatewayName, PaymentMethodType.CHECKOUT_KLARNA, true)) {
         return PaymentMethodTypeId.CHECKOUT_KLARNA
+    } else if (matchStrings(gatewayName, PaymentMethodType.ELAVON, true)) {
+        return PaymentMethodTypeId.ELAVON
     }
     return -1
 }
+
+/*export const getGatewayName = (id: number): string | -1 => {
+    return idToGatewayNameMap.get(id) ?? -1;
+};*/
 
 /**
  * Given a gateway ID, returns the corresponding gateway name.
@@ -71,6 +95,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.CHECKOUT_APPLE_PAY
     } else if (id === PaymentMethodTypeId.CHECKOUT_KLARNA) {
         return PaymentMethodType.CHECKOUT_KLARNA
+    } else if (id === PaymentMethodTypeId.ELAVON) {
+        return PaymentMethodType.ELAVON
     }
     return -1
 }

@@ -15,6 +15,7 @@ It integrates SDK APIs for the following providers:
 | Klarna          | Client-side **Modal Widget**            |
 | ApplePay        | Client-side **Modal Widget + Redirect** |
 | Juspay          | Client-side **Custom Widget + Redirect** |
+| Elavon        | Client-side **Modal Widget + Redirect** |
 
 ## PayPal
 
@@ -87,6 +88,16 @@ It integrates SDK APIs for the following providers:
 | NPM Package    | https://github.com/better-commerce/bc-juspay-sdk                                              | Node.js SDK for interaction with Juspay APIs - @better-commerce/bc-juspay-sdk |
 | Dashboard - Sandbox        | https://sandbox.portal.juspay.in/ |                                                                               |
 | Dashboard - Live           | https://portal.juspay.in/                               |                                                                               |
+
+## Elavon
+
+| Name           | Reference                                                                                     | Description                                                                   |
+| :------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| API Collection | https://developer.elavon.com/products/checkout-js/v1/api-reference                                      | An API reference you’ll need to test the server-side component of your integration. |
+| Checkout.js Transaction Request     | https://developer.elavon.com/products/checkout-js/v1/api-reference#tag/Checkout.js-Transaction-Request                                             |                                                                               |
+| NPM Package    | https://github.com/better-commerce/bc-elavon-sdk                                              | Node.js SDK for interaction with Elavon APIs - @better-commerce/bc-elavon-sdk |
+| Dashboard - Sandbox        | https://reporting.sandbox.elavonpaymentgateway.com/#/login |                                                                               |
+| Dashboard - Live           | https://reporting.elavonpaymentgateway.com/#/login                               |                                                                               |
 
 ## Installation
 

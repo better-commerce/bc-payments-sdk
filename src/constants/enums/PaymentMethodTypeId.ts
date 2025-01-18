@@ -29,4 +29,5 @@ export enum PaymentMethodTypeId {
     CHEQUE = 9,
     CHECKOUT_APPLE_PAY = 10,
     CHECKOUT_KLARNA = 11,
+    ELAVON = 12,
 }

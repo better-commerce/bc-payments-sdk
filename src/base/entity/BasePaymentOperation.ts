@@ -15,6 +15,8 @@ import { ApplePayPayment } from "../../modules/payments/ApplePayPayment";
 import { JuspayPayment } from "../../modules/payments/JuspayPayment";
 import { Logger } from "../../modules/better-commerce/Logger";
 import { IJuspayPaymentProvider } from "../contracts/GatewayProviders/IJuspayPaymentProvider";
+import { IElavonPaymentProvider } from "../contracts/GatewayProviders/IElavonPaymentProvider";
+import { ElavonPayment } from "../../modules/payments/ElavonPayment";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -31,7 +33,7 @@ import { IJuspayPaymentProvider } from "../contracts/GatewayProviders/IJuspayPay
  * @abstract
  * @category Payment Operation
  */
-export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider {
+export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider, IElavonPaymentProvider {
 
     /**
      * Creates a one time payment order.
@@ -95,6 +97,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.CHECKOUT) {
             return await new CheckoutPayment().requestToken(data);
+        } else if (paymentProvider === PaymentMethodType.ELAVON) {
+            return await new ElavonPayment().requestToken(data);
         }
         return null;
     }
@@ -260,7 +264,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         }
         return null;
     }
-    
+
     /**
      * Retrieves the card information for the current payment provider.
      * Specific to {Juspay}, Retrieves the card information for the current payment provider.
@@ -455,6 +459,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new StripePayment();
         } else if (paymentProvider === PaymentMethodType.JUSPAY) {
             obj = new JuspayPayment();
+        } else if (paymentProvider === PaymentMethodType.ELAVON) {
+            obj = new ElavonPayment();
         }
         return obj;
     }

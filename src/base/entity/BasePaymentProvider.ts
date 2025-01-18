@@ -13,6 +13,7 @@ import { BCEnvironment } from "../config/BCEnvironment";
 import { stringToBoolean } from "../../utils/parse-util";
 import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
 import { Logger } from "../../modules/better-commerce/Logger";
+import { ElavonEnvironment } from "bc-elavon-sdk";
 
 /**
  * Abstract class {BasePaymentProvider} is the base class for all payment providers.
@@ -162,6 +163,26 @@ export abstract class BasePaymentProvider {
                 extras = { ...extras, returnUrl, };
                 JuspayEnv.init();
                 JuspayEnv.withCredentials(merchantId, apiKey, baseUrl, undefined, undefined, extras);
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.ELAVON.toLowerCase()) {
+
+                const merchantId = config?.settings?.find((x: any) => x.key === "MotoAccountCode")?.value || Defaults.String.Value;
+                const merchantUserId = config?.settings?.find((x: any) => x.key === "MotoSignature")?.value || Defaults.String.Value;
+                const merchantPIN = config?.settings?.find((x: any) => x.key === "MotoUserName")?.value || Defaults.String.Value;
+                const vendorId = config?.settings?.find((x: any) => x.key === "MotoUserName")?.value || Defaults.String.Value;
+
+                // Init Env
+                ElavonEnvironment.initServer(merchantId, merchantUserId, merchantPIN, vendorId, isSandbox, {
+                    logActivity: (data: any) => {
+                        if (providerLoggingEnabled) {
+                            Logger.logPayment(data, {});
+                        }
+                    }
+                });
+
+                //const logData = { data: `CheckoutEnvironment.initServer(${clientId}, ${accessSecret}, ${processingChannelId}, ${isSandbox})` };
+                //logActivity(providerLoggingEnabled, logData, `${config?.systemName} | InitProviderPayment`);
+
                 return true;
             }
         }

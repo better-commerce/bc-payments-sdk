@@ -1,6 +1,6 @@
 {
   "name": "@better-commerce/bc-payments-sdk",
-  "version": "0.2.7",
+  "version": "0.2.7-canary.6",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,8 @@
     "bc-apple-pay-sdk": "^0.0.2",
     "bc-checkout-sdk": "0.2.1",
     "bc-clearpay-sdk": "0.0.3",
-    "bc-juspay-sdk": "0.4.9",
+    "bc-elavon-sdk": "0.0.0-canary.1",
+    "bc-juspay-sdk": "0.5.0",
     "bc-klarna-sdk": "0.0.4",
     "bc-paypal-sdk": "0.0.3",
     "bc-stripe-sdk": "0.0.3",
