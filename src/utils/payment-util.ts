@@ -57,6 +57,8 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.CHECKOUT_KLARNA
     } else if (matchStrings(gatewayName, PaymentMethodType.ELAVON, true)) {
         return PaymentMethodTypeId.ELAVON
+    } else if (matchStrings(gatewayName, PaymentMethodType.OPAYO, true)) {
+        return PaymentMethodTypeId.OPAYO
     }
     return -1
 }
@@ -97,6 +99,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.CHECKOUT_KLARNA
     } else if (id === PaymentMethodTypeId.ELAVON) {
         return PaymentMethodType.ELAVON
+    } else if (id === PaymentMethodTypeId.OPAYO) {
+        return PaymentMethodType.OPAYO
     }
     return -1
 }

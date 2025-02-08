@@ -30,4 +30,5 @@ export enum PaymentMethodTypeId {
     CHECKOUT_APPLE_PAY = 10,
     CHECKOUT_KLARNA = 11,
     ELAVON = 12,
+    OPAYO = 13,
 }

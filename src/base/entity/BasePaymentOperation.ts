@@ -17,6 +17,7 @@ import { Logger } from "../../modules/better-commerce/Logger";
 import { IJuspayPaymentProvider } from "../contracts/GatewayProviders/IJuspayPaymentProvider";
 import { IElavonPaymentProvider } from "../contracts/GatewayProviders/IElavonPaymentProvider";
 import { ElavonPayment } from "../../modules/payments/ElavonPayment";
+import { IOpayoPaymentProvider } from "../contracts/GatewayProviders/IOpayoPaymentProvider";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -33,7 +34,7 @@ import { ElavonPayment } from "../../modules/payments/ElavonPayment";
  * @abstract
  * @category Payment Operation
  */
-export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider, IElavonPaymentProvider {
+export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider, IElavonPaymentProvider, IOpayoPaymentProvider {
 
     /**
      * Creates a one time payment order.
@@ -460,6 +461,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         } else if (paymentProvider === PaymentMethodType.JUSPAY) {
             obj = new JuspayPayment();
         } else if (paymentProvider === PaymentMethodType.ELAVON) {
+            obj = new ElavonPayment();
+        } else if (paymentProvider === PaymentMethodType.OPAYO) {
             obj = new ElavonPayment();
         }
         return obj;
