@@ -1,27 +1,32 @@
-import { BCEnvironment } from "./base/config/BCEnvironment";
-import { PaymentSourceType as CheckoutPaymentSourceType, PaymentType as CheckoutPaymentType, PaymentRequest as CheckoutPaymentRequest } from "bc-checkout-sdk";
-import { IPaymentIntent as KlarnaPaymentIntent } from "bc-klarna-sdk/dist/models/IPaymentIntent";
-import { PaymentIntent as KlarnaPaymentIntentType } from "bc-klarna-sdk/dist/constants/enums/PaymentIntent";
-import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderLine";
-import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
-import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
-import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
-import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
+export * as Infra from "./infrastructure"
+export * as Domain from "./domain"
+import * as Utils from "./utils"
 
-import { PaymentMethodType } from "./constants";
-import { PaymentMethodTypeId } from "./constants";
-import { getGatewayId, getGatewayName } from "./utils/payment-util";
-import { JuspayPaymentType } from "./constants/enums";
+import { BCEnvironment } from "./domain/config/BCEnvironment";
+import { PaymentRequest as CheckoutPaymentRequest } from "../SDKs/checkout/domain/models";
+import { PaymentSourceType as CheckoutPaymentSourceType, PaymentType as CheckoutPaymentType } from "../SDKs/checkout/domain/enums";
+import { IPaymentIntent as KlarnaPaymentIntent } from "../SDKs/klarna/domain/models";
+import { PaymentIntent as KlarnaPaymentIntentType } from "../SDKs/klarna/domain/enums";
+import { IOrderLine as KlarnaOrderLine } from "../SDKs/klarna/domain/models";
+import { IOrderLine as ClearPayOrderLine, IAddress as ClearPayAddress, IPaymentIntent as ClearPayPaymentIntent } from "../SDKs/clearpay/domain/models";
+import { APIConnectionException, APIException, AuthenticationException, BaseException as BCException, InvalidRequestException } from "./domain/entity";
+import { IPaymentInfo } from "./domain/models/better-commerce/IPaymentInfo";
+import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./domain/enums/PaymentStatus";
+
+import { PaymentMethodType } from "./domain/enums";
+import { PaymentMethodTypeId } from "./domain/enums";
+const { getGatewayId, getGatewayName } = Utils.PaymentUtil;
+import { JuspayPaymentType } from "./domain/enums";
 
 // Generic Enums
 export { PaymentMethodType, PaymentMethodTypeId, JuspayPaymentType, };
 
 // Payments Module
 export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, PaymentStatus, };
-import { PaymentOperation } from "./operations/PaymentOperation";
+import { PaymentOperation } from "./domain/operations/PaymentOperation";
 
 // BetterCommerce Module
-import { BetterCommerceOperation } from "./operations/BetterCommerceOperation";
+import { BetterCommerceOperation } from "./domain/operations/BetterCommerceOperation";
 
 // Generic Types
 export { BCEnvironment, APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException };
@@ -46,3 +51,5 @@ export { BetterCommerceOperation };
 
 // Generic Methods
 export { getGatewayId, getGatewayName };
+
+export { Utils };
