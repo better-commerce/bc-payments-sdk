@@ -30,4 +30,5 @@ export enum PaymentMethodType {
     CHECKOUT_KLARNA = 'checkoutklarna',
     ELAVON = 'elavon',
     OPAYO = 'opayo',
+    WALLET = 'wallet',
 };
