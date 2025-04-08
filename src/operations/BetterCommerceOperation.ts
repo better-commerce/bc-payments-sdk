@@ -87,52 +87,28 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                 let info: any = {}
                 if (paymentInfo?.paymentInfo1) {
-                    info = {
-                        ...info,
-                        paymentInfo1: paymentInfo?.paymentInfo1
-                    }
+                    info = { ...info, paymentInfo1: paymentInfo?.paymentInfo1 }
                 }
                 if (paymentInfo?.paymentInfo2) {
-                    info = {
-                        ...info,
-                        paymentInfo2: paymentInfo?.paymentInfo2
-                    }
+                    info = { ...info, paymentInfo2: paymentInfo?.paymentInfo2 }
                 }
                 if (paymentInfo?.paymentInfo3) {
-                    info = {
-                        ...info,
-                        paymentInfo3: paymentInfo?.paymentInfo3
-                    }
+                    info = { ...info, paymentInfo3: paymentInfo?.paymentInfo3 }
                 }
                 if (paymentInfo?.paymentInfo4) {
-                    info = {
-                        ...info,
-                        paymentInfo4: paymentInfo?.paymentInfo4
-                    }
+                    info = { ...info, paymentInfo4: paymentInfo?.paymentInfo4 }
                 }
                 if (paymentInfo?.paymentInfo5) {
-                    info = {
-                        ...info,
-                        paymentInfo5: paymentInfo?.paymentInfo5
-                    }
+                    info = { ...info, paymentInfo5: paymentInfo?.paymentInfo5 }
                 }
                 if (paymentInfo?.paymentInfo6) {
-                    info = {
-                        ...info,
-                        paymentInfo6: paymentInfo?.paymentInfo6
-                    }
+                    info = { ...info, paymentInfo6: paymentInfo?.paymentInfo6 }
                 }
                 if (paymentInfo?.paymentInfo7) {
-                    info = {
-                        ...info,
-                        paymentInfo7: paymentInfo?.paymentInfo7
-                    }
+                    info = { ...info, paymentInfo7: paymentInfo?.paymentInfo7 }
                 }
                 if (paymentInfo?.paymentInfo8) {
-                    info = {
-                        ...info,
-                        paymentInfo8: paymentInfo?.paymentInfo8
-                    }
+                    info = { ...info, paymentInfo8: paymentInfo?.paymentInfo8 }
                 }
                 return info
             }
@@ -213,16 +189,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             }
                         } else {
 
-                            if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase()) {
-                                paymentStatus = {
-                                    statusId: PaymentStatus.PAID,
-                                    purchaseAmount: orderAmount
-                                }
+                            if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.WALLET?.toLowerCase()) {
+                                paymentStatus = { statusId: PaymentStatus.PAID, purchaseAmount: orderAmount }
                             } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
-                                paymentStatus = {
-                                    statusId: PaymentStatus.AUTHORIZED,
-                                    purchaseAmount: orderAmount
-                                }
+                                paymentStatus = { statusId: PaymentStatus.AUTHORIZED, purchaseAmount: orderAmount }
                             } else {
 
                                 // Call gateway specific SDK API to get the order/payment status.
@@ -292,7 +262,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 model: orderModel,
                                 orderId: orderId,
                             };
-                            //console.log('---- paymentResponseInput ----', JSON.stringify(paymentResponseInput))
+                            console.log('---- paymentResponseInput ----', JSON.stringify(paymentResponseInput))
                             await Logger.logPayment({ data: orderModel, message: `${gateway?.toLowerCase()} | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                             const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
                             if (paymentResponseResult) {

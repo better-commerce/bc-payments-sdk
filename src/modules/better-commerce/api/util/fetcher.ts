@@ -141,7 +141,13 @@ const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, head
             : Guid.empty,
         ClientIP: cookies?.ClientIP || "",
     };
-    const config: any = { method: method, url: computedUrl.href, headers: { ...headers, ...newConfig }, };
+
+    // Pass UserToken if received in from the consuming application (server-side)
+    let userToken = null
+    if (cookies?.["ut"]) {
+        userToken = cookies?.["ut"] as string
+    }
+    const config: any = { method: method, url: computedUrl.href, headers: { ...headers, ...newConfig, UserToken: userToken }, };
 
     if (Object.keys(params).length) {
         config.params = params;

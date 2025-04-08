@@ -31,4 +31,5 @@ export enum PaymentMethodTypeId {
     CHECKOUT_KLARNA = 11,
     ELAVON = 12,
     OPAYO = 13,
+    WALLET = 14,
 }
