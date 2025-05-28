@@ -20,7 +20,7 @@ import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
-import { PaymentMethodTypeId } from "../constants";
+import { PaymentMethodTypeId, PaymentSelectionType } from "../constants";
 import { matchStrings } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
@@ -53,7 +53,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return createOrderResult;
     }
 
-    
+
     /**
      * Processes a payment based on the provided payment data.
      * 
@@ -116,6 +116,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
             let orderModel: any;
             const isCancelled = data?.extras?.isCancelled ?? false;
             const gateway = data?.extras?.gateway || Defaults.String.Value;
+            const paymentType = data?.extras?.paymentType || PaymentSelectionType.FULL; // Default value is FULL
+            let partialAmount = data?.extras?.partialAmount || Defaults.Int.Value; // Default value is 0
 
             if (gateway) {
                 let paymentGatewayOrderTxnId = "";
@@ -137,6 +139,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     if (orderResult) {
                         let paymentStatus: any;
                         const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+                        const amountToBePaid = (paymentType === PaymentSelectionType.FULL) ? orderAmount : partialAmount;
+                        //console.log({ gateway, paymentType, orderAmount, partialAmount })
 
                         // If this is COD order.
                         if (isCOD) {
@@ -199,19 +203,75 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
                             }
 
+                            /**************** This block is for partial payments only (STARTS) ****************/
+                            let paymentInfo9 = 0
+                            let isLastPartialPayment = false
+                            let isPartialPaymentEnabled = (paymentType === PaymentSelectionType.PARTIAL)
+
+                            // WALLET only - For partial payment, re-evaluate the payment status.
+                            if ([PaymentMethodType.WALLET?.toLowerCase()].includes(gateway?.toLowerCase())) {
+
+                                // Get all payments for this order.
+                                const payments = orderResult?.payments || [];
+
+                                // Get all partial payments for this order.
+                                const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
+
+                                // Calculate the total partially paid amount for this order.
+                                const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+                                console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
+                                
+                                // Is this a partial payment?
+                                let isPartialPayment = (paymentType === PaymentSelectionType.PARTIAL)
+
+                                // If payment type is FULL and there are any partial payments, then it is a last partial payment.
+                                if (paymentType === PaymentSelectionType.FULL && totalPartiallyPaidAmount > 0) {
+
+                                    // This is a partial payment.
+                                    isPartialPayment = true
+                                    isPartialPaymentEnabled = true
+
+                                    // Calculate the partial amount.
+                                    partialAmount = orderAmount - totalPartiallyPaidAmount
+                                }
+
+                                // If this is a partial payment.
+                                if (isPartialPayment) {
+
+                                    // Always set paymentInfo9 to partial amount.
+                                    paymentInfo9 = partialAmount
+
+                                    // If there are any partial payments, check if the total paid amount is equal to the order amount.
+                                    if (totalPartiallyPaidAmount > 0) {
+
+                                        isLastPartialPayment = ((totalPartiallyPaidAmount + partialAmount) === orderAmount)
+                                        paymentStatus = {
+
+                                            // If the [total partially paid + current partial amount] is equal to the order amount, then the payment status is PAID.
+                                            statusId: isLastPartialPayment ? PaymentStatus.PAID : PaymentStatus.PENDING,
+                                            purchaseAmount: isLastPartialPayment ? orderAmount : amountToBePaid
+                                        }
+                                    } else {
+                                        paymentStatus = {
+                                            statusId: PaymentStatus.PENDING,
+                                            purchaseAmount: amountToBePaid
+                                        }
+                                    }
+                                }
+                            }
+                            /**************** This block is for partial payments only (ENDS) ****************/
+
+                            //console.log('paymentStatus', paymentStatus)
+
                             orderModel = {
                                 id: txnOrderId?.split('-')[1],
                                 cardNo: null,
                                 orderNo: parseInt(txnOrderId?.split('-')[0]),
-                                orderAmount: 0, // Always send orderAmount = 0
-                                paidAmount: !isCancelled
-                                    ? paymentStatus?.purchaseAmount
-                                    : 0,
-                                balanceAmount: '0.00',
+                                orderAmount,
+                                paidAmount: !isCancelled ? paymentStatus?.purchaseAmount : 0,
+                                balanceAmount: (paymentType === PaymentSelectionType.PARTIAL) ? (orderAmount - partialAmount) : 0,
                                 isValid: true,
-                                status: !isCancelled
-                                    ? paymentStatus?.statusId
-                                    : PaymentStatus.DECLINED,
+                                status: !isCancelled ? paymentStatus?.statusId : PaymentStatus.DECLINED,
                                 authCode: !isCancelled
                                     ? (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase()) ? data?.extras?.token : paymentGatewayOrderTxnId
                                     : null,
@@ -243,6 +303,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 upFrontPayment: false,
                                 upFrontAmount: '0.00',
                                 isPrePaid: !isCOD,
+                                isPartialPaymentEnabled,
 
                                 discountedTotal: bankOfferDetails?.discountedTotal ?? 0,
                                 externalPromoCode: bankOfferDetails?.voucherCode ?? null,
@@ -253,7 +314,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         additionalInfo2: bankOfferDetails?.status,
                                     }
                                     : null,
-                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) }
+                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo), paymentInfo9, }
                             };
                         }
 

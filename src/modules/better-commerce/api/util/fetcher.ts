@@ -6,6 +6,7 @@ import { AuthenticationException } from "../../../../base/entity/exception/Authe
 import { InvalidRequestException } from "../../../../base/entity/exception/InvalidRequestException";
 import { RequestMethod } from "../../../../constants/enums/RequestMethod";
 import { Guid } from "../../../../types/guid";
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Create a reusable connection instance that can be passed around to different controllers
 const keepAliveAgent = new Agent({
@@ -128,7 +129,7 @@ Object.freeze(axiosInstance)
  * @throws {AuthenticationException} If the response status is 401.
  * @throws {APIException} For any other non-2xx response status.
  */
-const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, headers = {}, cookies = {}, baseUrl = "", }: any) => {
+const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, headers = {}, cookies = {}, baseUrl = "", logRequest = false, }: any) => {
     const computedUrl = new URL(url, baseUrl || BCEnvironment.getBaseApiUrl());
     const newConfig = {
         Currency: cookies.Currency || BCEnvironment.getDefaultCurrency(),
@@ -159,6 +160,9 @@ const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, head
     //console.log(config)
     try {
         const response = await axiosInstance(config);
+        if (logRequest) {
+            logRequestAndResponse(config, response)
+        }
 
         let responseCode = response.status;
         let responseBody = response.data;
@@ -195,6 +199,9 @@ const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, head
             }
         }
     } catch (error: any) {
+        if (logRequest) {
+            logRequestAndResponse(config, error)
+        }
         let errorData = {};
 
         if (error.response) {
@@ -230,4 +237,16 @@ const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, head
         //throw new Error(error.response.data.message);
     }
 }
+
+const logRequestAndResponse = (config: AxiosRequestConfig, response?: AxiosResponse) => {
+    const requestLog = {
+      timestamp: new Date().toISOString(),
+      request: { method: config.method?.toUpperCase(), url: config.url, headers: config.headers, params: config.params, data: config.data },
+      response: response ? { status: response.status, headers: response.headers, data: response.data } : undefined
+    };
+
+    const logMessage = JSON.stringify(requestLog, null, 2);
+    console.log(logMessage)
+  }
+
 export default fetcher;

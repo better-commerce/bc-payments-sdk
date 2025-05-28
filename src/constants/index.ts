@@ -1,8 +1,3 @@
-import { OrderStatus } from "./enums";
-import { PaymentMethodType } from "./enums";
-import { PaymentMethodTypeId } from "./enums";
-import { PaymentStatus } from "./enums";
-import { PayPalOrderIntent } from "./enums";
-import { RequestMethod } from "./enums";
+import { OrderStatus, PaymentMethodType, PaymentMethodTypeId, PaymentStatus, PayPalOrderIntent, RequestMethod, PaymentSelectionType } from "./enums";
 
-export { OrderStatus, PaymentMethodType, PaymentMethodTypeId, PaymentStatus, PayPalOrderIntent, RequestMethod, };
+export { OrderStatus, PaymentMethodType, PaymentMethodTypeId, PaymentStatus, PayPalOrderIntent, RequestMethod, PaymentSelectionType };

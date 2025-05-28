@@ -28,7 +28,7 @@ export class Api {
      * @throws {AuthenticationException} If the response status is 401.
      * @throws {APIException} For any other non-2xx response status.
      */
-    static async call(url: string, method: string, params?: any, headers?: any, cookies?: any): Promise<any> {
+    static async call(url: string, method: string, params?: any, headers?: any, cookies?: any, logRequest = false): Promise<any> {
 
         let options = { url, method, headers, cookies, baseUrl: BCEnvironment.baseApiUrl, };
 
@@ -40,6 +40,6 @@ export class Api {
             }
         }
 
-        return await fetcher(options);
+        return await fetcher({ ...options, logRequest });
     }
 }

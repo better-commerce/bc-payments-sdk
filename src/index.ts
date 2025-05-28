@@ -8,13 +8,12 @@ import { APIConnectionException, APIException, AuthenticationException, BCExcept
 import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
 import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
 
-import { PaymentMethodType } from "./constants";
-import { PaymentMethodTypeId } from "./constants";
+import { PaymentMethodType, PaymentMethodTypeId, PaymentSelectionType } from "./constants";
 import { getGatewayId, getGatewayName } from "./utils/payment-util";
 import { JuspayPaymentType } from "./constants/enums";
 
 // Generic Enums
-export { PaymentMethodType, PaymentMethodTypeId, JuspayPaymentType, };
+export { PaymentMethodType, PaymentMethodTypeId, JuspayPaymentType, PaymentSelectionType, };
 
 // Payments Module
 export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, PaymentStatus, };
