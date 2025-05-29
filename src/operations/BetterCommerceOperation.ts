@@ -21,7 +21,7 @@ import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
 import { ClearPayPayment } from "../modules/payments/ClearPayPament";
 import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 import { PaymentMethodTypeId, PaymentSelectionType } from "../constants";
-import { matchStrings } from "../utils/parse-util";
+import { matchStrings, tryParseJson } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 
 /**
@@ -116,7 +116,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             let orderModel: any;
             const isCancelled = data?.extras?.isCancelled ?? false;
             const gateway = data?.extras?.gateway || Defaults.String.Value;
-            const paymentType = data?.extras?.paymentType || PaymentSelectionType.FULL; // Default value is FULL
+            let paymentType = data?.extras?.paymentType || PaymentSelectionType.FULL; // Default value is FULL
             let partialAmount = data?.extras?.partialAmount || Defaults.Int.Value; // Default value is 0
 
             if (gateway) {
@@ -124,22 +124,35 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                 // For PayPal, Checkout, Stripe, Klarna & ClearPay
                 if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase()) {
+                    // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
                 }
 
+                // Get payment method
                 const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
+
+                // If payment method is found
                 if (paymentMethod) {
+                    // Get additional service charge
                     const additionalServiceCharge = paymentMethod?.settings?.length
                         ? paymentMethod?.settings?.find((x: any) => x?.key === "AdditionalServiceCharge")?.value || "0"
                         : "0";
 
                     const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
+
+                    // Get order details
                     const { result: orderResult }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
                     const { headers, cookies, ...rest } = data?.extras;
+
+                    // If order is found    
                     if (orderResult) {
                         let paymentStatus: any;
+
+                        // Get order amount
                         const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
-                        const amountToBePaid = (paymentType === PaymentSelectionType.FULL) ? orderAmount : partialAmount;
+
+                        // Get amount to be paid
+                        let amountToBePaid = (paymentType === PaymentSelectionType.FULL) ? orderAmount : partialAmount;
                         //console.log({ gateway, paymentType, orderAmount, partialAmount })
 
                         // If this is COD order.
@@ -201,6 +214,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 // Call gateway specific SDK API to get the order/payment status.
                                 paymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
+                                paymentType = paymentStatus?.paymentType;
+                                partialAmount = paymentStatus?.partialAmount;
+                                amountToBePaid = (paymentType === PaymentSelectionType.FULL) ? orderAmount : partialAmount;
                             }
 
                             /**************** This block is for partial payments only (STARTS) ****************/
@@ -208,8 +224,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             let isLastPartialPayment = false
                             let isPartialPaymentEnabled = (paymentType === PaymentSelectionType.PARTIAL)
 
-                            // WALLET only - For partial payment, re-evaluate the payment status.
-                            if ([PaymentMethodType.WALLET?.toLowerCase()].includes(gateway?.toLowerCase())) {
+                            // For partial payment, re-evaluate the payment status.
+                            // Except for COD & Cheque, all other payment methods support partial payments.
+                            if (![PaymentMethodType.COD?.toLowerCase(), PaymentMethodType.CHEQUE?.toLowerCase()].includes(gateway?.toLowerCase())) {
 
                                 // Get all payments for this order.
                                 const payments = orderResult?.payments || [];
@@ -220,11 +237,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 // Calculate the total partially paid amount for this order.
                                 const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
                                 console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
-                                
+
                                 // Is this a partial payment?
                                 let isPartialPayment = (paymentType === PaymentSelectionType.PARTIAL)
 
-                                // If payment type is FULL and there are any partial payments, then it is a last partial payment.
+                                // If payment type is FULL and there are any partial payments, then it is next partial payment.
                                 if (paymentType === PaymentSelectionType.FULL && totalPartiallyPaidAmount > 0) {
 
                                     // This is a partial payment.
@@ -416,6 +433,24 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             }
                             console.log('--- paymentNo ---', paymentNo)
 
+                            const dbOrderAmount = orderResult?.grandTotal?.raw?.withTax || 0
+
+                            // Get all partial payments for this order.
+                            const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == dbOrderAmount) || [];
+
+                            // Calculate the total partially paid amount for this order.
+                            const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+                            console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
+
+                            let isPartialPaymentEnabled = (paymentStatus?.paymentType === PaymentSelectionType.PARTIAL)
+
+                            // If payment type is FULL and there are any partial payments, then it is a last partial payment.
+                            if (paymentStatus?.paymentType === PaymentSelectionType.FULL && totalPartiallyPaidAmount > 0) {
+
+                                // This is a partial payment.
+                                isPartialPaymentEnabled = true
+                            }
+
                             if (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.ORDER_REFUNDED.toLowerCase()) {
                                 // Order Refunded
 
@@ -423,11 +458,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
                                 let statusId = PaymentStatus.DECLINED
-                                const payment = payments?.find(
-                                    (x: any) =>
-                                        x?.id == paymentNo &&
-                                        x?.status == PaymentStatus.PENDING
-                                );
+                                const payment = payments?.find((x: any) => x?.id == paymentNo && x?.status == PaymentStatus.PENDING);
                                 console.log('--- payment ---', payment)
 
                                 if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
@@ -436,36 +467,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     const paymentStatusId: number = paymentStatus?.statusId
                                     if (paymentStatusId === PaymentStatus.PAID) {
                                         console.log('--- SuccessUpdate ---')
-                                        result = await this.paymentHookOrderSuccessUpdate(
-                                            paymentMethodType,
-                                            paymentMethodTypeId,
-                                            orderId,
-                                            paymentStatus?.orderDetails,
-                                            statusId,
-                                            orderValue,
-                                            orderResult,
-                                            {
-                                                paymentNo,
-                                                orderNo,
-                                                hookData,
-                                            }
-                                        )
+                                        result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, })
                                     } else if (paymentStatusId == PaymentStatus.DECLINED) {
                                         console.log('--- FailureUpdate ---')
-                                        result = await this.paymentHookOrderFailureUpdate(
-                                            paymentMethodType,
-                                            paymentMethodTypeId,
-                                            orderId,
-                                            paymentStatus?.orderDetails,
-                                            statusId,
-                                            orderValue,
-                                            orderResult,
-                                            {
-                                                paymentNo,
-                                                orderNo,
-                                                hookData,
-                                            }
-                                        )
+                                        result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, })
                                     }
                                     return result;
                                 }
@@ -496,9 +501,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns A promise that resolves to an object containing the status ID, purchase amount, and
      * optionally the order details if `returnOrderDetails` is true.
      */
-    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any }> {
+    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number }> {
         let orderDetails: any = Defaults.Object.Value;
-        let purchaseAmount = 0;
+        let purchaseAmount = 0, paymentType = PaymentSelectionType.FULL, partialAmount = 0;
         let statusId = PaymentStatus.PENDING;
 
         switch (gateway?.toLowerCase()) {
@@ -533,6 +538,14 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = paypalOrderDetails?.purchase_units?.length
                     ? parseFloat(paypalOrderDetails?.purchase_units[0]?.amount?.value.toString() || Defaults.Int.Value.toString())
                     : Defaults.Int.Value;
+                const customId = paypalOrderDetails?.purchase_units?.length
+                    ? paypalOrderDetails?.purchase_units[0]?.custom_id
+                    : Defaults.String.Value;
+                if (customId) {
+                    const customIdObj: any = tryParseJson(customId);
+                    paymentType = customIdObj?.paymentType || PaymentSelectionType.FULL;
+                    partialAmount = customIdObj?.partialAmount || purchaseAmount;
+                }
                 break;
 
             case PaymentMethodType.CHECKOUT?.toLowerCase():
@@ -595,8 +608,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = parseFloat(clearPayOrderDetails?.originalAmount?.amount?.toString());
                 break;
         }
-        console.log("payment status", { statusId, purchaseAmount });
-        return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value };
+        console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
+        return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value, paymentType, partialAmount };
     }
 
     /**
@@ -638,19 +651,41 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
             const dbOrderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
+            const { paymentType, partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, } = extras;
+            let paymentInfo9 = 0
+            let isLastPartialPayment = false
+            let orderStatusId = PaymentStatus.PENDING
 
             if (dbOrderAmount > 0) {
                 let savePspInfo = getIsSavePSPInfo(methodId, order);
+
+                if (isPartialPaymentEnabled) {
+                    paymentInfo9 = orderValue;
+
+                    // If payment type is FULL and there are any partial payments, then it is next partial payment.
+                    if (paymentType === PaymentSelectionType.FULL && totalPartiallyPaidAmount > 0) {
+
+                        // Calculate the partial amount.
+                        paymentInfo9 = dbOrderAmount - totalPartiallyPaidAmount
+                    }
+                    isLastPartialPayment = ((totalPartiallyPaidAmount + partialAmount) === dbOrderAmount)
+
+                    if (isLastPartialPayment) {
+                        orderStatusId = PaymentStatus.PAID
+                    }
+                } else {
+                    orderStatusId = PaymentStatus.PAID
+                }
 
                 const orderModel = {
                     id: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.paymentNo : getPaymentNo(methodId, order),
                     cardNo: null,
                     orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
                     orderAmount: dbOrderAmount,
-                    paidAmount: orderValue,
-                    balanceAmount: '0.00',
+                    paidAmount: isLastPartialPayment ? dbOrderAmount : partialAmount,
+                    balanceAmount: (paymentType === PaymentSelectionType.PARTIAL) ? (dbOrderAmount - partialAmount) : 0,
                     isValid: true,
-                    status: PaymentStatus.PAID,
+                    status: orderStatusId,
                     authCode: getAuthCode(methodId, order),
                     issuerUrl: null,
                     paRequest: null,
@@ -675,6 +710,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     paymentInfo4: getCardType(methodId, order), // (cardType)
                     paymentInfo5: getCardIssuer(methodId, order), // (cardIssuer)
                     paymentInfo6: getCardBrand(methodId, order), // (cardBrand)
+                    paymentInfo9,
                     cardType: null,
                     operatorId: null,
                     refStoreId: null,
@@ -686,6 +722,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     upFrontPayment: false,
                     upFrontAmount: '0.00',
                     isPrePaid: false,
+                    isPartialPaymentEnabled,
                 }
 
                 const paymentResponseInput = {
@@ -731,9 +768,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     id: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.paymentNo : getPaymentNo(methodId, order),
                     cardNo: null,
                     orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
-                    orderAmount: orderAmount,
+                    orderAmount,
                     paidAmount: 0,
-                    balanceAmount: '0.00',
+                    balanceAmount: 0,
                     isValid: true,
                     status: statusId,
                     authCode: getAuthCode(methodId, order),
@@ -760,6 +797,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     paymentInfo4: getCardType(methodId, order), // (cardType)
                     paymentInfo5: getCardIssuer(methodId, order), // (cardIssuer)
                     paymentInfo6: getCardBrand(methodId, order), // (cardBrand)
+                    paymentInfo9: 0,
                     cardType: null,
                     operatorId: null,
                     refStoreId: null,
@@ -771,6 +809,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     upFrontPayment: false,
                     upFrontAmount: '0.00',
                     isPrePaid: false,
+                    isPartialPaymentEnabled: false,
                 }
 
                 const paymentResponseInput = {
