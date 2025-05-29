@@ -1,4 +1,4 @@
-const { BCEnvironment, BetterCommerceOperation } = require("../../../dist");
+const { BCEnvironment, BetterCommerceOperation } = require("../../../../dist");
 
 const config = {
     "id": 46,
