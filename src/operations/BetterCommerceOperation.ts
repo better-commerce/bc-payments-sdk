@@ -606,6 +606,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     statusId = PaymentStatus.DECLINED;
                 }
                 purchaseAmount = parseFloat(clearPayOrderDetails?.originalAmount?.amount?.toString());
+                const merchantReference = clearPayOrderDetails?.merchantReference;
+                if (merchantReference) {
+                    const merchantReferenceObj: any = tryParseJson(merchantReference);
+                    paymentType = merchantReferenceObj?.paymentType || PaymentSelectionType.FULL;
+                    partialAmount = merchantReferenceObj?.partialAmount || purchaseAmount;
+                }
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
