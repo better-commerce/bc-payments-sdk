@@ -577,6 +577,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(klarnaOrderDetails?.order_amount.toString()) / 100.0;
+                const merchantData = klarnaOrderDetails?.merchant_data || Defaults.String.Value;
+                if (merchantData) {
+                    const merchantDataObj: any = tryParseJson(merchantData);
+                    paymentType = merchantDataObj?.paymentType || PaymentSelectionType.FULL;
+                    partialAmount = merchantDataObj?.partialAmount || purchaseAmount;
+                }
                 break;
 
             case PaymentMethodType.STRIPE?.toLowerCase():
