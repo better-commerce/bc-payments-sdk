@@ -567,6 +567,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     }
                 }
                 purchaseAmount = checkoutOrderDetails?.amount / 100.0;
+                paymentType = checkoutOrderDetails?.metadata?.paymentType || PaymentSelectionType.FULL;
+                partialAmount = checkoutOrderDetails?.metadata?.partialAmount || purchaseAmount;
                 break;
 
             case PaymentMethodType.KLARNA?.toLowerCase():
@@ -678,7 +680,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     if (paymentType === PaymentSelectionType.FULL && totalPartiallyPaidAmount > 0) {
 
                         // Calculate the partial amount.
-                        paymentInfo9 = dbOrderAmount - totalPartiallyPaidAmount
+                        paymentInfo9 = parseFloat((dbOrderAmount - totalPartiallyPaidAmount).toFixed(2))
                     }
                     isLastPartialPayment = ((totalPartiallyPaidAmount + partialAmount) === dbOrderAmount)
 
