@@ -595,6 +595,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     statusId = PaymentStatus.PAID;
                 }
                 purchaseAmount = parseFloat(stripeOrderDetails?.amount_received.toString()) / 100.0;
+                paymentType = stripeOrderDetails?.metadata?.paymentType || PaymentSelectionType.FULL;
+                partialAmount = parseFloat(stripeOrderDetails?.metadata?.partialAmount?.toString() || "0") || purchaseAmount;
                 break;
 
             case PaymentMethodType.CLEAR_PAY?.toLowerCase():
