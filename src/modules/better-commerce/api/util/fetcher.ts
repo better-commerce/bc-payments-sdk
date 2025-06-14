@@ -35,7 +35,7 @@ const SingletonFactory = (function () {
         baseURL: BCEnvironment.baseApiUrl,
         withCredentials: true,
     });
-    const getToken = () => accessToken;
+    const getToken = () => BCEnvironment.getApiToken() ? BCEnvironment.getApiToken() : accessToken;
 
     const setToken = (token: string) => (accessToken = token);
 
@@ -83,23 +83,39 @@ const SingletonFactory = (function () {
                 axiosInstance.interceptors.response.eject(interceptor);
 
                 // return getAuthToken().finally(createAxiosResponseInterceptor)
-                const url = new URL('oAuth/token', BCEnvironment.getBaseAuthUrl());
-
-                return axiosInstance({
-                    url: url.href,
-                    method: RequestMethod.POST,
-                    data: `client_id=${BCEnvironment.getClientId()}&client_secret=${BCEnvironment.getSharedSecret()}&grant_type=client_credentials`,
-                })
-                    .then((res: any) => {
+                
+                if (BCEnvironment.getApiToken()) {
+                    const url = new URL('admin/auth/refresh', BCEnvironment.getBaseAuthUrl());
+                    const refreshToken = BCEnvironment.getRefreshToken();
+                    return axiosInstance({
+                        url: url.href,
+                        method: RequestMethod.POST,
+                        data: { refreshToken },
+                    }).then((res: any) => {
+                        BCEnvironment.setApiToken(res.data.accessToken);
+                        BCEnvironment.setRefreshToken(res.data.refreshToken);
+                        setToken(res.data.accessToken);
+                        error.response.config.headers['Authorization'] = `Bearer ${res.data.accessToken}`;
+                        return axiosInstance(error.response.config);
+                    }).catch((error) => {
+                        //@TODO redirect here to Login page
+                        return Promise.reject(error);
+                    }).finally(createAxiosResponseInterceptor)
+                } else {
+                    const url = new URL('oAuth/token', BCEnvironment.getBaseAuthUrl());
+                    return axiosInstance({
+                        url: url.href,
+                        method: RequestMethod.POST,
+                        data: `client_id=${BCEnvironment.getClientId()}&client_secret=${BCEnvironment.getSharedSecret()}&grant_type=client_credentials`,
+                    }).then((res: any) => {
                         setToken(res.data.access_token);
                         error.response.config.headers['Authorization'] = `Bearer ${res.data.access_token}`;
                         return axiosInstance(error.response.config);
-                    })
-                    .catch((error) => {
+                    }).catch((error) => {
                         //@TODO redirect here to Login page
                         return Promise.reject(error);
-                    })
-                    .finally(createAxiosResponseInterceptor)
+                    }).finally(createAxiosResponseInterceptor)
+                }
             }
         )
     }
@@ -240,13 +256,13 @@ const fetcher = async ({ url = '', method = 'post', data = {}, params = {}, head
 
 const logRequestAndResponse = (config: AxiosRequestConfig, response?: AxiosResponse) => {
     const requestLog = {
-      timestamp: new Date().toISOString(),
-      request: { method: config.method?.toUpperCase(), url: config.url, headers: config.headers, params: config.params, data: config.data },
-      response: response ? { status: response.status, headers: response.headers, data: response.data } : undefined
+        timestamp: new Date().toISOString(),
+        request: { method: config.method?.toUpperCase(), url: config.url, headers: config.headers, params: config.params, data: config.data },
+        response: response ? { status: response.status, headers: response.headers, data: response.data } : undefined
     };
 
     const logMessage = JSON.stringify(requestLog, null, 2);
     console.log(logMessage)
-  }
+}
 
 export default fetcher;

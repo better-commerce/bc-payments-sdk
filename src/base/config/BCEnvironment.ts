@@ -34,6 +34,18 @@ export class BCEnvironment {
      *
      * @property {string}
      */
+    static apiToken: string;
+
+    /**
+     *
+     * @property {string}
+     */
+    static refreshToken: string;
+
+    /**
+     *
+     * @property {string}
+     */
     static defaultCountry: string;
 
     /**
@@ -102,11 +114,11 @@ export class BCEnvironment {
         BCEnvironment.thisObj = new BCEnvironment();
         BCEnvironment.clientId = clientId;
         BCEnvironment.sharedSecret = sharedSecret;
-        BCEnvironment.baseAuthUrl = Endpoints.Base.AUTH_URL;
-        BCEnvironment.baseApiUrl = Endpoints.Base.API_URL;
-        BCEnvironment.defaultCountry = "GB";
-        BCEnvironment.defaultCurrency = "GBP";
-        BCEnvironment.defaultLanguage = "en-GB";
+        BCEnvironment.baseAuthUrl = baseAuthUrl || Endpoints.Base.AUTH_URL;
+        BCEnvironment.baseApiUrl = baseApiUrl || Endpoints.Base.API_URL;
+        BCEnvironment.defaultCountry = defaultCountry || "GB";
+        BCEnvironment.defaultCurrency = defaultCurrency || "GBP";
+        BCEnvironment.defaultLanguage = defaultLanguage || "en-GB";
         BCEnvironment.config = config;
         BCEnvironment.enableProviderLogging = true;
 
@@ -139,6 +151,63 @@ export class BCEnvironment {
         }
         return BCEnvironment.thisObj;
         //}
+    }
+
+    /**
+     * Initializes the BCEnvironment object with the required parameters to make API calls.
+     * This method should be used when you already have a valid API token and refresh token.
+     * @param {string} apiToken - The API token to use for authentication.
+     * @param {string} refreshToken - The refresh token to use when the API token expires.
+     * @param {Object} [config] - The configuration for payment gateways etc.
+     * @param {string} [baseAuthUrl] - The base URL for the authentication API.
+     * @param {string} [baseApiUrl] - The base URL for the API.
+     * @param {number} [connectTimeout] - The timeout for the connection in milliseconds.
+     * @param {number} [readTimeout] - The timeout for reading the response in milliseconds.
+     * @param {string} [defaultCountry] - The default country to use for the API.
+     * @param {string} [defaultCurrency] - The default currency to use for the API.
+     * @param {string} [defaultLanguage] - The default language to use for the API.
+     * @returns {BCEnvironment} - The initialized BCEnvironment object.
+     */
+    static initSession(apiToken: string, refreshToken: string, config?: any, baseAuthUrl?: string, baseApiUrl?: string, connectTimeout?: number, readTimeout?: number, defaultCountry?: string, defaultCurrency?: string, defaultLanguage?: string) {
+        BCEnvironment.thisObj = new BCEnvironment();
+        BCEnvironment.apiToken = apiToken;
+        BCEnvironment.refreshToken = refreshToken;
+        BCEnvironment.baseAuthUrl = baseAuthUrl || Endpoints.Base.AUTH_URL;
+        BCEnvironment.baseApiUrl = baseApiUrl || Endpoints.Base.API_URL;
+        BCEnvironment.defaultCountry = defaultCountry || "GB";
+        BCEnvironment.defaultCurrency = defaultCurrency || "GBP";
+        BCEnvironment.defaultLanguage = defaultLanguage || "en-GB";
+        BCEnvironment.config = config;
+        BCEnvironment.enableProviderLogging = true;
+
+        if (baseAuthUrl) {
+            BCEnvironment.baseAuthUrl = baseAuthUrl;
+        }
+
+        if (baseApiUrl) {
+            BCEnvironment.baseApiUrl = baseApiUrl;
+        }
+
+        if (connectTimeout) {
+            BCEnvironment.connectTimeout = connectTimeout;
+        }
+
+        if (readTimeout) {
+            BCEnvironment.readTimeout = readTimeout;
+        }
+
+        if (defaultCountry) {
+            BCEnvironment.defaultCountry = defaultCountry;
+        }
+
+        if (defaultCurrency) {
+            BCEnvironment.defaultCurrency = defaultCurrency;
+        }
+
+        if (defaultLanguage) {
+            BCEnvironment.defaultLanguage = defaultLanguage;
+        }
+        return BCEnvironment.thisObj;
     }
 
     /**
@@ -225,6 +294,25 @@ export class BCEnvironment {
     }
 
     /**
+     * Retrieves the API token used for authentication.
+     * 
+     * @return {string} The API token.
+     */
+    static getApiToken(): string {
+        return BCEnvironment.apiToken;
+    }
+
+    /**
+     * Retrieves the refresh token used for authentication.
+     * 
+     * @return {string} The refresh token.
+     */
+
+    static getRefreshToken(): string {
+        return BCEnvironment.refreshToken;
+    }
+
+    /**
      * Retrieves the default country associated with the BetterCommerce account.
      * 
      * @return {string} The default country.
@@ -294,5 +382,23 @@ export class BCEnvironment {
      */
     static getEnableProviderLogging(): boolean {
         return BCEnvironment.enableProviderLogging;
+    }
+
+    /**
+     * Sets the API token for the BetterCommerce API.
+     * 
+     * @param {string} apiToken - The API token to set.
+     */
+    static setApiToken(apiToken: string): void {
+        BCEnvironment.apiToken = apiToken;
+    }
+
+    /**
+     * Sets the refresh token for the BetterCommerce API.
+     * 
+     * @param {string} refreshToken - The refresh token to set.
+     */
+    static setRefreshToken(refreshToken: string): void {
+        BCEnvironment.refreshToken = refreshToken;
     }
 }
