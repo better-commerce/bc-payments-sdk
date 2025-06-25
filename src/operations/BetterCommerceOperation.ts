@@ -157,17 +157,30 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                         // If this is COD order.
                         if (isCOD) {
+                            let paymentInfo9 = 0
+                            let isLastPartialPayment = false
+                            if (paymentType === PaymentSelectionType.PARTIAL) {
+                                const payments = orderResult?.payments || [];
+                                const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
+                                const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+                                console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
+                                
+                                if (totalPartiallyPaidAmount > 0) {
+                                    isLastPartialPayment = ((totalPartiallyPaidAmount + partialAmount) === orderAmount)
+                                }
+                                paymentInfo9 = !isLastPartialPayment ? partialAmount : orderAmount
+                            }
+
+
                             orderModel = {
                                 id: txnOrderId?.split('-')[1],
                                 cardNo: null,
                                 orderNo: parseInt(txnOrderId?.split('-')[0]),
                                 orderAmount: orderAmount,
-                                paidAmount: 0.0,
-                                balanceAmount: orderAmount,
+                                paidAmount: 0.0, //amountToBePaid === orderAmount ? 0.0 : amountToBePaid,
+                                balanceAmount: orderAmount, //!isLastPartialPayment ? (amountToBePaid === orderAmount ? orderAmount : (orderAmount - amountToBePaid)) : 0.0,
                                 isValid: true,
-                                status: !isCancelled
-                                    ? PaymentStatus.AUTHORIZED
-                                    : PaymentStatus.DECLINED,
+                                status: !isCancelled ? PaymentStatus.AUTHORIZED : PaymentStatus.DECLINED,
                                 authCode: null,
                                 issuerUrl: null,
                                 paRequest: null,
@@ -199,7 +212,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 upFrontTerm: '76245369',
                                 isPrePaid: false,
                                 additionalServiceCharge: additionalServiceCharge,
-                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo) },
+                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo), paymentInfo9 },
                             };
                             paymentStatus = {
                                 statusId: PaymentStatus.AUTHORIZED,

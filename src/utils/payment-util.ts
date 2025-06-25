@@ -159,8 +159,13 @@ export const getPaymentTransactionOrderId = async (methodId: number, data: any):
         console.log('--- payPalOrderId ---', payPalOrderId)
         if (payPalOrderId) {
             const { extras } = data
-            const { clientId, sharedSecret, config, authUrl, baseUrl } = extras
-            BCEnvironment.init(clientId, sharedSecret, config, authUrl, baseUrl);
+            const { clientId, sharedSecret, apiToken, refreshToken, config, authUrl, baseUrl } = extras
+            if (!clientId && !sharedSecret) {
+                BCEnvironment.init(clientId, sharedSecret, config, authUrl, baseUrl);
+            }
+            if (!apiToken && !refreshToken) {
+                BCEnvironment.initSession(apiToken, refreshToken, config, authUrl, baseUrl);
+            }
             const paypalOrderDetails = await new PayPalPayment().getOrderDetails(payPalOrderId);
             console.log('--- paypalOrderDetails ---', JSON.stringify(paypalOrderDetails))
             if (paypalOrderDetails?.purchase_units?.length) {
