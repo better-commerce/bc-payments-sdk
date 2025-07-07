@@ -38,7 +38,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns The company details
      */
     async getCompanyDetails(data: any) {
-        const companyDetailsResult = await B2B.getCompanyDetailsByUserId(data, { cookies: data?.extras?.cookies });
+        const companyDetailsResult = await B2B.getCompanyDetailsByUserId(data, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
         return companyDetailsResult;
     }
 
@@ -49,7 +49,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns The order details response from the CommerceHub platform
      */
     async convertOrder(data: any): Promise<any> {
-        const createOrderResult = await Checkout.convertOrder(data, { cookies: data?.extras?.cookies });
+        const createOrderResult = await Checkout.convertOrder(data, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
         return createOrderResult;
     }
 
@@ -129,7 +129,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
 
                 // Get payment method
-                const paymentMethod = await this.getPaymentMethod(gateway, { cookies: data?.extras?.cookies });
+                const paymentMethod = await this.getPaymentMethod(gateway, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
 
                 // If payment method is found
                 if (paymentMethod) {
@@ -141,7 +141,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     const { isCOD, orderId, txnOrderId, bankOfferDetails } = data;
 
                     // Get order details
-                    const { result: orderResult }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
+                    const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
                     const { headers, cookies, ...rest } = data?.extras;
 
                     // If order is found    
@@ -355,7 +355,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             };
                             console.log('---- paymentResponseInput ----', JSON.stringify(paymentResponseInput))
                             await Logger.logPayment({ data: orderModel, message: `${gateway?.toLowerCase()} | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
-                            const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: data?.extras?.cookies });
+                            const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
                             if (paymentResponseResult) {
 
                                 await Logger.logPayment({ data: paymentResponseResult, message: `${gateway?.toLowerCase()} | UpdatePaymentResponse API20 Response` }, { headers: {}, cookies: {} })
@@ -423,7 +423,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 console.log('--- orderId ---', orderId)
 
                 if (orderId != Defaults.Guid.Value) {
-                    const { result: orderResult }: any = await Order.get(orderId, { cookies: Defaults.Object.Value });
+                    const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers || {}, cookies: Defaults.Object.Value });
                     console.log('--- orderResult ---', orderResult)
                     if (orderResult?.id && orderResult?.id != Defaults.Guid.Value) {
 
@@ -480,10 +480,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     const paymentStatusId: number = paymentStatus?.statusId
                                     if (paymentStatusId === PaymentStatus.PAID) {
                                         console.log('--- SuccessUpdate ---')
-                                        result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, })
+                                        result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
                                     } else if (paymentStatusId == PaymentStatus.DECLINED) {
                                         console.log('--- FailureUpdate ---')
-                                        result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, })
+                                        result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
                                     }
                                     return result;
                                 }
@@ -847,7 +847,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 };
                 await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
-                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { headers: extras?.headers || {}, cookies: {} });
                 return paymentResponseResult;
             }
         }
