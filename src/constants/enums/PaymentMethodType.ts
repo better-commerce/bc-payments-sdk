@@ -31,4 +31,5 @@ export enum PaymentMethodType {
     ELAVON = 'elavon',
     OPAYO = 'opayo',
     WALLET = 'wallet',
+    OMNICAPITAL = 'omnicapital'
 };

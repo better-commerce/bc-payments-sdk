@@ -61,6 +61,8 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.OPAYO
     } else if (matchStrings(gatewayName, PaymentMethodType.WALLET, true)) {
         return PaymentMethodTypeId.WALLET
+    } else if (matchStrings(gatewayName, PaymentMethodType.OMNICAPITAL, true)) {
+        return PaymentMethodTypeId.OMNICAPITAL
     }
     return -1
 }
@@ -105,6 +107,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.OPAYO
     } else if (id === PaymentMethodTypeId.WALLET) {
         return PaymentMethodType.WALLET
+    }  else if (id === PaymentMethodTypeId.OMNICAPITAL) {
+        return PaymentMethodType.OMNICAPITAL
     }
     return -1
 }
