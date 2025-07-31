@@ -12,7 +12,7 @@ import { CheckoutPayment } from "../modules/payments/CheckoutPayment";
 import { Checkout } from "../modules/better-commerce/Checkout";
 import { Defaults, PaymentTransactionStatus } from "../constants/constants";
 import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
-import { PaymentStatus } from "../constants/enums/PaymentStatus";
+import { OmniCapital, PaymentStatus } from "../constants/enums/PaymentStatus";
 import { PaymentMethodType } from "../constants/enums/PaymentMethodType";
 import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway } from "../constants/enums/PaymentStatus";
 import { StripePayment } from "../modules/payments/StripePayment";
@@ -23,6 +23,7 @@ import { IPaymentInfo } from "../models/better-commerce/IPaymentInfo";
 import { PaymentMethodTypeId, PaymentSelectionType } from "../constants";
 import { matchStrings, tryParseJson } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
+import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
 
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
@@ -123,7 +124,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 let paymentGatewayOrderTxnId = "";
 
                 // For PayPal, Checkout, Stripe, Klarna & ClearPay
-                if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase()) {
+                if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
                     // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
                 }
@@ -164,7 +165,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
                                 const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
                                 console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
-                                
+
                                 if (totalPartiallyPaidAmount > 0) {
                                     isLastPartialPayment = ((totalPartiallyPaidAmount + partialAmount) === orderAmount)
                                 }
@@ -223,6 +224,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 paymentStatus = { statusId: PaymentStatus.PAID, purchaseAmount: orderAmount }
                             } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
                                 paymentStatus = { statusId: PaymentStatus.AUTHORIZED, purchaseAmount: orderAmount }
+                            } else if (gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
+                                const apiPaymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
+                                paymentStatus = { statusId: apiPaymentStatus.statusId, purchaseAmount: orderAmount }
                             } else {
 
                                 // Call gateway specific SDK API to get the order/payment status.
@@ -635,6 +639,20 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     paymentType = merchantReferenceObj?.paymentType || PaymentSelectionType.FULL;
                     partialAmount = merchantReferenceObj?.partialAmount || purchaseAmount;
                 }
+                break;
+
+            case PaymentMethodType.OMNICAPITAL?.toLowerCase():
+                const omniCapitalOrderDetails = orderDetails = await new OmniCapitalPayment().getOrderDetails(data);
+                if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.APPROVED?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.COMPLETED?.toLowerCase()) {
+                    statusId = PaymentStatus.PAID;
+                } else if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.AWAITING_FULFILLMENT?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.REFER?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.SIGN_DOCS?.toLowerCase()) {
+                    statusId = PaymentStatus.INITIATED;
+                } else if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.DECLINE?.toLowerCase()) {
+                    statusId = PaymentStatus.DECLINED;
+                }
+                purchaseAmount = 0; // OmniCapital API doesn't return order amount
+                paymentType = PaymentSelectionType.FULL;
+                partialAmount = 0;
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });

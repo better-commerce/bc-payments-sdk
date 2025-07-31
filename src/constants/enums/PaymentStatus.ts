@@ -174,6 +174,44 @@ export module ClearPay {
   };
 };
 
+export module OmniCapital {
+
+  /**
+ * Enum {@link PaymentStatus} represents the various statuses a transaction can have
+ * in the OmniCapital retail finance workflow.
+ *
+ * @readonly
+ * @enum {string}
+ * @property {string} APPROVED – The transaction has been successfully approved.
+ * @property {string} REFER – The transaction requires further review or referral.
+ * @property {string} DECLINE – The transaction was declined and will not proceed.
+ * @property {string} SIGN_DOCS – The customer needs to sign required documents to continue.
+ * @property {string} AWAITING_FULFILLMENT – The transaction is approved and is waiting for order fulfillment.
+ * @property {string} COMPLETED – The transaction has been fully processed and finalized.
+ */
+  export enum PaymentStatus {
+    
+    /** The transaction has been successfully approved. */
+    APPROVED = 'Approved',
+
+    /** The transaction requires further review or referral. */
+    REFER = 'Refer',
+
+    /** The transaction was declined and will not proceed. */
+    DECLINE = 'Decline',
+
+    /** The customer needs to sign required documents to continue. */
+    SIGN_DOCS = 'Sign Docs',
+
+    /** The transaction is approved and is waiting for order fulfillment. */
+    AWAITING_FULFILLMENT = 'Awaiting Fulfillment',
+
+    /** The transaction has been fully processed and finalized. */
+    COMPLETED = 'Completed',
+  }
+
+}
+
 export module Juspay {
 
   /**

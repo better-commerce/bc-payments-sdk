@@ -18,6 +18,7 @@ import { IJuspayPaymentProvider } from "../contracts/GatewayProviders/IJuspayPay
 import { IElavonPaymentProvider } from "../contracts/GatewayProviders/IElavonPaymentProvider";
 import { ElavonPayment } from "../../modules/payments/ElavonPayment";
 import { IOpayoPaymentProvider } from "../contracts/GatewayProviders/IOpayoPaymentProvider";
+import { OmniCapitalPayment } from "../../modules/payments/OmniCapitalPayment";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -464,6 +465,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new ElavonPayment();
         } else if (paymentProvider === PaymentMethodType.OPAYO) {
             obj = new ElavonPayment();
+        } else if (paymentProvider === PaymentMethodType.OMNICAPITAL) {
+            obj = new OmniCapitalPayment();
         }
         return obj;
     }

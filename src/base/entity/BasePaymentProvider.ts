@@ -15,6 +15,7 @@ import { PaymentMethodType } from "../../constants/enums/PaymentMethodType";
 import { Logger } from "../../modules/better-commerce/Logger";
 import { ElavonEnvironment } from "bc-elavon-sdk";
 import { OpayoEnvironment } from "bc-opayo-sdk";
+import { OmniCapitalEnvironment } from "bc-omnicapital-sdk";
 
 /**
  * Abstract class {BasePaymentProvider} is the base class for all payment providers.
@@ -196,6 +197,25 @@ export abstract class BasePaymentProvider {
 
                 // Init Env
                 OpayoEnvironment.init(vendorName, integrationKey, integrationPassword, isSandbox, { ...extras,
+                    logActivity: (data: any) => {
+                        if (providerLoggingEnabled) {
+                            Logger.logPayment(data, {});
+                        }
+                    }
+                });
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.OMNICAPITAL.toLowerCase()) {
+
+                const installationId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                const apiKey = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+                const username = config?.settings?.find((x: any) => x.key === "MotoUserName")?.value || Defaults.String.Value;
+                const password = config?.settings?.find((x: any) => x.key === "MotoPassword")?.value || Defaults.String.Value;
+                const webFormSubmitUrl = config?.settings?.find((x: any) => x.key === "ProductionUrl")?.value || Defaults.String.Value;
+                let extras: any = BCEnvironment.getExtras();
+                extras = { ...extras, webFormSubmitUrl, };
+
+                // Init Env
+                OmniCapitalEnvironment.init(apiKey, installationId, username, password, isSandbox, { ...extras,
                     logActivity: (data: any) => {
                         if (providerLoggingEnabled) {
                             Logger.logPayment(data, {});
