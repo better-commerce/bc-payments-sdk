@@ -204,7 +204,7 @@ export module OmniCapital {
     SIGN_DOCS = 'Sign Docs',
 
     /** The transaction is approved and is waiting for order fulfillment. */
-    AWAITING_FULFILLMENT = 'Awaiting Fulfillment',
+    AWAITING_FULFILLMENT = 'Awaiting Fulfilment',
 
     /** The transaction has been fully processed and finalized. */
     COMPLETED = 'Completed',
