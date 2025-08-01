@@ -195,7 +195,7 @@ export module OmniCapital {
     APPROVED = 'Approved',
 
     /** The transaction requires further review or referral. */
-    REFER = 'Refer',
+    REFER = 'Credit check referred',
 
     /** The transaction was declined and will not proceed. */
     DECLINE = 'Decline',
