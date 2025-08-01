@@ -643,12 +643,37 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentMethodType.OMNICAPITAL?.toLowerCase():
                 const omniCapitalOrderDetails = orderDetails = await new OmniCapitalPayment().getOrderDetails(data);
-                if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.APPROVED?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.COMPLETED?.toLowerCase()) {
-                    statusId = PaymentStatus.PAID;
-                } else if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.AWAITING_FULFILLMENT?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.REFER?.toLowerCase() || omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.SIGN_DOCS?.toLowerCase()) {
-                    statusId = PaymentStatus.INITIATED;
-                } else if (omniCapitalOrderDetails?.Status?.toLowerCase() === OmniCapital.PaymentStatus.DECLINE?.toLowerCase()) {
-                    statusId = PaymentStatus.DECLINED;
+                switch (omniCapitalOrderDetails?.Status?.toLowerCase()) {
+                    case OmniCapital.PaymentStatus.COMPLETE?.toLowerCase():
+                        statusId = PaymentStatus.PAID;
+                        break;
+
+                    case OmniCapital.PaymentStatus.PENDING?.toLowerCase():
+                    case OmniCapital.PaymentStatus.IN_PROGRESS?.toLowerCase():
+                    case OmniCapital.PaymentStatus.AWAITING_FULFILMENT?.toLowerCase():
+                    case OmniCapital.PaymentStatus.EXCEPTION?.toLowerCase():
+                    case OmniCapital.PaymentStatus.REFERRAL_OVERRIDE_APPROVE?.toLowerCase():
+                    case OmniCapital.PaymentStatus.REFERRAL_OVERRIDE_RESCORE?.toLowerCase():
+                    case OmniCapital.PaymentStatus.SIGN_DOCUMENTS?.toLowerCase():
+                    case OmniCapital.PaymentStatus.SIGN_DOCUMENTS_AMENDMENT?.toLowerCase():
+                        statusId = PaymentStatus.INITIATED;
+                        break;
+
+                    case OmniCapital.PaymentStatus.PAYMENT_REQUESTED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CDS_NOTE_REQUIRED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_ISSUE?.toLowerCase():
+                        statusId = PaymentStatus.PENDING;
+                        break;
+
+                    case OmniCapital.PaymentStatus.DECLINED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
+                    case OmniCapital.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
+                        statusId = PaymentStatus.DECLINED;
+                        break;
                 }
                 purchaseAmount = 0; // OmniCapital API doesn't return order amount
                 paymentType = PaymentSelectionType.FULL;

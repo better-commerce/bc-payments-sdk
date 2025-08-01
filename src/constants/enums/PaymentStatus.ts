@@ -177,37 +177,36 @@ export module ClearPay {
 export module OmniCapital {
 
   /**
- * Enum {@link PaymentStatus} represents the various statuses a transaction can have
- * in the OmniCapital retail finance workflow.
- *
- * @readonly
- * @enum {string}
- * @property {string} APPROVED – The transaction has been successfully approved.
- * @property {string} REFER – The transaction requires further review or referral.
- * @property {string} DECLINE – The transaction was declined and will not proceed.
- * @property {string} SIGN_DOCS – The customer needs to sign required documents to continue.
- * @property {string} AWAITING_FULFILLMENT – The transaction is approved and is waiting for order fulfillment.
- * @property {string} COMPLETED – The transaction has been fully processed and finalized.
- */
+   * Enum {@link PaymentStatus} represents the various statuses a transaction can have
+   * in the OmniCapital retail finance workflow.
+   *
+   * @readonly
+   * @enum {string}
+   */
   export enum PaymentStatus {
-    
-    /** The transaction has been successfully approved. */
+    PENDING = 'Pending',
+    IN_PROGRESS = 'In Progress',
+    DECLINED = 'Declined',
+    UNDERWRITER = 'Underwriter',
+    CUSTOMER_ACTION_REQUIRED = 'Customer Action Required',
+    REFERRAL_OVERRIDE_APPROVE = 'Referral (Override - Approve)',
+    REFERRAL_OVERRIDE_RESCORE = 'Referral (Override - Rescore)',
+    SIGN_DOCUMENTS = 'Sign Documents',
+    SIGN_DOCUMENTS_AMENDMENT = 'Sign Documents (Amendment)',
     APPROVED = 'Approved',
-
-    /** The transaction requires further review or referral. */
-    REFER = 'Credit check referred',
-
-    /** The transaction was declined and will not proceed. */
-    DECLINE = 'Decline',
-
-    /** The customer needs to sign required documents to continue. */
-    SIGN_DOCS = 'Sign Docs',
-
-    /** The transaction is approved and is waiting for order fulfillment. */
-    AWAITING_FULFILLMENT = 'Awaiting Fulfilment',
-
-    /** The transaction has been fully processed and finalized. */
-    COMPLETED = 'Completed',
+    AWAITING_FULFILMENT = 'Awaiting fulfilment',
+    EXCEPTION = 'Exception',
+    PAYMENT_REQUESTED = 'Payment Requested',
+    CDS_NOTE_REQUIRED = 'C.D.S. Note Required',
+    CDS_NOTE_REVIEW = 'C.D.S. Note Review',
+    CDS_NOTE_REVIEW_CUSTOMER = 'C.D.S. Note Review (Customer)',
+    CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION = 'C.D.S. Note Review (Customer - Investigation)',
+    CDS_NOTE_REVIEW_CUSTOMER_ISSUE = 'C.D.S. Note Review (Customer - Issue)',
+    COMPLETE = 'Complete',
+    ORDER_CANCELLED = 'Order cancelled',
+    FINANCE_OFFER_WITHDRAWN = 'Finance offer withdrawn',
+    ORDER_REFUNDED = 'Order refunded',
+    APPLICATION_LAPSED = 'Application Lapsed'
   }
 
 }
