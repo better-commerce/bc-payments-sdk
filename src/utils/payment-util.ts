@@ -6,6 +6,7 @@ import { groupMatch, matchStrings, stringToBoolean, tryParseJson } from "./parse
 import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
 import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
 import { BCEnvironment } from "../base/config/BCEnvironment"
+import { OmniCapital } from "../constants/enums/PaymentStatus"
 
 export const gatewayNameToIdMap = new Map<string, number>(
     Object.entries(PaymentMethodType).map(([key, value]) => [
@@ -107,7 +108,7 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.OPAYO
     } else if (id === PaymentMethodTypeId.WALLET) {
         return PaymentMethodType.WALLET
-    }  else if (id === PaymentMethodTypeId.OMNICAPITAL) {
+    } else if (id === PaymentMethodTypeId.OMNICAPITAL) {
         return PaymentMethodType.OMNICAPITAL
     }
     return -1
@@ -145,6 +146,16 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
             return PaymentTransactionStatus.TXN_FAILED;
         }
     } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
+        const status = data?.Status?.toLowerCase() || Defaults.String.Value
+        switch (status) {
+            case OmniCapital.PaymentStatus.COMPLETE?.toLowerCase():
+                return PaymentTransactionStatus.TXN_CHARGED;
+            case OmniCapital.PaymentStatus.DECLINED?.toLowerCase():
+            case OmniCapital.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
+            case OmniCapital.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
+            case OmniCapital.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
+                return PaymentTransactionStatus.TXN_FAILED;
+        }
     }
     return PaymentTransactionStatus.NONE;
 }
