@@ -420,6 +420,16 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             paymentNo = paymentNoDetails?.split('-')[1];
                         }
                     }
+                } else if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
+                    orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
+                    const retailerUniqueRef = hookData?.["Identification[RetailerUniqueRef]"]
+                    if (retailerUniqueRef) {
+                        const json: any = tryParseJson(retailerUniqueRef)
+                        if (json?.orderId && json?.orderId?.split('-')?.length) {
+                            orderNo = json?.orderId?.split('-')[0];
+                            paymentNo = json?.orderId?.split('-')[1];
+                        }
+                    }
                 } else {
                     orderId = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);
                 }
@@ -435,6 +445,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             paymentGatewayOrderTxnId = hookData?.data?.id;
                         } else if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
                             paymentGatewayOrderTxnId = hookData?.resource?.supplementary_data?.related_ids?.order_id;
+                        } else if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
+                            paymentGatewayOrderTxnId = hookData?.LoanApplicationId;
                         }
                         console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
 

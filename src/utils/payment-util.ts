@@ -2,7 +2,7 @@
 import { PayPalPayment } from "../modules/payments/PayPalPayment"
 
 // Other Imports
-import { groupMatch, matchStrings, stringToBoolean } from "./parse-util"
+import { groupMatch, matchStrings, stringToBoolean, tryParseJson } from "./parse-util"
 import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
 import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
 import { BCEnvironment } from "../base/config/BCEnvironment"
@@ -144,6 +144,7 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
         } else if (data?.event_type === Paypal.EventType.PAYMENT_AUTHENTICATION_FAILED) {
             return PaymentTransactionStatus.TXN_FAILED;
         }
+    } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
     }
     return PaymentTransactionStatus.NONE;
 }
@@ -178,6 +179,14 @@ export const getPaymentTransactionOrderId = async (methodId: number, data: any):
                 if (description) {
                     return parseOrderId(description)?.trim() || Defaults.String.Value;
                 }
+            }
+        }
+    } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
+        const retailerUniqueRef = data?.["Identification[RetailerUniqueRef]"]
+        if (retailerUniqueRef) {
+            const json: any = tryParseJson(retailerUniqueRef)
+            if (json?.id) {
+                return json?.id
             }
         }
     }
