@@ -241,6 +241,8 @@ export const getOrderNo = (methodId: number, data: any, extras?: any): number =>
         return data?.metadata?.udf4.split('-')[0];
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return parseInt(data?.order_id?.split('-')[0]);
+    } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
+        return data?.orderNo;
     }
     return Defaults.Int.Value;
 }
@@ -259,6 +261,8 @@ export const getPaymentNo = (methodId: number, data: any, extras?: any): string 
         return data?.metadata?.udf4.split('-')[1];
     } else if (methodId == PaymentMethodTypeId.JUSPAY) {
         return data?.udf6?.split('-')[1];
+    } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
+        return data?.paymentNo;
     }
     return Defaults.String.Value;
 }

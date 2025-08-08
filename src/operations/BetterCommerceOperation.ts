@@ -452,17 +452,20 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                         const payments = orderResult?.payments;
                         if (payments?.length) {
+                            const dbOrderAmount = orderResult?.grandTotal?.raw?.withTax || 0
 
                             // Call gateway specific SDK API to get the order/payment status.
-                            const paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true);
+                            let paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true, dbOrderAmount);
+                            if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
+                                paymentStatus = { ...paymentStatus, orderDetails: { ...paymentStatus?.orderDetails, orderNo, paymentNo, } }
+                            }
                             console.log('--- paymentStatus ---', paymentStatus)
 
-                            if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL) {
+                            if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL && paymentMethodTypeId !== PaymentMethodTypeId.OMNICAPITAL) {
                                 paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
                             }
                             console.log('--- paymentNo ---', paymentNo)
 
-                            const dbOrderAmount = orderResult?.grandTotal?.raw?.withTax || 0
 
                             // Get all partial payments for this order.
                             const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == dbOrderAmount) || [];
@@ -530,7 +533,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns A promise that resolves to an object containing the status ID, purchase amount, and
      * optionally the order details if `returnOrderDetails` is true.
      */
-    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number }> {
+    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false, orderValue = 0): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number }> {
         let orderDetails: any = Defaults.Object.Value;
         let purchaseAmount = 0, paymentType = PaymentSelectionType.FULL, partialAmount = 0;
         let statusId = PaymentStatus.PENDING;
@@ -687,9 +690,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         statusId = PaymentStatus.DECLINED;
                         break;
                 }
-                purchaseAmount = 0; // OmniCapital API doesn't return order amount
+                purchaseAmount = orderValue; // OmniCapital API doesn't return order amount
                 paymentType = PaymentSelectionType.FULL;
-                partialAmount = 0;
+                partialAmount = orderValue;
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
