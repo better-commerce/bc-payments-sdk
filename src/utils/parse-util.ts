@@ -47,6 +47,10 @@ export const tryParseJson = (json: any) => {
     if (json) {
         let parsed = {};
         try {
+            // If the string contains escaped quotes, unescape them first
+            if (typeof json === 'string' && json.includes('\\"')) {
+                json = json.replace(/\\"/g, '"');
+            }
             parsed = JSON.parse(json);
             return parsed;
         } catch (e: any) {
