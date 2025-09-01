@@ -687,6 +687,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     case OmniCapital.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
                     case OmniCapital.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
                     case OmniCapital.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CREDIT_CHECK_DECLINED?.toLowerCase():
+                    case OmniCapital.PaymentStatus.CREDIT_CHECK_PRE_DECLINE?.toLowerCase():
                         statusId = PaymentStatus.DECLINED;
                         break;
                 }

@@ -206,7 +206,9 @@ export module OmniCapital {
     ORDER_CANCELLED = 'Order cancelled',
     FINANCE_OFFER_WITHDRAWN = 'Finance offer withdrawn',
     ORDER_REFUNDED = 'Order refunded',
-    APPLICATION_LAPSED = 'Application Lapsed'
+    APPLICATION_LAPSED = 'Application Lapsed',
+    CREDIT_CHECK_DECLINED = 'Credit Check Declined',
+    CREDIT_CHECK_PRE_DECLINE = 'Credit Check Pre Decline',
   }
 
 }
