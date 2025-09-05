@@ -148,6 +148,8 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
     } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
         const status = data?.Status?.toLowerCase() || Defaults.String.Value
         switch (status) {
+            case OmniCapital.PaymentStatus.AWAITING_FULFILMENT?.toLowerCase():
+                return PaymentTransactionStatus.TXN_INITIATED;
             case OmniCapital.PaymentStatus.COMPLETE?.toLowerCase():
                 return PaymentTransactionStatus.TXN_CHARGED;
             case OmniCapital.PaymentStatus.DECLINED?.toLowerCase():

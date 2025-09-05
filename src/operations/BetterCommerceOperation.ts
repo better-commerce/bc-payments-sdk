@@ -25,6 +25,8 @@ import { matchStrings, tryParseJson } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
 
+export const DEBUG_LOGGING_ENABLED = true
+
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
  * It contains methods for getting order details, creating orders, updating orders, getting payment methods, processing payments and more.
@@ -406,8 +408,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
             // Read transaction type from the incoming hook data.
             const paymentTransactionStatus = getPaymentTransactionStatus(paymentMethodTypeId, hookData);
             console.log('--- paymentTransactionStatus ---', paymentTransactionStatus)
-            // TODO: Temp Log
-            await Logger.logPayment({ data: { paymentTransactionStatus }, message: `Log | ${hookData?.Status}` }, { headers: {}, cookies: {} })
+
+            if (DEBUG_LOGGING_ENABLED) {
+                // TODO: Debugging Log
+                await Logger.logPayment({ data: { paymentTransactionStatus }, message: `Log | ${hookData?.Status}` }, { headers: {}, cookies: {} })
+            }
 
             // If web hook transaction is applicable for further processing.
             if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
@@ -438,8 +443,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
 
                 console.log('--- orderId ---', orderId)
-                // TODO: Temp Log
-                await Logger.logPayment({ data: { orderId }, message: `Log | ${hookData?.Status} | orderId` }, { headers: {}, cookies: {} })
+
+                if (DEBUG_LOGGING_ENABLED) {
+                    // TODO: Debugging Log
+                    await Logger.logPayment({ data: { orderId }, message: `Log | ${hookData?.Status} | orderId` }, { headers: {}, cookies: {} })
+                }
 
                 if (orderId != Defaults.Guid.Value) {
                     const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers || {}, cookies: Defaults.Object.Value });
@@ -454,8 +462,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             paymentGatewayOrderTxnId = hookData?.LoanApplicationId;
                         }
                         console.log('--- paymentGatewayOrderTxnId ---', paymentGatewayOrderTxnId)
-                        // TODO: Temp Log
-                        await Logger.logPayment({ data: { paymentGatewayOrderTxnId }, message: `Log | ${hookData?.Status} | paymentGatewayOrderTxnId` }, { headers: {}, cookies: {} })
+
+                        if (DEBUG_LOGGING_ENABLED) {
+                            // TODO: Debugging Log
+                            await Logger.logPayment({ data: { paymentGatewayOrderTxnId }, message: `Log | ${hookData?.Status} | paymentGatewayOrderTxnId` }, { headers: {}, cookies: {} })
+                        }
 
                         const payments = orderResult?.payments;
                         if (payments?.length) {
@@ -467,16 +478,21 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 paymentStatus = { ...paymentStatus, orderDetails: { ...paymentStatus?.orderDetails, orderNo, paymentNo, } }
                             }
                             console.log('--- paymentStatus ---', paymentStatus)
-                            // TODO: Temp Log
-                            await Logger.logPayment({ data: { paymentStatus }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+
+                            if (DEBUG_LOGGING_ENABLED) {
+                                // TODO: Debugging Log
+                                await Logger.logPayment({ data: { paymentStatus }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+                            }
 
                             if (paymentMethodTypeId !== PaymentMethodTypeId.PAYPAL && paymentMethodTypeId !== PaymentMethodTypeId.OMNICAPITAL) {
                                 paymentNo = getPaymentNo(paymentMethodTypeId, paymentStatus?.orderDetails);
                             }
                             console.log('--- paymentNo ---', paymentNo)
-                            // TODO: Temp Log
-                            await Logger.logPayment({ data: { paymentNo }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
 
+                            if (DEBUG_LOGGING_ENABLED) {
+                                // TODO: Debugging Log
+                                await Logger.logPayment({ data: { paymentNo }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+                            }
 
                             // Get all partial payments for this order.
                             const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == dbOrderAmount) || [];
@@ -484,8 +500,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             // Calculate the total partially paid amount for this order.
                             const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
                             console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
-                            // TODO: Temp Log
-                            await Logger.logPayment({ data: { totalPartiallyPaidAmount }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+
+                            if (DEBUG_LOGGING_ENABLED) {
+                                // TODO: Debugging Log
+                                await Logger.logPayment({ data: { totalPartiallyPaidAmount }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+                            }
 
                             let isPartialPaymentEnabled = (paymentStatus?.paymentType === PaymentSelectionType.PARTIAL)
 
@@ -501,11 +520,16 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                             } else {
 
-                                const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
+                                const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_INITIATED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
                                 let statusId = PaymentStatus.DECLINED
                                 const payment = payments?.find((x: any) => x?.id == paymentNo && (x?.status == PaymentStatus.PENDING || x?.status == PaymentStatus.INITIATED));
                                 console.log('--- payment ---', payment)
-                                await Logger.logPayment({ data: { payment }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+                                console.log('--- processTxn ---', `${processTxn}`)
+
+                                if (DEBUG_LOGGING_ENABLED) {
+                                    // TODO: Debugging Log
+                                    await Logger.logPayment({ data: { payment }, message: `Log | ${hookData?.Status} | ${paymentGatewayOrderTxnId}` }, { headers: {}, cookies: {} })
+                                }
 
                                 if (payment && processTxn /*&& paymentStatus?.statusId === PaymentStatus.PENDING*/) {
                                     let result = Defaults.Object.Value;
@@ -514,9 +538,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     if (paymentStatusId === PaymentStatus.PAID) {
                                         console.log('--- SuccessUpdate ---')
                                         result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
-                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
+                                    } else if (paymentStatusId == PaymentStatus.DECLINED || paymentStatusId === PaymentStatus.INITIATED) {
                                         console.log('--- FailureUpdate ---')
-                                        result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
+                                        const computedStatusId = (paymentStatusId === PaymentStatus.INITIATED) ? PaymentStatus.INITIATED : statusId
+                                        result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, computedStatusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
                                     }
                                     return result;
                                 }
@@ -834,6 +859,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 };
                 await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
+                if (DEBUG_LOGGING_ENABLED) {
+                    // TODO: Debugging Log
+                    await Logger.logPayment({ data: { paymentResponseInput }, message: `Log | ${extras?.hookData?.Status} | OrderSuccess` }, { headers: {}, cookies: {} })
+                }
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                 return paymentResponseResult;
             }
@@ -921,6 +950,10 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 };
                 await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderFailure paymentResponseInput ---', JSON.stringify(paymentResponseInput))
+                if (DEBUG_LOGGING_ENABLED) {
+                    // TODO: Debugging Log
+                    await Logger.logPayment({ data: { paymentResponseInput }, message: `Log | ${extras?.hookData?.Status} | OrderFailure` }, { headers: {}, cookies: {} })
+                }
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { headers: extras?.headers || {}, cookies: {} });
                 return paymentResponseResult;
             }

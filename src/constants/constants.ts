@@ -22,6 +22,7 @@ export module RegularExpression {
 
 export enum PaymentTransactionStatus {
     NONE = 'None',
+    TXN_INITIATED = 'TXN_INITIATED',
     TXN_CHARGED = 'TXN_CHARGED',
     TXN_FAILED = 'TXN_FAILED',
     ORDER_REFUNDED = 'ORDER_REFUNDED',
