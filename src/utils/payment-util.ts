@@ -157,6 +157,8 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
             case 'credit check declined':
             case 'credit check pre decline':
                 return PaymentTransactionStatus.TXN_FAILED;
+            case 'awaiting fulfilment':
+                return PaymentTransactionStatus.TXN_INITIATED;
         }
     }
     return PaymentTransactionStatus.NONE;

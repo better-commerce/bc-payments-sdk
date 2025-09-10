@@ -539,7 +539,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                             } else {
 
-                                const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase())
+                                const processTxn = (paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_CHARGED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_FAILED.toLowerCase() || paymentTransactionStatus.toLowerCase() === PaymentTransactionStatus.TXN_INITIATED.toLowerCase())
                                 let statusId = PaymentStatus.DECLINED
                                 const payment = payments?.find((x: any) => x?.id == paymentNo && (x?.status == PaymentStatus.PENDING || x?.status == PaymentStatus.INITIATED));
                                 console.log('--- payment ---', payment)

@@ -24,6 +24,7 @@ export enum PaymentTransactionStatus {
     NONE = 'None',
     TXN_CHARGED = 'TXN_CHARGED',
     TXN_FAILED = 'TXN_FAILED',
+    TXN_INITIATED = 'TXN_INITIATED',
     ORDER_REFUNDED = 'ORDER_REFUNDED',
 }
 
