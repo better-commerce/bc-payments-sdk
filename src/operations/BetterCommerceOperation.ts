@@ -411,11 +411,21 @@ export class BetterCommerceOperation implements ICommerceProvider {
             // The UrlEncoded webhook data from Omnicapital doesn't handle encoded data, which is a bug at their end.
             // Therefore, use API key from config instead of webhook data
             // This fixes the URL decoding issue where '+' becomes ' ' in webhook data
-            if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL && hookData?.api_key) {
-                const config: any = BCEnvironment.getConfig();
-                const configApiKey = config?.settings?.find((x: any) => x.key === "Signature")?.value;
-                if (configApiKey) {
-                    hookData.api_key = configApiKey;
+            if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
+                // Ensure BCEnvironment is properly initialized for OmniCapital webhooks
+                // Handle both data structures: extras at top level (correct) or inside hookData (legacy)
+                const extras = data?.extras || hookData?.extras;
+                if (extras?.clientId && extras?.sharedSecret) {
+                    BCEnvironment.init(extras.clientId, extras.sharedSecret, extras.config, extras.authUrl, extras.baseUrl);
+                }
+                
+                // Replace API key if needed
+                if (hookData?.api_key) {
+                    const config: any = BCEnvironment.getConfig();
+                    const configApiKey = config?.settings?.find((x: any) => x.key === "Signature")?.value;
+                    if (configApiKey) {
+                        hookData.api_key = configApiKey;
+                    }
                 }
             }
 
@@ -705,36 +715,36 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.OMNICAPITAL?.toLowerCase():
                 const omniCapitalOrderDetails = orderDetails = await new OmniCapitalPayment().getOrderDetails(data);
                 switch (omniCapitalOrderDetails?.Status?.toLowerCase()) {
-                    case OmniCapital.PaymentStatus.COMPLETE?.toLowerCase():
+                    case 'complete':
                         statusId = PaymentStatus.PAID;
                         break;
 
-                    case OmniCapital.PaymentStatus.PENDING?.toLowerCase():
-                    case OmniCapital.PaymentStatus.IN_PROGRESS?.toLowerCase():
-                    case OmniCapital.PaymentStatus.AWAITING_FULFILMENT?.toLowerCase():
-                    case OmniCapital.PaymentStatus.EXCEPTION?.toLowerCase():
-                    case OmniCapital.PaymentStatus.REFERRAL_OVERRIDE_APPROVE?.toLowerCase():
-                    case OmniCapital.PaymentStatus.REFERRAL_OVERRIDE_RESCORE?.toLowerCase():
-                    case OmniCapital.PaymentStatus.SIGN_DOCUMENTS?.toLowerCase():
-                    case OmniCapital.PaymentStatus.SIGN_DOCUMENTS_AMENDMENT?.toLowerCase():
+                    case 'pending':
+                    case 'in progress':
+                    case 'awaiting fulfilment':
+                    case 'exception':
+                    case 'referral (override - approve)':
+                    case 'referral (override - rescore)':
+                    case 'sign documents':
+                    case 'sign documents (amendment)':
                         statusId = PaymentStatus.INITIATED;
                         break;
 
-                    case OmniCapital.PaymentStatus.PAYMENT_REQUESTED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CDS_NOTE_REQUIRED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_ISSUE?.toLowerCase():
+                    case 'payment requested':
+                    case 'c.d.s. note required':
+                    case 'c.d.s. note review':
+                    case 'c.d.s. note review (customer)':
+                    case 'c.d.s. note review (customer - investigation)':
+                    case 'c.d.s. note review (customer - issue)':
                         statusId = PaymentStatus.PENDING;
                         break;
 
-                    case OmniCapital.PaymentStatus.DECLINED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
-                    case OmniCapital.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CREDIT_CHECK_DECLINED?.toLowerCase():
-                    case OmniCapital.PaymentStatus.CREDIT_CHECK_PRE_DECLINE?.toLowerCase():
+                    case 'declined':
+                    case 'finance offer withdrawn':
+                    case 'order cancelled':
+                    case 'application lapsed':
+                    case 'credit check declined':
+                    case 'credit check pre decline':
                         statusId = PaymentStatus.DECLINED;
                         break;
                 }

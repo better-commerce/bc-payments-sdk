@@ -148,12 +148,14 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
     } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
         const status = data?.Status?.toLowerCase() || Defaults.String.Value
         switch (status) {
-            case OmniCapital.PaymentStatus.COMPLETE?.toLowerCase():
+            case 'complete':
                 return PaymentTransactionStatus.TXN_CHARGED;
-            case OmniCapital.PaymentStatus.DECLINED?.toLowerCase():
-            case OmniCapital.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
-            case OmniCapital.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
-            case OmniCapital.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
+            case 'declined':
+            case 'finance offer withdrawn':
+            case 'order cancelled':
+            case 'application lapsed':
+            case 'credit check declined':
+            case 'credit check pre decline':
                 return PaymentTransactionStatus.TXN_FAILED;
         }
     }
