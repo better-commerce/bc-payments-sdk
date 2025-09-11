@@ -7,6 +7,8 @@ import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
 import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
 import { BCEnvironment } from "../base/config/BCEnvironment"
 import { OmniCapital } from "../constants/enums/PaymentStatus"
+import { DEBUG_LOGGING_ENABLED } from "../operations/BetterCommerceOperation"
+import { Logger } from "../modules/better-commerce/Logger"
 
 export const gatewayNameToIdMap = new Map<string, number>(
     Object.entries(PaymentMethodType).map(([key, value]) => [
@@ -146,20 +148,33 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
             return PaymentTransactionStatus.TXN_FAILED;
         }
     } else if (methodId == PaymentMethodTypeId.OMNICAPITAL) {
+        let paymentStatus = PaymentTransactionStatus.NONE
+
+        if (DEBUG_LOGGING_ENABLED) {
+            // TODO: Debugging Log
+            Logger.logPayment({ data: { methodId, data }, message: `Log | getPaymentTransactionStatus` }, { headers: {}, cookies: {} })
+        }
         const status = data?.Status?.toLowerCase() || Defaults.String.Value
         switch (status) {
             case 'complete':
-                return PaymentTransactionStatus.TXN_CHARGED;
+                paymentStatus = PaymentTransactionStatus.TXN_CHARGED;
             case 'declined':
             case 'finance offer withdrawn':
             case 'order cancelled':
             case 'application lapsed':
             case 'credit check declined':
             case 'credit check pre decline':
-                return PaymentTransactionStatus.TXN_FAILED;
+                paymentStatus = PaymentTransactionStatus.TXN_FAILED;
             case 'awaiting fulfilment':
-                return PaymentTransactionStatus.TXN_INITIATED;
+                paymentStatus = PaymentTransactionStatus.TXN_INITIATED;
+            default:
+                console.log('--- OmniCapital no case matched, returning NONE ---')
         }
+        if (DEBUG_LOGGING_ENABLED) {
+            // TODO: Debugging Log
+            Logger.logPayment({ data: { paymentStatus }, message: `Log | getPaymentTransactionStatus` }, { headers: {}, cookies: {} })
+        }
+        return paymentStatus
     }
     return PaymentTransactionStatus.NONE;
 }
