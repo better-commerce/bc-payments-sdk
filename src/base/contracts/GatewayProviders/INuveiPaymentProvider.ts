@@ -1,0 +1,7 @@
+/**
+ * Interface {@link INuveiPaymentProvider} provides methods for payment processing with Nuvei
+ */
+export interface INuveiPaymentProvider {
+    requestToken(data: any): any;
+    openOrder(data: any): any;
+};

@@ -16,6 +16,7 @@ import { Logger } from "../../modules/better-commerce/Logger";
 import { ElavonEnvironment } from "bc-elavon-sdk";
 import { OpayoEnvironment } from "bc-opayo-sdk";
 import { OmniCapitalEnvironment } from "bc-omnicapital-sdk";
+import { NuveiEnvironment } from "bc-nuvei-sdk";
 
 /**
  * Abstract class {BasePaymentProvider} is the base class for all payment providers.
@@ -216,6 +217,24 @@ export abstract class BasePaymentProvider {
 
                 // Init Env
                 OmniCapitalEnvironment.init(apiKey, installationId, username, password, isSandbox, { ...extras,
+                    logActivity: (data: any) => {
+                        if (providerLoggingEnabled) {
+                            Logger.logPayment(data, {});
+                        }
+                    }
+                });
+                return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI.toLowerCase()) {
+
+                const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
+                const merchantSiteId = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
+                const merchantSecretKey = config?.settings?.find((x: any) => x.key === "MotoSignature")?.value || Defaults.String.Value;
+                const extras: any = BCEnvironment.getExtras();
+
+                console.log({merchantId, merchantSiteId, merchantSecretKey, isSandbox, extras})
+
+                // Init Env
+                NuveiEnvironment.init(merchantId, merchantSiteId, merchantSecretKey, isSandbox, { ...extras,
                     logActivity: (data: any) => {
                         if (providerLoggingEnabled) {
                             Logger.logPayment(data, {});

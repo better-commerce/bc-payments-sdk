@@ -19,6 +19,9 @@ import { IElavonPaymentProvider } from "../contracts/GatewayProviders/IElavonPay
 import { ElavonPayment } from "../../modules/payments/ElavonPayment";
 import { IOpayoPaymentProvider } from "../contracts/GatewayProviders/IOpayoPaymentProvider";
 import { OmniCapitalPayment } from "../../modules/payments/OmniCapitalPayment";
+import { INuveiPaymentProvider } from "../contracts/GatewayProviders/INuveiPaymentProvider";
+import { IOpenOrderResponse } from "bc-nuvei-sdk";
+import { NuveiPayment } from "../../modules/payments/NuveiPayment";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -35,7 +38,7 @@ import { OmniCapitalPayment } from "../../modules/payments/OmniCapitalPayment";
  * @abstract
  * @category Payment Operation
  */
-export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider, IElavonPaymentProvider, IOpayoPaymentProvider {
+export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, IKlarnaPaymentProvider, IPayPalPaymentProvier, IStripePaymentProvider, IApplePayPaymentProvider, IJuspayPaymentProvider, IElavonPaymentProvider, IOpayoPaymentProvider, INuveiPaymentProvider {
 
     /**
      * Creates a one time payment order.
@@ -100,6 +103,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         if (paymentProvider === PaymentMethodType.CHECKOUT) {
             return await new CheckoutPayment().requestToken(data);
         } else if (paymentProvider === PaymentMethodType.ELAVON) {
+            return await new ElavonPayment().requestToken(data);
+        } else if (paymentProvider === PaymentMethodType.NUVEI) {
             return await new ElavonPayment().requestToken(data);
         }
         return null;
@@ -410,6 +415,33 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.JUSPAY) {
             return await new JuspayPayment().getOffers(data);
+        }
+        return null;
+    }
+
+    /**
+     * Calling the server-side /openOrder API request is the first step in a Web SDK or Simply Connect flow. 
+     * /openOrder authenticates your Nuvei merchant credentials, sets up an order in the Nuvei system, and returns a sessionToken.
+     * 
+     * sessionToken must be included in all subsequent Web SDK and Simply Connect method calls in that session, such as for createPayment() or checkout().
+     * 
+     * /openOrder also allows you to set user-related parameters such as shipping details and billing details. 
+     * Using the preventOverride parameter either allows or prevents subsequent Web SDK and 
+     * Simply Connect method calls from overriding these user-related parameters.
+     * 
+     * This method should be implemented by the concrete payment operation classes.
+     * It should attempt to open an order in the current payment provider and return the result.
+     * 
+     * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#openOrder
+     * 
+     * @param data - The order data required by the payment provider.
+     * @throws {Error} - If the method is not implemented.
+     * @returns {any} - The result of the open order request.
+     */
+    public async openOrder(data: any): Promise<IOpenOrderResponse> {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.NUVEI) {
+            return await new NuveiPayment().openOrder(data);
         }
         return null;
     }
