@@ -66,6 +66,8 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.WALLET
     } else if (matchStrings(gatewayName, PaymentMethodType.OMNICAPITAL, true)) {
         return PaymentMethodTypeId.OMNICAPITAL
+    } else if (matchStrings(gatewayName, PaymentMethodType.NUVEI, true)) {
+        return PaymentMethodTypeId.NUVEI
     }
     return -1
 }
@@ -112,6 +114,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.WALLET
     } else if (id === PaymentMethodTypeId.OMNICAPITAL) {
         return PaymentMethodType.OMNICAPITAL
+    } else if (id === PaymentMethodTypeId.NUVEI) {
+        return PaymentMethodType.NUVEI
     }
     return -1
 }

@@ -33,4 +33,5 @@ export enum PaymentMethodTypeId {
     OPAYO = 13,
     WALLET = 14,
     OMNICAPITAL = 15,
+    NUVEI = 16,
 }
