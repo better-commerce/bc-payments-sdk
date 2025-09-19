@@ -1,4 +1,4 @@
-import { Transaction } from "bc-nuvei-sdk";
+import { IGetTransactionDetailsResponse, Transaction } from "bc-nuvei-sdk";
 import { INuveiPaymentProvider } from "../../base/contracts/GatewayProviders/INuveiPaymentProvider";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
@@ -46,16 +46,14 @@ export class NuveiPayment extends BasePaymentProvider implements IPaymentProvide
      * /openOrder also allows you to set user-related parameters such as shipping details and billing details. 
      * Using the preventOverride parameter either allows or prevents subsequent Web SDK and Simply Connect 
      * method calls from overriding these user-related parameters.
-     * _____
-     * Nuvei
-     * ‾‾‾‾‾
+     * 
      * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#openorder
      * 
      * @param data - The data required for creating a session with Nuvei.
      * @returns A promise that resolves to the result of the session creation
      *          or an object with error details if an error occurs.
      */
-    async openOrder(data: any): Promise<any> {
+    async initPaymentIntent(data: any): Promise<any> {
         try {
             if (super.initSDK()) {
                 const transaction = new Transaction();
@@ -68,14 +66,59 @@ export class NuveiPayment extends BasePaymentProvider implements IPaymentProvide
             return { hasError: true, error: error?.message };
         }
     }
-
-    initPaymentIntent(data: any) {
-        throw new Error("Method not implemented.");
-    }
+    
     requestPayment(data: any) {
         throw new Error("Method not implemented.");
     }
-    getOrderDetails(data: any) {
-        throw new Error("Method not implemented.");
+    
+    /**
+     * This method retrieves the status of a payment recently performed. It receives the session ID and queries if a payment was performed. 
+     * If a payment was performed, the method returns the status of this payment.
+     * 
+     * Use /getPaymentStatus when you need to retrieve the status of a payment to verify a payment response or 
+     * to check if the response was not received or was not received correctly or completely.
+     * 
+     * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#getPaymentStatus
+     * 
+     * @param data - The order ID for which details should be retrieved.
+     * @returns A promise that resolves to the result of the order details retrieval
+     *          or an object with error details if an error occurs.
+     */
+    async getOrderDetails(data: any): Promise<any> {
+        try {
+            if (super.initSDK()) {
+                const transaction = new Transaction();
+                const openOrderResult = await transaction.getDetails(data);
+                return openOrderResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Gets detailed information about a specific transaction.
+     * Can query by either transactionId or clientUniqueId.
+     * If multiple transactions share the same clientUniqueId, only the most recent is returned.
+     *
+     * @param {Object} params The query parameters
+     * @param {string} params.transactionId - The Gateway transaction ID (conditional - either this or clientUniqueId required)
+     * @param {string} params.clientUniqueId - The unique transaction ID in merchant system (conditional - either this or transactionId required)
+     * @returns {Promise<IGetTransactionDetailsResponse>} A promise resolving to the transaction details
+     */
+    async getTransactionDetails(data: any): Promise<IGetTransactionDetailsResponse | any> {
+        try {
+            if (super.initSDK()) {
+                const transaction = new Transaction();
+                const openOrderResult = await transaction.getTransactionDetails(data);
+                return openOrderResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
     }
 }

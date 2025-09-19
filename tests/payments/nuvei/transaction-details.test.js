@@ -101,29 +101,11 @@ const config = {
     ],
     "message": null
 };
-const data = {
-    clientUniqueId: `test_${Date.now()}`,
-    currency: "USD",
-    amount: "100.00",
-    country: "US",
-    email: "test@example.com",
-    billingAddress: {
-        firstName: "John",
-        lastName: "Doe",
-        country: "US",
-        email: "test@example.com"
-    },
-    urlDetails: {
-        successUrl: "https://example.com/success",
-        failureUrl: "https://example.com/failure",
-        pendingUrl: "https://example.com/pending",
-        notificationUrl: "https://example.com/webhook"
-    }
-}
+const data = { clientUniqueId: "10796-4321184", }
 const clientId = "f148f128-1c3d-47a0-a9e2-45506c080971"
 const sharedSecret = "f7M2iEM0BBokUtsUDuQ6Hz7nASHnsowojOadmDj1QFY=";
 BCEnvironment.init(clientId, sharedSecret, config);
 
-new PaymentOperation().openOrder(data).then(response => {
+new PaymentOperation().getTransactionDetails(data).then(response => {
     console.log(JSON.stringify(response));
 });

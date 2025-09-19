@@ -48,7 +48,7 @@ export enum PaymentStatus {
   RETRY_REFUND = 18,
 };
 
-export module PayPal {
+export namespace PayPal {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a PayPal payment operation.
@@ -81,7 +81,7 @@ export module PayPal {
   };
 };
 
-export module Checkout {
+export namespace Checkout {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a Checkout payment operation.
@@ -108,7 +108,7 @@ export module Checkout {
   };
 };
 
-export module Stripe {
+export namespace Stripe {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a Stripe payment operation.
@@ -126,7 +126,7 @@ export module Stripe {
   };
 };
 
-export module Klarna {
+export namespace Klarna {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a Klarna payment operation.
@@ -154,7 +154,7 @@ export module Klarna {
   };
 };
 
-export module ClearPay {
+export namespace ClearPay {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a ClearPay payment operation.
@@ -174,7 +174,7 @@ export module ClearPay {
   };
 };
 
-export module OmniCapital {
+export namespace OmniCapital {
 
   /**
    * Enum {@link PaymentStatus} represents the various statuses a transaction can have
@@ -213,7 +213,7 @@ export module OmniCapital {
 
 }
 
-export module Juspay {
+export namespace Juspay {
 
   /**
    * Enum {PaymentStatus} contains the list of payment statuses for a Juspay payment operation.
@@ -249,3 +249,12 @@ export module Juspay {
     CAPTURE_INITIATED = "CAPTURE_INITIATED",
   };
 };
+
+export namespace Nuvei {
+  
+  export enum PaymentStatus {
+    APPROVED = 'APPROVED', 
+    DECLINED = 'DECLINED', 
+    ERROR = 'ERROR'
+  } 
+}

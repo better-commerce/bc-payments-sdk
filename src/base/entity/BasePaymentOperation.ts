@@ -420,28 +420,21 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
-     * Calling the server-side /openOrder API request is the first step in a Web SDK or Simply Connect flow. 
-     * /openOrder authenticates your Nuvei merchant credentials, sets up an order in the Nuvei system, and returns a sessionToken.
+     * Gets detailed information about a specific transaction.
+     * Can query by either transactionId or clientUniqueId.
+     * If multiple transactions share the same clientUniqueId, only the most recent is returned.
      * 
-     * sessionToken must be included in all subsequent Web SDK and Simply Connect method calls in that session, such as for createPayment() or checkout().
-     * 
-     * /openOrder also allows you to set user-related parameters such as shipping details and billing details. 
-     * Using the preventOverride parameter either allows or prevents subsequent Web SDK and 
-     * Simply Connect method calls from overriding these user-related parameters.
-     * 
-     * This method should be implemented by the concrete payment operation classes.
-     * It should attempt to open an order in the current payment provider and return the result.
-     * 
-     * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#openOrder
-     * 
-     * @param data - The order data required by the payment provider.
-     * @throws {Error} - If the method is not implemented.
-     * @returns {any} - The result of the open order request.
+     * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#getTransactionDetails
+     *
+     * @param {Object} params The query parameters
+     * @param {string} params.transactionId - The Gateway transaction ID (conditional - either this or clientUniqueId required)
+     * @param {string} params.clientUniqueId - The unique transaction ID in merchant system (conditional - either this or transactionId required)
+     * @returns {Promise<IGetTransactionDetailsResponse>} A promise resolving to the transaction details
      */
-    public async openOrder(data: any): Promise<IOpenOrderResponse> {
+    public async getTransactionDetails(data: any) {
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.NUVEI) {
-            return await new NuveiPayment().openOrder(data);
+            return await new NuveiPayment().getTransactionDetails(data);
         }
         return null;
     }
@@ -499,6 +492,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new ElavonPayment();
         } else if (paymentProvider === PaymentMethodType.OMNICAPITAL) {
             obj = new OmniCapitalPayment();
+        } else if (paymentProvider === PaymentMethodType.NUVEI) {
+            obj = new NuveiPayment();
         }
         return obj;
     }

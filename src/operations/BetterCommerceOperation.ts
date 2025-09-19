@@ -15,7 +15,7 @@ import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { BCEnvironment } from "../base/config/BCEnvironment";
 import { OmniCapital, PaymentStatus } from "../constants/enums/PaymentStatus";
 import { PaymentMethodType } from "../constants/enums/PaymentMethodType";
-import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway } from "../constants/enums/PaymentStatus";
+import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway, Nuvei as NuveiGateway } from "../constants/enums/PaymentStatus";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
@@ -25,6 +25,7 @@ import { PaymentMethodTypeId, PaymentSelectionType } from "../constants";
 import { matchStrings, tryParseJson } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
+import { NuveiPayment } from "../modules/payments/NuveiPayment";
 
 export const DEBUG_LOGGING_ENABLED = true
 
@@ -129,6 +130,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 // For PayPal, Checkout, Stripe, Klarna & ClearPay
                 if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
                     // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
+                    paymentGatewayOrderTxnId = data?.extras?.orderId;
+                } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase()) {
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
                 }
 
@@ -402,6 +405,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      */
     async processPaymentHook(data: IPaymentHookProcessingData): Promise<any> {
         try {
+            await Logger.logPayment({ data, message: `Log | WebhookData | processPaymentHook` }, { headers: {}, cookies: {} })
             let paymentNo, orderNo;
             let paymentGatewayOrderTxnId = Defaults.String.Value;
             const { paymentMethodTypeId, paymentMethodType, data: hookData } = data
@@ -412,18 +416,37 @@ export class BetterCommerceOperation implements ICommerceProvider {
             // Therefore, use API key from config instead of webhook data
             // This fixes the URL decoding issue where '+' becomes ' ' in webhook data
             if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
-                // Ensure BCEnvironment is properly initialized for OmniCapital webhooks
-                // Handle both data structures: extras at top level (correct) or inside hookData (legacy)
-                const extras = data?.extras || hookData?.extras;
-                if (extras?.clientId && extras?.sharedSecret) {
-                    BCEnvironment.init(extras.clientId, extras.sharedSecret, extras.config, extras.authUrl, extras.baseUrl);
+
+                if (DEBUG_LOGGING_ENABLED) {
+                    // TODO: Debugging Log
+                    await Logger.logPayment({ data: { hookData }, message: `Log | hookData | ${hookData?.Status}` }, { headers: {}, cookies: {} })
                 }
-                
+
+                // Ensure BCEnvironment is properly initialized for OmniCapital webhooks
+                // The extras are passed inside hookData.extras from the webhook handler
+                const extras = hookData?.extras;
+                if (extras?.clientId && extras?.sharedSecret) {
+                    console.log('--- Initializing BCEnvironment for OmniCapital webhook ---');
+                    BCEnvironment.init(extras.clientId, extras.sharedSecret, extras.config, extras.authUrl, extras.baseUrl);
+
+                    // Also add extras to BCEnvironment for OmniCapitalEnvironment to use
+                    BCEnvironment.addExtras({
+                        country: extras?.country || 'GB',
+                        currency: extras?.currency || 'GBP',
+                        language: extras?.language || 'en'
+                    });
+                } else {
+                    console.error('--- WARNING: Missing BCEnvironment credentials for OmniCapital webhook ---');
+                    console.error('hookData.extras:', hookData?.extras);
+                    console.error('data structure:', { paymentMethodTypeId, paymentMethodType, dataKeys: Object.keys(data) });
+                }
+
                 // Replace API key if needed
                 if (hookData?.api_key) {
                     const config: any = BCEnvironment.getConfig();
                     const configApiKey = config?.settings?.find((x: any) => x.key === "Signature")?.value;
                     if (configApiKey) {
+                        console.log('--- Replacing OmniCapital API key from config ---');
                         hookData.api_key = configApiKey;
                     }
                 }
@@ -569,7 +592,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
             }
         } catch (error: any) {
-            await Logger.logPayment(error, { headers: {}, cookies: {} })
+            await Logger.logPayment({ data: error, message: `Log | Error | processPaymentHook` }, { headers: {}, cookies: {} })
+            //await Logger.logPayment(error, { headers: {}, cookies: {} })
             return { hasError: true, error: error }
         }
         return null;
@@ -751,6 +775,29 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 purchaseAmount = orderValue; // OmniCapital API doesn't return order amount
                 paymentType = PaymentSelectionType.FULL;
                 partialAmount = orderValue;
+                break;
+
+            case PaymentMethodType.NUVEI?.toLowerCase():
+
+                // Get PayPal payment details
+                let nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ clientUniqueId: data });
+
+                try {
+                    await Logger.logPayment({ data: nuveiOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
+                } catch (error: any) {
+                    // Bypass error incurred due to logging.
+                }
+
+                if (nuveiOrderDetails?.transactionDetails?.transactionStatus?.toLowerCase() === NuveiGateway.PaymentStatus.APPROVED?.toLowerCase()) {
+                    statusId = PaymentStatus.PAID;
+                } else {
+                    statusId = PaymentStatus.DECLINED;
+                }
+                purchaseAmount = nuveiOrderDetails?.partialApproval?.requestedAmount
+                    ? parseFloat(nuveiOrderDetails?.partialApproval?.requestedAmount || Defaults.Int.Value.toString())
+                    : Defaults.Int.Value;
+                paymentType = PaymentSelectionType.FULL;
+                partialAmount =  purchaseAmount;
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
