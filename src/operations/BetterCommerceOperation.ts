@@ -779,6 +779,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentMethodType.NUVEI?.toLowerCase():
 
+                try {
+                    await Logger.logPayment({ data: { clientUniqueId: data }, message: `${gateway?.toLowerCase()} | Invoke GetPaymentStatus` }, { headers: {}, cookies: {} })
+                } catch (error: any) {
+                    // Bypass error incurred due to logging.
+                }
+
                 // Get PayPal payment details
                 let nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ clientUniqueId: data });
 
