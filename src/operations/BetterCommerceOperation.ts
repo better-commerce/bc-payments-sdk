@@ -26,8 +26,7 @@ import { matchStrings, tryParseJson } from "../utils/parse-util";
 import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo, getOrderNo, getPSPGatewayInfo, getPSPInfo, getPSPResponseMsg, getPaymentIdentifier, getPaymentNo, getPaymentTransactionOrderId, getPaymentTransactionStatus, getSignature } from "../utils/payment-util";
 import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
 import { NuveiPayment } from "../modules/payments/NuveiPayment";
-
-export const DEBUG_LOGGING_ENABLED = true
+import { DEBUG_LOGGING_ENABLED } from "../constants/constants";
 
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
@@ -461,7 +460,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             }
 
             // If web hook transaction is applicable for further processing.
-            if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE) {
+            if (paymentTransactionStatus.toLowerCase() !== PaymentTransactionStatus.NONE.toLowerCase()) {
                 let orderId;
                 if (paymentMethodTypeId === PaymentMethodTypeId.PAYPAL) {
                     const details: string = await getPaymentTransactionOrderId(paymentMethodTypeId, hookData);

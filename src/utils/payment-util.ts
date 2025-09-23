@@ -4,10 +4,9 @@ import { PayPalPayment } from "../modules/payments/PayPalPayment"
 // Other Imports
 import { groupMatch, matchStrings, stringToBoolean, tryParseJson } from "./parse-util"
 import { PaymentMethodType, PaymentMethodTypeId } from "../constants"
-import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression } from "../constants/constants"
+import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression, DEBUG_LOGGING_ENABLED } from "../constants/constants"
 import { BCEnvironment } from "../base/config/BCEnvironment"
 import { OmniCapital } from "../constants/enums/PaymentStatus"
-import { DEBUG_LOGGING_ENABLED } from "../operations/BetterCommerceOperation"
 import { Logger } from "../modules/better-commerce/Logger"
 
 export const gatewayNameToIdMap = new Map<string, number>(
@@ -162,6 +161,7 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
         switch (status) {
             case 'complete':
                 paymentStatus = PaymentTransactionStatus.TXN_CHARGED;
+                break;
             case 'declined':
             case 'finance offer withdrawn':
             case 'order cancelled':
@@ -169,10 +169,14 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
             case 'credit check declined':
             case 'credit check pre decline':
                 paymentStatus = PaymentTransactionStatus.TXN_FAILED;
+                break;
             case 'awaiting fulfilment':
+            case 'order fulfilled':
                 paymentStatus = PaymentTransactionStatus.TXN_INITIATED;
+                break;
             default:
                 console.log('--- OmniCapital no case matched, returning NONE ---')
+                break;
         }
         if (DEBUG_LOGGING_ENABLED) {
             // TODO: Debugging Log
