@@ -67,6 +67,10 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.OMNICAPITAL
     } else if (matchStrings(gatewayName, PaymentMethodType.NUVEI, true)) {
         return PaymentMethodTypeId.NUVEI
+    } else if (matchStrings(gatewayName, PaymentMethodType.NUVEI_GOOGLE_PAY, true)) {
+        return PaymentMethodTypeId.NUVEI_GOOGLE_PAY
+    } else if (matchStrings(gatewayName, PaymentMethodType.NUVEI_APPLE_PAY, true)) {
+        return PaymentMethodTypeId.NUVEI_APPLE_PAY
     }
     return -1
 }
@@ -115,6 +119,10 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.OMNICAPITAL
     } else if (id === PaymentMethodTypeId.NUVEI) {
         return PaymentMethodType.NUVEI
+    } else if (id === PaymentMethodTypeId.NUVEI_GOOGLE_PAY) {
+        return PaymentMethodType.NUVEI_GOOGLE_PAY
+    } else if (id === PaymentMethodTypeId.NUVEI_APPLE_PAY) {
+        return PaymentMethodType.NUVEI_APPLE_PAY
     }
     return -1
 }

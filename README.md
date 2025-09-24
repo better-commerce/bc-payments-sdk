@@ -16,6 +16,7 @@ It integrates SDK APIs for the following providers:
 | ApplePay        | Client-side **Modal Widget + Redirect** |
 | Juspay          | Client-side **Custom Widget + Redirect** |
 | Elavon        | Client-side **Modal Widget + Redirect** |
+| Nuvei        | Client-side **Modal Widget + Redirect** |
 
 ## PayPal
 
@@ -98,6 +99,17 @@ It integrates SDK APIs for the following providers:
 | NPM Package    | https://github.com/better-commerce/bc-elavon-sdk                                              | Node.js SDK for interaction with Elavon APIs - @better-commerce/bc-elavon-sdk |
 | Dashboard - Sandbox        | https://reporting.sandbox.elavonpaymentgateway.com/#/login |                                                                               |
 | Dashboard - Live           | https://reporting.elavonpaymentgateway.com/#/login                               |                                                                               |
+
+## Nuvei
+
+| Name           | Reference                                                                                     | Description                                                                   |
+| :------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| API Collection | https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#Introduction                                      | An API reference you’ll need to test the server-side component of your integration. |
+| GooglePay WebSDK Integration     | https://docs.nuvei.com/documentation/global-guides/google-pay/google-pay-integration/google-pay-guide-web-sdk/                                            |                                                                               |
+| ApplePay WebSDK Integration     | https://docs.nuvei.com/documentation/global-guides/apple-pay-guides/implementation/static-apple-pay-button-using-web-sdk/                                             |                                                                               |
+| NPM Package    | https://github.com/better-commerce/bc-nuvei-sdk                                              | Node.js SDK for interaction with Nuvei APIs - @better-commerce/bc-nuvei-sdk |
+| Dashboard - Sandbox        | https://sandbox.nuvei.com/login |                                                                               |
+| Dashboard - Live           | https://nuvei.com/login                               |                                                                               |
 
 ## Installation
 

@@ -34,4 +34,6 @@ export enum PaymentMethodTypeId {
     WALLET = 14,
     OMNICAPITAL = 15,
     NUVEI = 16,
+    NUVEI_GOOGLE_PAY = 17,
+    NUVEI_APPLE_PAY = 18,
 }

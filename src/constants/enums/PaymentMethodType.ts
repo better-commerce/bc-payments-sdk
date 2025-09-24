@@ -32,5 +32,7 @@ export enum PaymentMethodType {
     OPAYO = 'opayo',
     WALLET = 'wallet',
     OMNICAPITAL = 'omnicapital',
-    NUVEI = 'nuvei'
+    NUVEI = 'nuvei',
+    NUVEI_GOOGLE_PAY = 'nuveigooglepay',
+    NUVEI_APPLE_PAY = 'nuveiapplepay',
 };
