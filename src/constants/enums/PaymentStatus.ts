@@ -194,6 +194,7 @@ export namespace OmniCapital {
     SIGN_DOCUMENTS = 'Sign Documents',
     SIGN_DOCUMENTS_AMENDMENT = 'Sign Documents (Amendment)',
     APPROVED = 'Approved',
+    ORDER_FULFILLED = 'order fulfilled',
     AWAITING_FULFILMENT = 'Awaiting fulfilment',
     EXCEPTION = 'Exception',
     PAYMENT_REQUESTED = 'Payment Requested',

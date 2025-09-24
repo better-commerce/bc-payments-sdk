@@ -15,7 +15,7 @@ import { ICommerceProvider } from "../base/contracts/ICommerceProvider";
 import { BCEnvironment } from "../base/config/BCEnvironment";
 import { OmniCapital, PaymentStatus } from "../constants/enums/PaymentStatus";
 import { PaymentMethodType } from "../constants/enums/PaymentMethodType";
-import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway, Nuvei as NuveiGateway } from "../constants/enums/PaymentStatus";
+import { Checkout as CheckoutGateway, Klarna as KlarnaGateway, PayPal as PayPalGateway, Stripe as StripeGateway, ClearPay as ClearPayGateway, OmniCapital as OmniCapitalGateway, Nuvei as NuveiGateway } from "../constants/enums/PaymentStatus";
 import { StripePayment } from "../modules/payments/StripePayment";
 import { OrderStatus } from "../constants/enums/OrderStatus";
 import { KlarnaPayment } from "../modules/payments/KlarnaPayment";
@@ -516,7 +516,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             const dbOrderAmount = orderResult?.grandTotal?.raw?.withTax || 0
 
                             // Call gateway specific SDK API to get the order/payment status.
-                            let paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true, dbOrderAmount);
+                            let paymentStatus = await this.getPaymentStatus(paymentMethodType, paymentGatewayOrderTxnId, true, dbOrderAmount, hookData);
                             if (paymentMethodTypeId === PaymentMethodTypeId.OMNICAPITAL) {
                                 paymentStatus = { ...paymentStatus, orderDetails: { ...paymentStatus?.orderDetails, orderNo, paymentNo, } }
                             }
@@ -612,7 +612,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns A promise that resolves to an object containing the status ID, purchase amount, and
      * optionally the order details if `returnOrderDetails` is true.
      */
-    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false, orderValue = 0): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number }> {
+    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false, orderValue = 0, hookData: any = {}): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number, hookData?: any }> {
         let orderDetails: any = Defaults.Object.Value;
         let purchaseAmount = 0, paymentType = PaymentSelectionType.FULL, partialAmount = 0;
         let statusId = PaymentStatus.PENDING;
@@ -738,36 +738,46 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.OMNICAPITAL?.toLowerCase():
                 const omniCapitalOrderDetails = orderDetails = await new OmniCapitalPayment().getOrderDetails(data);
                 switch (omniCapitalOrderDetails?.Status?.toLowerCase()) {
-                    case 'complete':
+                    case OmniCapitalGateway.PaymentStatus.ORDER_FULFILLED?.toLowerCase():
+
+                        // Special handling to cater OmniCapital system's bug. When the webhook is triggered for "COMPLETE" status
+                        // then the order status at their end is "ORDER FULFILLED".
+                        if (hookData?.Status && hookData?.Status?.toLowerCase() === OmniCapitalGateway.PaymentStatus.COMPLETE?.toLowerCase()) {
+
+                            // If this is "COMPLETE" webhook hit and current status is "ORDER FULFILLED".
+                            statusId = PaymentStatus.PAID;
+                        }
+                        break;
+                    case OmniCapitalGateway.PaymentStatus.COMPLETE?.toLowerCase():
                         statusId = PaymentStatus.PAID;
                         break;
 
-                    case 'pending':
-                    case 'in progress':
-                    case 'awaiting fulfilment':
-                    case 'exception':
-                    case 'referral (override - approve)':
-                    case 'referral (override - rescore)':
-                    case 'sign documents':
-                    case 'sign documents (amendment)':
+                    case OmniCapitalGateway.PaymentStatus.PENDING?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.IN_PROGRESS?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.AWAITING_FULFILMENT?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.EXCEPTION?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.REFERRAL_OVERRIDE_APPROVE?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.REFERRAL_OVERRIDE_RESCORE?.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.SIGN_DOCUMENTS.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.SIGN_DOCUMENTS_AMENDMENT.toLowerCase():
                         statusId = PaymentStatus.INITIATED;
                         break;
 
-                    case 'payment requested':
-                    case 'c.d.s. note required':
-                    case 'c.d.s. note review':
-                    case 'c.d.s. note review (customer)':
-                    case 'c.d.s. note review (customer - investigation)':
-                    case 'c.d.s. note review (customer - issue)':
+                    case OmniCapitalGateway.PaymentStatus.PAYMENT_REQUESTED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REQUIRED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_ISSUE.toLowerCase():
                         statusId = PaymentStatus.PENDING;
                         break;
 
-                    case 'declined':
-                    case 'finance offer withdrawn':
-                    case 'order cancelled':
-                    case 'application lapsed':
-                    case 'credit check declined':
-                    case 'credit check pre decline':
+                    case OmniCapitalGateway.PaymentStatus.DECLINED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.FINANCE_OFFER_WITHDRAWN.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.ORDER_CANCELLED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.APPLICATION_LAPSED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CREDIT_CHECK_DECLINED.toLowerCase():
+                    case OmniCapitalGateway.PaymentStatus.CREDIT_CHECK_PRE_DECLINE.toLowerCase():
                         statusId = PaymentStatus.DECLINED;
                         break;
                 }
@@ -802,7 +812,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     ? parseFloat(nuveiOrderDetails?.partialApproval?.requestedAmount || Defaults.Int.Value.toString())
                     : Defaults.Int.Value;
                 paymentType = PaymentSelectionType.FULL;
-                partialAmount =  purchaseAmount;
+                partialAmount = purchaseAmount;
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
