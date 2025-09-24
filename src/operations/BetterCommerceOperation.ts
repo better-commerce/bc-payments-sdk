@@ -130,7 +130,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
                     // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
-                } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase()) {
+                } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase()) {
                     paymentGatewayOrderTxnId = data?.extras?.token; // data?.extras?.orderId;
                 }
 
@@ -787,6 +787,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 break;
 
             case PaymentMethodType.NUVEI?.toLowerCase():
+            case PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase():
 
                 try {
                     await Logger.logPayment({ data: { clientUniqueId: data }, message: `${gateway?.toLowerCase()} | Invoke GetPaymentStatus` }, { headers: {}, cookies: {} })

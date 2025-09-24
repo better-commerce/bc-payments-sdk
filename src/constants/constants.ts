@@ -20,7 +20,7 @@ export module RegularExpression {
     export const ORDER_BASKET_ID_MATCH = /Order (.*?) for basket (.*?) for orderId (.*?)$/g
 }
 
-export const DEBUG_LOGGING_ENABLED = true
+export const DEBUG_LOGGING_ENABLED = false
 
 export enum PaymentTransactionStatus {
     NONE = 'None',
