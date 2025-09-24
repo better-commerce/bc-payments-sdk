@@ -131,7 +131,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
                 } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase()) {
-                    paymentGatewayOrderTxnId = data?.extras?.orderId;
+                    paymentGatewayOrderTxnId = data?.extras?.token; // data?.extras?.orderId;
                 }
 
                 // Get payment method
@@ -785,7 +785,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 }
 
                 // Get PayPal payment details
-                let nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ clientUniqueId: data });
+                let nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ transactionId: data });
 
                 try {
                     await Logger.logPayment({ data: nuveiOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })

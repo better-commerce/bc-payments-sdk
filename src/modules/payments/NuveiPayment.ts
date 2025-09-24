@@ -102,6 +102,8 @@ export class NuveiPayment extends BasePaymentProvider implements IPaymentProvide
      * Gets detailed information about a specific transaction.
      * Can query by either transactionId or clientUniqueId.
      * If multiple transactions share the same clientUniqueId, only the most recent is returned.
+     * 
+     * API Reference - https://docs.nuvei.com/api/main/indexMain_v1_0.html?json#getTransactionDetails
      *
      * @param {Object} params The query parameters
      * @param {string} params.transactionId - The Gateway transaction ID (conditional - either this or clientUniqueId required)
