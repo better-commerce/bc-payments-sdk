@@ -440,6 +440,27 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
     }
 
     /**
+     * Gets Google Pay merchant info JWT for secure domain registration.
+     * This JWT solution allows Nuvei to dynamically enable unlimited web domains
+     * without having to register each one in Google Pay and Wallet consoles.
+     * The merchant receives a registered domain and JWT for each transaction.
+     *
+     * API Reference - https://docs.nuvei.com/api/advanced/indexAdvanced.html?json#googlePayMerchantInfoJwt
+     *
+     * @param {Object} params The parameters for getting merchant info JWT
+     * @param {string} params.sessionToken The session token from openOrder
+     * @param {string} params.merchantOrigin The merchant's domain origin
+     * @returns {Promise<IGetGooglePayMerchantInfoJwtResponse>} A promise resolving to the merchant info with JWT
+     */
+    public async getGooglePayMerchantInfoJwt(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
+            return await new NuveiPayment().getGooglePayMerchantInfoJwt(data);
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the payment provider type from the configuration.
      * 
      * This method accesses the current configuration to determine the 

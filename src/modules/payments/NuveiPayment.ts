@@ -1,10 +1,10 @@
-import { IGetTransactionDetailsResponse, Transaction } from "bc-nuvei-sdk";
+import { IGetGooglePayMerchantInfoJwtResponse, IGetTransactionDetailsResponse, Transaction } from "bc-nuvei-sdk";
 import { INuveiPaymentProvider } from "../../base/contracts/GatewayProviders/INuveiPaymentProvider";
 import { IPaymentProvider } from "../../base/contracts/IPaymentProvider";
 import { BasePaymentProvider } from "../../base/entity/BasePaymentProvider";
 
 export class NuveiPayment extends BasePaymentProvider implements IPaymentProvider, INuveiPaymentProvider {
-
+    
     /**
      * Requests a token from the Nuvei payment provider.
      * 
@@ -116,6 +116,20 @@ export class NuveiPayment extends BasePaymentProvider implements IPaymentProvide
                 const transaction = new Transaction();
                 const openOrderResult = await transaction.getTransactionDetails(data);
                 return openOrderResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    async getGooglePayMerchantInfoJwt(data: any): Promise<IGetGooglePayMerchantInfoJwtResponse | any> {
+        try {
+            if (super.initSDK()) {
+                const transaction = new Transaction();
+                const jwtResult = await transaction.getGooglePayMerchantInfoJwt(data);
+                return jwtResult;
             }
             return null;
         }
