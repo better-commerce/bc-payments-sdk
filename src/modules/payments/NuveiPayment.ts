@@ -124,12 +124,48 @@ export class NuveiPayment extends BasePaymentProvider implements IPaymentProvide
         }
     }
 
-    async getGooglePayMerchantInfoJwt(data: any): Promise<IGetGooglePayMerchantInfoJwtResponse | any> {
+    async requestGooglePayToken(data: any): Promise<IGetGooglePayMerchantInfoJwtResponse | any> {
         try {
             if (super.initSDK()) {
                 const transaction = new Transaction();
                 const jwtResult = await transaction.getGooglePayMerchantInfoJwt(data);
                 return jwtResult;
+            }
+            return null;
+        }
+        catch (error: any) {
+            return { hasError: true, error: error?.message };
+        }
+    }
+
+    /**
+     * Gets the list of registered Google Pay domains for the merchant.
+     * This endpoint retrieves all domains that are currently registered for Google Pay processing.
+     *
+     * API Reference - https://docs.nuvei.com/api/advanced/indexAdvanced.html?json#getRegisteredGooglePayDomains
+     *
+     * @param {Object} params The parameters for retrieving registered domains
+     * @param {string[]} params.domainNames - Optional array of specific domains to query. If not provided, returns all registered domains.
+     * @returns {Promise<IGetRegisteredGooglePayDomainsResponse>} A promise resolving to the response with the list of registered domains
+     *
+     * @example
+     * // Get all registered domains
+     * const result = await transaction.getRegisteredGooglePayDomains();
+     * console.log('Registered domains:', result.domainNames);
+     *
+     * @example
+     * // Query specific domains
+     * const result = await transaction.getRegisteredGooglePayDomains({
+     *     domainNames: ["www.example.com", "mobile.example.com"]
+     * });
+     * console.log('Queried domains:', result.domainNames);
+     */
+    async getRegisteredDomains(data: any): Promise<IGetGooglePayMerchantInfoJwtResponse | any> {
+        try {
+            if (super.initSDK()) {
+                const transaction = new Transaction();
+                const domainsResult = await transaction.getRegisteredGooglePayDomains(data);
+                return domainsResult;
             }
             return null;
         }

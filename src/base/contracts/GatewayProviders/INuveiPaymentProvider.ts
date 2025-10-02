@@ -4,5 +4,6 @@
 export interface INuveiPaymentProvider {
     requestToken(data: any): any;
     getTransactionDetails(data: any): any;
-    getGooglePayMerchantInfoJwt(data: any): any;
+    requestGooglePayToken(data: any): any;
+    getRegisteredDomains(data: any): any;
 };

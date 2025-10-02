@@ -452,10 +452,40 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
      * @param {string} params.merchantOrigin The merchant's domain origin
      * @returns {Promise<IGetGooglePayMerchantInfoJwtResponse>} A promise resolving to the merchant info with JWT
      */
-    public async getGooglePayMerchantInfoJwt(data: any) {
+    public async requestGooglePayToken(data: any) {
         const paymentProvider = this.getPaymentProvider();
         if (paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
-            return await new NuveiPayment().getGooglePayMerchantInfoJwt(data);
+            return await new NuveiPayment().requestGooglePayToken(data);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the list of registered Google Pay domains for the merchant.
+     * This endpoint retrieves all domains that are currently registered for Google Pay processing.
+     *
+     * API Reference - https://docs.nuvei.com/api/advanced/indexAdvanced.html?json#getRegisteredGooglePayDomains
+     *
+     * @param {Object} params The parameters for retrieving registered domains
+     * @param {string[]} params.domainNames - Optional array of specific domains to query. If not provided, returns all registered domains.
+     * @returns {Promise<IGetRegisteredGooglePayDomainsResponse>} A promise resolving to the response with the list of registered domains
+     *
+     * @example
+     * // Get all registered domains
+     * const result = await transaction.getRegisteredGooglePayDomains();
+     * console.log('Registered domains:', result.domainNames);
+     *
+     * @example
+     * // Query specific domains
+     * const result = await transaction.getRegisteredGooglePayDomains({
+     *     domainNames: ["www.example.com", "mobile.example.com"]
+     * });
+     * console.log('Queried domains:', result.domainNames);
+     */
+    public async getRegisteredDomains(data: any) {
+        const paymentProvider = this.getPaymentProvider();
+        if (paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
+            return await new NuveiPayment().getRegisteredDomains(data);
         }
         return null;
     }
