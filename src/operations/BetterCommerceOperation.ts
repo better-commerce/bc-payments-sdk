@@ -738,15 +738,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.OMNICAPITAL?.toLowerCase():
                 const omniCapitalOrderDetails = orderDetails = await new OmniCapitalPayment().getOrderDetails(data);
                 switch (omniCapitalOrderDetails?.Status?.toLowerCase()) {
-                    case OmniCapitalGateway.PaymentStatus.ORDER_FULFILLED?.toLowerCase():
-
-                        // Special handling to cater OmniCapital system's bug. When the webhook is triggered for "COMPLETE" status
-                        // then the order status at their end is "ORDER FULFILLED".
-                        if (hookData?.Status && hookData?.Status?.toLowerCase() === OmniCapitalGateway.PaymentStatus.COMPLETE?.toLowerCase()) {
-
-                            // If this is "COMPLETE" webhook hit and current status is "ORDER FULFILLED".
-                            statusId = PaymentStatus.PAID;
-                        }
+                    case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REQUIRED?.toLowerCase():
+                        statusId = PaymentStatus.INITIATED;
                         break;
                     case OmniCapitalGateway.PaymentStatus.COMPLETE?.toLowerCase():
                         statusId = PaymentStatus.PAID;
