@@ -46,6 +46,8 @@ export enum PaymentStatus {
   DUPLICATE_REQUEST = 16,
   INITIATED = 17,
   RETRY_REFUND = 18,
+  AUTHORIZED_BY_WEBHOOK = 19,
+  PROCESSING = 20,
 };
 
 export namespace PayPal {
