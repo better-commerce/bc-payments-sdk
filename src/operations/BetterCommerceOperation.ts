@@ -231,7 +231,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 paymentStatus = { statusId: PaymentStatus.AUTHORIZED, purchaseAmount: orderAmount }
                             } else if (gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
                                 const apiPaymentStatus = await this.getPaymentStatus(gateway, paymentGatewayOrderTxnId);
-                                paymentStatus = { statusId: apiPaymentStatus.statusId, purchaseAmount: orderAmount }
+                                paymentStatus = { statusId: apiPaymentStatus.statusId, purchaseAmount: apiPaymentStatus.purchaseAmount /*orderAmount*/ }
                             } else {
 
                                 // Call gateway specific SDK API to get the order/payment status.
@@ -781,7 +781,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         statusId = PaymentStatus.DECLINED;
                         break;
                 }
-                purchaseAmount = orderValue; // OmniCapital API doesn't return order amount
+                purchaseAmount = omniCapitalOrderDetails?.Deposit ? parseFloat(omniCapitalOrderDetails?.Deposit?.toString()) : 0; 
                 paymentType = PaymentSelectionType.FULL;
                 partialAmount = orderValue;
                 break;
