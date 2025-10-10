@@ -8,6 +8,7 @@ import { Checkout, Defaults, PaymentTransactionStatus, Paypal, RegularExpression
 import { BCEnvironment } from "../base/config/BCEnvironment"
 import { OmniCapital } from "../constants/enums/PaymentStatus"
 import { Logger } from "../modules/better-commerce/Logger"
+import { OmniCapital as OmniCapitalGateway } from "../constants/enums/PaymentStatus";
 
 export const gatewayNameToIdMap = new Map<string, number>(
     Object.entries(PaymentMethodType).map(([key, value]) => [
@@ -167,19 +168,20 @@ export const getPaymentTransactionStatus = (methodId: number, data: any): string
         }
         const status = data?.Status?.toLowerCase() || Defaults.String.Value
         switch (status) {
-            case 'complete':
+            case OmniCapitalGateway.PaymentStatus.COMPLETE?.toLowerCase():
                 paymentStatus = PaymentTransactionStatus.TXN_CHARGED;
                 break;
-            case 'declined':
-            case 'finance offer withdrawn':
-            case 'order cancelled':
-            case 'application lapsed':
-            case 'credit check declined':
-            case 'credit check pre decline':
+            case OmniCapitalGateway.PaymentStatus.DECLINED?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.FINANCE_OFFER_WITHDRAWN?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.ORDER_CANCELLED?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.APPLICATION_LAPSED?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.CREDIT_CHECK_DECLINED?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.CREDIT_CHECK_PRE_DECLINE?.toLowerCase():
                 paymentStatus = PaymentTransactionStatus.TXN_FAILED;
                 break;
-            case 'awaiting fulfilment':
-            case 'order fulfilled':
+            case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REQUIRED?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.AWAITING_FULFILMENT?.toLowerCase():
+            case OmniCapitalGateway.PaymentStatus.ORDER_FULFILLED?.toLowerCase():
                 paymentStatus = PaymentTransactionStatus.TXN_INITIATED;
                 break;
             default:

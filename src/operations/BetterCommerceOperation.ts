@@ -575,10 +575,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     let result = Defaults.Object.Value;
                                     const orderValue = paymentStatus?.purchaseAmount;
                                     const paymentStatusId: number = paymentStatus?.statusId
+                                    console.log('--- paymentStatusId ---', paymentStatusId)
                                     if (paymentStatusId === PaymentStatus.PAID) {
                                         console.log('--- SuccessUpdate ---')
                                         result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
-                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
+                                    } else if (paymentStatusId === PaymentStatus.INITIATED || paymentStatusId == PaymentStatus.DECLINED) {
                                         console.log('--- FailureUpdate ---')
                                         result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
                                     }
@@ -770,8 +771,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         statusId = PaymentStatus.INITIATED;
                         break;
 
-                    case OmniCapitalGateway.PaymentStatus.PAYMENT_REQUESTED.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REQUIRED.toLowerCase():
+                        statusId = PaymentStatus.INITIATED;
+                        break;
+
+                    case OmniCapitalGateway.PaymentStatus.PAYMENT_REQUESTED.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION.toLowerCase():
