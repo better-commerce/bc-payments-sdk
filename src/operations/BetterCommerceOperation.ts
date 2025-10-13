@@ -576,10 +576,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                     const orderValue = paymentStatus?.purchaseAmount;
                                     const paymentStatusId: number = paymentStatus?.statusId
                                     console.log('--- paymentStatusId ---', paymentStatusId)
-                                    if (paymentStatusId === PaymentStatus.PAID) {
+                                    if (paymentStatusId === PaymentStatus.INITIATED || paymentStatusId === PaymentStatus.PAID) {
                                         console.log('--- SuccessUpdate ---')
-                                        result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
-                                    } else if (paymentStatusId === PaymentStatus.INITIATED || paymentStatusId == PaymentStatus.DECLINED) {
+                                        const explicitOrderStatusId = (paymentStatusId === PaymentStatus.INITIATED) ? paymentStatusId : PaymentStatus.PENDING
+                                        const explicitPaidAmount = (paymentStatusId === PaymentStatus.INITIATED) ? paymentStatus.purchaseAmount : 0
+                                        result = await this.paymentHookOrderSuccessUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, }, explicitOrderStatusId, explicitPaidAmount)
+                                    } else if (paymentStatusId == PaymentStatus.DECLINED) {
                                         console.log('--- FailureUpdate ---')
                                         result = await this.paymentHookOrderFailureUpdate(paymentMethodType, paymentMethodTypeId, orderId, paymentStatus?.orderDetails, statusId, orderValue, orderResult, { paymentNo, orderNo, hookData, paymentType: paymentStatus?.paymentType, partialAmount: paymentStatus?.partialAmount, isPartialPaymentEnabled, totalPartiallyPaidAmount, headers: data?.extras?.headers, })
                                     }
@@ -866,7 +868,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @param extras - Additional data that may be required for updating the payment response.
      * @returns A promise that resolves to the updated payment response or null if the payment response could not be updated.
      */
-    private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any) {
+    private async paymentHookOrderSuccessUpdate(methodName: string, methodId: number, orderId: string, order: any, statusId: number, orderValue: any, bcOrder: any, extras?: any, explicitOrderStatusId = PaymentStatus.PENDING, explicitPaidAmount = 0) {
 
         if (bcOrder?.id && matchStrings(orderId, bcOrder?.id, true)) {
             const dbOrderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
@@ -896,12 +898,16 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     orderStatusId = PaymentStatus.PAID
                 }
 
+                orderStatusId = (explicitOrderStatusId !== PaymentStatus.PENDING) ? explicitOrderStatusId : orderStatusId
+
                 const orderModel = {
                     id: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.paymentNo : getPaymentNo(methodId, order),
                     cardNo: null,
                     orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
                     orderAmount: dbOrderAmount,
-                    paidAmount: isLastPartialPayment ? dbOrderAmount : partialAmount,
+                    paidAmount: (explicitPaidAmount > 0) 
+                        ? explicitPaidAmount 
+                        : isLastPartialPayment ? dbOrderAmount : partialAmount,
                     balanceAmount: (paymentType === PaymentSelectionType.PARTIAL) ? (dbOrderAmount - partialAmount) : 0,
                     isValid: true,
                     status: orderStatusId,
@@ -948,6 +954,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
+                
                 await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });

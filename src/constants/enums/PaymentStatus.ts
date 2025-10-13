@@ -27,6 +27,7 @@
  * @ordinal {number} RETRY_REFUND - The payment refund should be retried.
  */
 export enum PaymentStatus {
+  NONE = -1,
   PENDING = 0,
   AUTHORIZED = 1,
   PAID = 2,
