@@ -877,7 +877,15 @@ export class BetterCommerceOperation implements ICommerceProvider {
             let isLastPartialPayment = false
             let orderStatusId = PaymentStatus.PENDING
 
+            
             if (dbOrderAmount > 0) {
+                
+                // Get payment method
+                console.log('--- paymentMethodType ---', methodName)
+                const paymentMethod = await this.getPaymentMethod(methodName, { headers: {}, cookies: {} });
+                const paymentMethodId = paymentMethod?.id
+                console.log('--- paymentMethodId ---', { paymentMethodId })
+
                 let savePspInfo = getIsSavePSPInfo(methodId, order);
 
                 if (isPartialPaymentEnabled) {
@@ -905,8 +913,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     cardNo: null,
                     orderNo: (methodId === PaymentMethodTypeId.PAYPAL) ? extras?.orderNo : getOrderNo(methodId, order),
                     orderAmount: dbOrderAmount,
-                    paidAmount: (explicitPaidAmount > 0) 
-                        ? explicitPaidAmount 
+                    paidAmount: (explicitPaidAmount > 0)
+                        ? explicitPaidAmount
                         : isLastPartialPayment ? dbOrderAmount : partialAmount,
                     balanceAmount: (paymentType === PaymentSelectionType.PARTIAL) ? (dbOrderAmount - partialAmount) : 0,
                     isValid: true,
@@ -917,7 +925,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     pspSessionCookie: getSignature(methodId, order, extras?.hookData),
                     pspResponseCode: statusId,
                     pspResponseMessage: getPSPResponseMsg(methodId, order),
-                    paymentGatewayId: methodId,
+                    paymentGatewayId: paymentMethodId,
                     paymentGateway: methodName,
                     token: null,
                     payerId: null,
@@ -988,6 +996,13 @@ export class BetterCommerceOperation implements ICommerceProvider {
             const orderAmount = bcOrder?.grandTotal?.raw?.withTax || 0
 
             if (orderAmount > 0) {
+
+                // Get payment method
+                console.log('--- paymentMethodType ---', methodName)
+                const paymentMethod = await this.getPaymentMethod(methodName, { headers: {}, cookies: {} });
+                const paymentMethodId = paymentMethod?.id
+                console.log('--- paymentMethodId ---', { paymentMethodId })
+
                 let savePspInfo = getIsSavePSPInfo(methodId, order);
 
                 const orderModel = {
@@ -1005,7 +1020,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     pspSessionCookie: getSignature(methodId, order, extras?.hookData),
                     pspResponseCode: statusId,
                     pspResponseMessage: getPSPResponseMsg(methodId, order),
-                    paymentGatewayId: methodId,
+                    paymentGatewayId: paymentMethodId,
                     paymentGateway: methodName,
                     token: null,
                     payerId: null,
