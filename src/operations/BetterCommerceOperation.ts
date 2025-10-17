@@ -777,11 +777,24 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         statusId = PaymentStatus.INITIATED;
                         break;
 
-                    case OmniCapitalGateway.PaymentStatus.PAYMENT_REQUESTED.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_INVESTIGATION.toLowerCase():
                     case OmniCapitalGateway.PaymentStatus.CDS_NOTE_REVIEW_CUSTOMER_ISSUE.toLowerCase():
+
+                        // Special handling to cater OmniCapital system's bug. 
+                        // When the webhook is triggered for "CDS_NOTE_REQUIRED" status
+                        // then the order status at their end is still "CDS_NOTE_REVIEW".
+                        if (hookData?.Status && hookData?.Status?.toLowerCase() === OmniCapitalGateway.PaymentStatus.CDS_NOTE_REQUIRED?.toLowerCase()) {
+
+                            // If this is "CDS_NOTE_REQUIRED" webhook hit and current status is "CDS_NOTE_REVIEW".
+                            statusId = PaymentStatus.INITIATED;
+                        } else {
+                            statusId = PaymentStatus.PENDING;
+                        }
+                        break;
+
+                    case OmniCapitalGateway.PaymentStatus.PAYMENT_REQUESTED.toLowerCase():
                         statusId = PaymentStatus.PENDING;
                         break;
 
@@ -877,9 +890,9 @@ export class BetterCommerceOperation implements ICommerceProvider {
             let isLastPartialPayment = false
             let orderStatusId = PaymentStatus.PENDING
 
-            
+
             if (dbOrderAmount > 0) {
-                
+
                 // Get payment method
                 console.log('--- paymentMethodType ---', methodName)
                 const paymentMethod = await this.getPaymentMethod(methodName, { headers: {}, cookies: {} });
@@ -962,7 +975,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     model: orderModel,
                     orderId: orderId,
                 };
-                
+
                 await Logger.logPayment({ data: orderModel, message: `${methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                 console.log('--- OrderSuccess paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                 const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
