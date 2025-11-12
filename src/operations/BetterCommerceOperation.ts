@@ -818,14 +818,30 @@ export class BetterCommerceOperation implements ICommerceProvider {
             case PaymentMethodType.NUVEI?.toLowerCase():
             case PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase():
 
-                try {
-                    await Logger.logPayment({ data: { clientUniqueId: data }, message: `${gateway?.toLowerCase()} | Invoke GetPaymentStatus` }, { headers: {}, cookies: {} })
-                } catch (error: any) {
-                    // Bypass error incurred due to logging.
-                }
+                // Get Nuvei payment details with retry logic
+                let nuveiOrderDetails;
+                let attempts = 0;
+                const MAX_ATTEMPTS = 5;
+                const WAIT_TIME_MS = 1000
 
-                // Get PayPal payment details
-                let nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ transactionId: data });
+                do {
+                    attempts++;
+
+                    try {
+                        await Logger.logPayment({ data: { clientUniqueId: data }, message: `${gateway?.toLowerCase()} | Invoke GetPaymentStatus | Attempt ${attempts}` }, { headers: {}, cookies: {} })
+                    } catch (error: any) {
+                        // Bypass error incurred due to logging.
+                    }
+
+                    nuveiOrderDetails = orderDetails = await new NuveiPayment().getTransactionDetails({ transactionId: data });
+                    if (nuveiOrderDetails?.errCode === 0) {
+                        break;
+                    }
+                    // Add {WAIT_TIME_MS} delay before next retry attempt (if not the last attempt)
+                    if (attempts < MAX_ATTEMPTS) {
+                        await new Promise(resolve => setTimeout(resolve, WAIT_TIME_MS));
+                    }
+                } while (attempts < MAX_ATTEMPTS);
 
                 try {
                     await Logger.logPayment({ data: nuveiOrderDetails, message: `${gateway?.toLowerCase()} | GetPaymentStatus` }, { headers: {}, cookies: {} })
