@@ -288,12 +288,14 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                             // If the [total partially paid + current partial amount] is equal to the order amount, then the payment status is PAID.
                                             statusId: isLastPartialPayment ? PaymentStatus.PAID : PaymentStatus.PENDING,
-                                            purchaseAmount: isLastPartialPayment ? orderAmount : amountToBePaid
+                                            purchaseAmount: isLastPartialPayment ? orderAmount : amountToBePaid,
+                                            paymentInfo: paymentStatus?.paymentInfo || null
                                         }
                                     } else {
                                         paymentStatus = {
                                             statusId: PaymentStatus.PENDING,
-                                            purchaseAmount: amountToBePaid
+                                            purchaseAmount: amountToBePaid,
+                                            paymentInfo: paymentStatus?.paymentInfo || null
                                         }
                                     }
                                 }
@@ -353,7 +355,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         additionalInfo2: bankOfferDetails?.status,
                                     }
                                     : null,
-                                ...{ ...getPaymentInfoPayload(data?.extras?.paymentInfo), paymentInfo9, }
+                                ...{ ...getPaymentInfoPayload(paymentStatus?.paymentInfo || data?.extras?.paymentInfo), paymentInfo9, }
                             };
                         }
 
@@ -615,10 +617,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @returns A promise that resolves to an object containing the status ID, purchase amount, and
      * optionally the order details if `returnOrderDetails` is true.
      */
-    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false, orderValue = 0, hookData: any = {}): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number, hookData?: any }> {
+    private async getPaymentStatus(gateway: string, data: any, returnOrderDetails = false, orderValue = 0, hookData: any = {}): Promise<{ statusId: number, purchaseAmount: number, orderDetails?: any, paymentType: string, partialAmount?: number, hookData?: any, paymentInfo?: any }> {
         let orderDetails: any = Defaults.Object.Value;
         let purchaseAmount = 0, paymentType = PaymentSelectionType.FULL, partialAmount = 0;
         let statusId = PaymentStatus.PENDING;
+        let paymentInfo: any = null
 
         switch (gateway?.toLowerCase()) {
 
@@ -840,10 +843,19 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     : Defaults.Int.Value;
                 paymentType = PaymentSelectionType.FULL;
                 partialAmount = purchaseAmount;
+
+                if (nuveiOrderDetails?.paymentOption?.card) {
+                    paymentInfo = {
+                        paymentInfo1: gateway,
+                        paymentInfo2: nuveiOrderDetails?.paymentOption?.card?.bin,
+                        paymentInfo4: nuveiOrderDetails?.paymentOption?.card?.cardType,
+                        paymentInfo6: nuveiOrderDetails?.paymentOption?.card?.cardBrand,
+                    }
+                }
                 break;
         }
         console.log("payment status", { statusId, purchaseAmount, paymentType, partialAmount });
-        return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value, paymentType, partialAmount };
+        return { statusId, purchaseAmount, orderDetails: returnOrderDetails ? orderDetails : Defaults.Object.Value, paymentType, partialAmount, paymentInfo };
     }
 
     /**
