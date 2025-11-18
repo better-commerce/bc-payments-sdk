@@ -36,4 +36,5 @@ export enum PaymentMethodTypeId {
     NUVEI = 16,
     NUVEI_GOOGLE_PAY = 17,
     NUVEI_APPLE_PAY = 18,
+    GIFT_CARD = 19,
 }
