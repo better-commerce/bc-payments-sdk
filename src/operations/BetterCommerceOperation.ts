@@ -27,6 +27,7 @@ import { getAuthCode, getCardBrand, getCardIssuer, getCardType, getIsSavePSPInfo
 import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
 import { NuveiPayment } from "../modules/payments/NuveiPayment";
 import { DEBUG_LOGGING_ENABLED } from "../constants/constants";
+import { GiftCard } from "../modules/better-commerce/GiftCard";
 
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
@@ -374,6 +375,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 // Get order details
                                 const { result: orderResultPostPaymentResponse }: any = await Order.get(orderId, { cookies: data?.extras?.cookies });
                                 console.log("---- orderResultPostPaymentResponse ----", orderResultPostPaymentResponse);
+
+                                // Handle post-payment actions (e.g., gift card redemption)
+                                if (orderResultPostPaymentResponse?.id) {
+                                    await this.handlePostPaymentActions(gateway, txnOrderId, data?.extras);
+                                }
 
                                 return isCancelled
                                     ? PaymentStatus.DECLINED
@@ -1105,5 +1111,24 @@ export class BetterCommerceOperation implements ICommerceProvider {
             }
         }
         return null;
+    }
+
+    private async handlePostPaymentActions(gateway: string, orderId: string, extras: any): Promise<void> {
+
+        // Gift card redemption
+        if (gateway?.toLowerCase() === PaymentMethodType.GIFT_CARD?.toLowerCase()) {
+            try {
+                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount, orderReference: orderId, transactionReference: orderId }
+                await GiftCard.redeem(data, { headers: extras?.headers, cookies: extras?.cookies });
+            } catch (error) {
+                // Decision: Do we fail the payment or just log?
+                // This is a business logic decision
+            }
+        }
+
+        // Future: Add other post-payment actions here
+        // - Loyalty points
+        // - Inventory updates
+        // - Webhooks
     }
 }
