@@ -225,7 +225,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             }
                         } else {
 
-                            if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.WALLET?.toLowerCase()) {
+                            if (gateway?.toLowerCase() === PaymentMethodType.ACCOUNT_CREDIT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.WALLET?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.GIFT_CARD?.toLowerCase()) {
                                 paymentStatus = { statusId: PaymentStatus.PAID, purchaseAmount: orderAmount }
                             } else if (gateway?.toLowerCase() === PaymentMethodType.CHEQUE?.toLowerCase()) {
                                 paymentStatus = { statusId: PaymentStatus.AUTHORIZED, purchaseAmount: orderAmount }
