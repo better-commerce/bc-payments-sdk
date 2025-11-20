@@ -1118,7 +1118,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
         // Gift card redemption
         if (gateway?.toLowerCase() === PaymentMethodType.GIFT_CARD?.toLowerCase()) {
             try {
-                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount, orderReference: orderId, transactionReference: orderId }
+                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount, orderReference: orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0]: orderId, transactionReference: orderId }
                 await GiftCard.redeem(data, { headers: extras?.headers, cookies: extras?.cookies });
             } catch (error) {
                 // Decision: Do we fail the payment or just log?
