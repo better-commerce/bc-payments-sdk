@@ -378,7 +378,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 // Handle post-payment actions (e.g., gift card redemption)
                                 if (orderResultPostPaymentResponse?.id) {
-                                    await this.handlePostPaymentActions(gateway, txnOrderId, data?.extras);
+                                    await this.handlePostPaymentActions(gateway, txnOrderId, amountToBePaid, data?.extras);
                                 }
 
                                 return isCancelled
@@ -1113,12 +1113,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async handlePostPaymentActions(gateway: string, orderId: string, extras: any): Promise<void> {
+    private async handlePostPaymentActions(gateway: string, orderId: string, amount: number, extras: any): Promise<void> {
 
         // Gift card redemption
         if (gateway?.toLowerCase() === PaymentMethodType.GIFT_CARD?.toLowerCase()) {
             try {
-                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount, orderReference: orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0]: orderId, transactionReference: orderId }
+                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount || amount, orderReference: orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0]: orderId, transactionReference: orderId }
                 await GiftCard.redeem(data, { headers: extras?.headers, cookies: extras?.cookies });
             } catch (error) {
                 // Decision: Do we fail the payment or just log?
