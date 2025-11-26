@@ -131,7 +131,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                 if (gateway?.toLowerCase() === PaymentMethodType.PAYPAL?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CHECKOUT?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.STRIPE?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.KLARNA?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.CLEAR_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.OMNICAPITAL?.toLowerCase()) {
                     // For PayPal, Checkout, Stripe, Klarna & ClearPay, the order id is the payment gateway order txn id
                     paymentGatewayOrderTxnId = data?.extras?.orderId;
-                } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase()) {
+                } else if (gateway?.toLowerCase() === PaymentMethodType.NUVEI?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.NUVEI_APPLE_PAY?.toLowerCase() || gateway?.toLowerCase() === PaymentMethodType.NUVEI_PAY_BY_BANK?.toLowerCase()) {
                     paymentGatewayOrderTxnId = data?.extras?.token; // data?.extras?.orderId;
                 }
 
@@ -823,6 +823,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             case PaymentMethodType.NUVEI?.toLowerCase():
             case PaymentMethodType.NUVEI_GOOGLE_PAY?.toLowerCase():
+            case PaymentMethodType.NUVEI_APPLE_PAY?.toLowerCase():
+            case PaymentMethodType.NUVEI_PAY_BY_BANK?.toLowerCase():
 
                 // Get Nuvei payment details with retry logic
                 let nuveiOrderDetails;

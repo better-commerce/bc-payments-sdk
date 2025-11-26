@@ -36,4 +36,5 @@ export enum PaymentMethodType {
     NUVEI_GOOGLE_PAY = 'nuveigooglepay',
     NUVEI_APPLE_PAY = 'nuveiapplepay',
     GIFT_CARD = 'giftcard',
+    NUVEI_PAY_BY_BANK = 'nuveipaybybank',
 };

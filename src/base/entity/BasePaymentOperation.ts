@@ -104,7 +104,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             return await new CheckoutPayment().requestToken(data);
         } else if (paymentProvider === PaymentMethodType.ELAVON) {
             return await new ElavonPayment().requestToken(data);
-        } else if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
+        } else if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY || paymentProvider === PaymentMethodType.NUVEI_APPLE_PAY || paymentProvider === PaymentMethodType.NUVEI_PAY_BY_BANK) {
             return await new NuveiPayment().requestToken(data);
         }
         return null;
@@ -433,7 +433,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
      */
     public async getTransactionDetails(data: any) {
         const paymentProvider = this.getPaymentProvider();
-        if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
+        if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY || paymentProvider === PaymentMethodType.NUVEI_APPLE_PAY || paymentProvider === PaymentMethodType.NUVEI_PAY_BY_BANK) {
             return await new NuveiPayment().getTransactionDetails(data);
         }
         return null;
@@ -543,7 +543,7 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new ElavonPayment();
         } else if (paymentProvider === PaymentMethodType.OMNICAPITAL) {
             obj = new OmniCapitalPayment();
-        } else if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY) {
+        } else if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY || paymentProvider === PaymentMethodType.NUVEI_APPLE_PAY || paymentProvider === PaymentMethodType.NUVEI_PAY_BY_BANK) {
             obj = new NuveiPayment();
         }
         return obj;

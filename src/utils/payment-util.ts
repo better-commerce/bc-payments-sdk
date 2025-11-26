@@ -74,6 +74,8 @@ export const getGatewayId = (gatewayName: string) => {
         return PaymentMethodTypeId.NUVEI_APPLE_PAY
     } else if (matchStrings(gatewayName, PaymentMethodType.GIFT_CARD, true)) {
         return PaymentMethodTypeId.GIFT_CARD
+    } else if (matchStrings(gatewayName, PaymentMethodType.NUVEI_PAY_BY_BANK, true)) {
+        return PaymentMethodTypeId.NUVEI_PAY_BY_BANK
     }
     return -1
 }
@@ -128,6 +130,8 @@ export const getGatewayName = (id: number) => {
         return PaymentMethodType.NUVEI_APPLE_PAY
     } else if (id === PaymentMethodTypeId.GIFT_CARD) {
         return PaymentMethodType.GIFT_CARD
+    } else if (id === PaymentMethodTypeId.NUVEI_PAY_BY_BANK) {
+        return PaymentMethodType.NUVEI_PAY_BY_BANK
     }
     return -1
 }

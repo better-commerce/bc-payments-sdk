@@ -224,7 +224,7 @@ export abstract class BasePaymentProvider {
                     }
                 });
                 return true;
-            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI.toLowerCase() || config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI_GOOGLE_PAY.toLowerCase()) {
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI.toLowerCase() || config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI_GOOGLE_PAY.toLowerCase() || config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI_APPLE_PAY.toLowerCase() || config?.systemName?.toLowerCase() === PaymentMethodType.NUVEI_PAY_BY_BANK.toLowerCase()) {
 
                 const merchantId = config?.settings?.find((x: any) => x.key === "AccountCode")?.value || Defaults.String.Value;
                 const merchantSiteId = config?.settings?.find((x: any) => x.key === "Signature")?.value || Defaults.String.Value;
