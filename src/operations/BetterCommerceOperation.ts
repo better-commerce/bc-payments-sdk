@@ -1120,21 +1120,25 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
         // Gift card creation
         if (order?.id !== Guid.empty && order?.items?.length) {
-            const giftCardItems = order?.items?.filter((item: any) => item?.itemType === 4)
-            if (giftCardItems?.length) {
-                try {
-                    const giftCardsAmount = giftCardItems.reduce((acc: number, item: any) => {
-                        return acc + (item?.price?.raw?.withTax ?? 0);
-                    }, 0)
-                    const currency = order?.currencyCode
-                    const purchaseOrderReference = orderId
-                    const customerId = order?.customerId
-                    const recipientEmail = order?.customer?.email || order?.customer?.username
+            const paidPayment = order?.payments?.filter((payment: any) => payment?.status === PaymentStatus.PAID || payment?.status === PaymentStatus.AUTHORIZED)
 
-                    const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId, customerId }
-                    await GiftCard.createGiftCard(data, { headers: extras?.headers, cookies: extras?.cookies });
-                } catch (error) {
-                    // Log error but don't fail the payment flow
+            if (paidPayment?.length) {
+                const giftCardItems = order?.items?.filter((item: any) => item?.itemType === 4)
+                if (giftCardItems?.length) {
+                    try {
+                        const giftCardsAmount = giftCardItems.reduce((acc: number, item: any) => {
+                            return acc + (item?.price?.raw?.withTax ?? 0);
+                        }, 0)
+                        const currency = order?.currencyCode
+                        const purchaseOrderReference = orderId
+                        const customerId = order?.customerId
+                        const recipientEmail = order?.customer?.email || order?.customer?.username
+
+                        const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId, customerId }
+                        await GiftCard.createGiftCard(data, { headers: extras?.headers, cookies: extras?.cookies });
+                    } catch (error) {
+                        // Log error but don't fail the payment flow
+                    }
                 }
             }
         }
