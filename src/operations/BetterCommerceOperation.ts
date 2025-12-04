@@ -28,6 +28,7 @@ import { OmniCapitalPayment } from "../modules/payments/OmniCapitalPayment";
 import { NuveiPayment } from "../modules/payments/NuveiPayment";
 import { DEBUG_LOGGING_ENABLED } from "../constants/constants";
 import { GiftCard } from "../modules/better-commerce/GiftCard";
+import { Guid } from "../types/guid";
 
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
@@ -378,7 +379,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 // Handle post-payment actions (e.g., gift card redemption)
                                 if (orderResultPostPaymentResponse?.id) {
-                                    await this.handlePostPaymentActions(gateway, txnOrderId, amountToBePaid, data?.extras);
+                                    await this.handlePostPaymentActions(gateway, txnOrderId, amountToBePaid, data?.extras, orderResult);
                                 }
 
                                 return isCancelled
@@ -1115,12 +1116,33 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async handlePostPaymentActions(gateway: string, orderId: string, amount: number, extras: any): Promise<void> {
+    private async handlePostPaymentActions(gateway: string, orderId: string, amount: number, extras: any, order: any): Promise<void> {
+
+        // Gift card creation
+        if (order?.id !== Guid.empty && order?.items?.length) {
+            const giftCardItems = order?.items?.filter((item: any) => item?.itemType === 4)
+            if (giftCardItems?.length) {
+                try {
+                    const giftCardsAmount = giftCardItems.reduce((acc: number, item: any) => {
+                        return acc + (item?.price?.raw?.withTax ?? 0);
+                    }, 0)
+                    const currency = order?.currencyCode
+                    const purchaseOrderReference = orderId
+                    const customerId = order?.customerId
+                    const recipientEmail = order?.customer?.email || order?.customer?.username
+
+                    const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId, customerId }
+                    await GiftCard.createGiftCard(data, { headers: extras?.headers, cookies: extras?.cookies });
+                } catch (error) {
+                    // Log error but don't fail the payment flow
+                }
+            }
+        }
 
         // Gift card redemption
         if (gateway?.toLowerCase() === PaymentMethodType.GIFT_CARD?.toLowerCase()) {
             try {
-                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount || amount, orderReference: orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0]: orderId, transactionReference: orderId }
+                const data = { code: extras?.paymentInfo?.paymentInfo2, amount: extras?.partialAmount || amount, orderReference: orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0] : orderId, transactionReference: orderId }
                 await GiftCard.redeem(data, { headers: extras?.headers, cookies: extras?.cookies });
             } catch (error) {
                 // Decision: Do we fail the payment or just log?

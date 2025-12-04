@@ -13,4 +13,11 @@ export class GiftCard {
         const redeemResult = await Api.call(`giftcard/gift-cards/redeem`, RequestMethod.POST, data, headers, cookies, true, Endpoints.Base.APIS_URL);
         return redeemResult;
     }
+
+    static async createGiftCard(data: any, { headers, cookies }: any): Promise<any> {
+        console.log("--- createGiftCard Input ---", data)
+        const createGiftCardResult = await Api.call(`giftcard/gift-cards`, RequestMethod.POST, data, headers, cookies, true, Endpoints.Base.APIS_URL);
+        console.log("--- createGiftCard Result ---", createGiftCardResult)
+        return createGiftCardResult;
+    }
 }
