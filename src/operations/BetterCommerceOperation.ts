@@ -379,7 +379,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 // Handle post-payment actions (e.g., gift card redemption)
                                 if (orderResultPostPaymentResponse?.id) {
-                                    await this.handlePostPaymentActions(gateway, txnOrderId, amountToBePaid, data?.extras, orderResult);
+                                    await this.handlePostPaymentActions(gateway, orderId, txnOrderId, amountToBePaid, data?.extras, orderResultPostPaymentResponse);
                                 }
 
                                 return isCancelled
@@ -1116,7 +1116,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async handlePostPaymentActions(gateway: string, orderId: string, amount: number, extras: any, order: any): Promise<void> {
+    private async handlePostPaymentActions(gateway: string, dbOrderId: string, orderId: string, amount: number, extras: any, order: any): Promise<void> {
 
         // Gift card creation
         if (order?.id !== Guid.empty && order?.items?.length) {
@@ -1130,11 +1130,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             return acc + (item?.price?.raw?.withTax ?? 0);
                         }, 0)
                         const currency = order?.currencyCode
-                        const purchaseOrderReference = orderId
+                        const purchaseOrderReference = orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0] : orderId
                         const customerId = order?.customerId
                         const recipientEmail = order?.customer?.email || order?.customer?.username
 
-                        const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId, customerId }
+                        const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId: dbOrderId, customerId }
                         await GiftCard.createGiftCard(data, { headers: extras?.headers, cookies: extras?.cookies });
                     } catch (error) {
                         // Log error but don't fail the payment flow
