@@ -29,6 +29,8 @@ import { NuveiPayment } from "../modules/payments/NuveiPayment";
 import { DEBUG_LOGGING_ENABLED } from "../constants/constants";
 import { GiftCard } from "../modules/better-commerce/GiftCard";
 import { Guid } from "../types/guid";
+import { Basket } from "../modules/better-commerce/Basket";
+import { Config } from "../modules/better-commerce/Config";
 
 /**
  * Class {BetterCommerceOperation} is the main entry point for all the operations related to BetterCommerce.
@@ -124,6 +126,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
             const gateway = data?.extras?.gateway || Defaults.String.Value;
             let paymentType = data?.extras?.paymentType || PaymentSelectionType.FULL; // Default value is FULL
             let partialAmount = data?.extras?.partialAmount || Defaults.Int.Value; // Default value is 0
+            let loyaltyPointsPaymentResponse: any = {}
 
             if (gateway) {
                 let paymentGatewayOrderTxnId = "";
@@ -301,7 +304,18 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                         }
                                     }
                                 }
+
+                                if (!isPartialPaymentEnabled || (isPartialPaymentEnabled && isLastPartialPayment)) {
+                                    loyaltyPointsPaymentResponse = await this.handleLoyaltyPointsPayment(isPartialPayment, orderAmount, data?.extras, totalPartiallyPaidAmount)
+                                }
                             }
+
+                            const isLoyaltyPointsPayment = (loyaltyPointsPaymentResponse?.id && loyaltyPointsPaymentResponse?.id !== Guid.empty)
+                            if (isLoyaltyPointsPayment) {
+                                isPartialPaymentEnabled = true
+                                paymentInfo9 = !isCancelled ? paymentStatus?.purchaseAmount : 0
+                            }
+
                             /**************** This block is for partial payments only (ENDS) ****************/
 
                             //console.log('paymentStatus', paymentStatus)
@@ -311,8 +325,12 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 cardNo: null,
                                 orderNo: parseInt(txnOrderId?.split('-')[0]),
                                 orderAmount,
-                                paidAmount: !isCancelled ? paymentStatus?.purchaseAmount : 0,
-                                balanceAmount: (paymentType === PaymentSelectionType.PARTIAL) ? (orderAmount - partialAmount) : 0,
+                                paidAmount: !isCancelled 
+                                    ? (isLoyaltyPointsPayment) ? orderAmount : paymentStatus?.purchaseAmount 
+                                    : 0,
+                                balanceAmount: isLoyaltyPointsPayment 
+                                    ? 0
+                                    : (paymentType === PaymentSelectionType.PARTIAL) ? (orderAmount - partialAmount) : 0,
                                 isValid: true,
                                 status: !isCancelled ? paymentStatus?.statusId : PaymentStatus.DECLINED,
                                 authCode: !isCancelled
@@ -379,7 +397,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                 // Handle post-payment actions (e.g., gift card redemption)
                                 if (orderResultPostPaymentResponse?.id) {
-                                    await this.handlePostPaymentActions(gateway, orderId, txnOrderId, amountToBePaid, data?.extras, orderResultPostPaymentResponse);
+                                    await this.handlePostPaymentResponseActions(gateway, orderId, txnOrderId, amountToBePaid, data?.extras, orderResultPostPaymentResponse);
                                 }
 
                                 return isCancelled
@@ -1116,7 +1134,163 @@ export class BetterCommerceOperation implements ICommerceProvider {
         return null;
     }
 
-    private async handlePostPaymentActions(gateway: string, dbOrderId: string, orderId: string, amount: number, extras: any, order: any): Promise<void> {
+    /**
+     * Handles pre-payment actions before processing a payment.
+     * Currently, it only checks if there is a valid basket with loyalty value greater than 0.
+     * If so, it will perform the necessary actions to update the basket and reduce the loyalty value.
+     * @param {any} extras The extras object containing the basketId and other necessary data.
+     * @returns {Promise<void>} The promise of the handled pre-payment actions.
+     */
+    private async handleLoyaltyPointsPayment(isPartialPayment: boolean, orderAmount: number, extras: any, totalPartiallyPaidAmount = 0): Promise<void> {
+        const basketId = extras?.cookies?.basketId
+        let orderId = ''
+        try {
+            if (basketId) {
+                const { result: basket } = await Basket.get({ basketId }, { headers: extras?.headers, cookies: extras?.cookies })
+
+                // If loyalty points have been redeemed in the basket
+                if (basket?.id !== Guid.empty && basket?.loyaltyValue > 0) {
+                    const { result: pluginConfig } = await Config.getPluginConfig({ pluginCode: "loyalty" }, { headers: extras?.headers, cookies: extras?.cookies })
+                    let paymentMethod: any = {}
+                    if (pluginConfig?.settings) {
+                        try {
+                            const settings = JSON.parse(pluginConfig?.settings)
+                            if (settings?.AccountCode && settings?.AccountCode?.split(",").length > 1) {
+                                const accountCode = settings?.AccountCode?.split(",")
+                                paymentMethod = {
+                                    methodId: accountCode?.[0],
+                                    methodName: accountCode?.[1],
+                                }
+                            }
+                        } catch (e) {
+                        }
+                    }
+                    const shippingMethodId = basket?.shippingMethodId
+                    const selectedShipping = basket?.shippingMethods?.find((x: any) => x?.id === shippingMethodId)
+                    const convertOrderInput = {
+                        basketId: basket?.id,
+                        customerId: basket?.customerId,
+                        basket: null,
+                        billingAddress: basket?.billingAddress,
+                        shippingAddress: basket?.shippingAddress,
+                        selectedShipping,
+                        selectedPayment: {
+                            id: paymentMethod?.methodId || 0,
+                            systemName: paymentMethod?.methodName || '',
+                        },
+                        storeId: basket?.storeId,
+                        Payment: {
+                            orderAmount,
+                            id: null,
+                            cardNo: null,
+                            orderNo: 0,
+                            paidAmount: 0,
+                            balanceAmount: 0,
+                            isValid: false,
+                            status: 0,
+                            authCode: null,
+                            issuerUrl: null,
+                            paRequest: null,
+                            pspSessionCookie: null,
+                            pspResponseCode: null,
+                            pspResponseMessage: null,
+                            paymentGatewayId: paymentMethod?.methodId || 0,
+                            paymentGateway: paymentMethod?.methodName || '',
+                            token: null,
+                            payerId: null,
+                            cvcResult: null,
+                            avsResult: null,
+                            secure3DResult: null,
+                            cardHolderName: null,
+                            issuerCountry: null,
+                            info1: null,
+                            fraudScore: null,
+                            paymentMethod: paymentMethod?.methodName || '',
+                            isVerify: false,
+                            isValidAddress: false,
+                            lastUpdatedBy: null,
+                            operatorId: null,
+                            refStoreId: null,
+                            tillNumber: null,
+                            externalRefNo: null,
+                            expiryYear: null,
+                            expiryMonth: null,
+                            isMoto: false,
+                            additionalServiceCharge: '0.0'
+                        }
+                    }
+                    const { errors, message, result: orderResult }: any = await Checkout.convertOrder(convertOrderInput, { headers: extras?.headers, cookies: extras?.cookies })
+                    if (!errors || (errors && errors?.length === 0)) {
+                        orderId = orderResult?.id
+
+                        const orderModel = {
+                            id: orderResult?.payment?.id,
+                            cardNo: null,
+                            orderNo: orderResult?.payment?.orderNo,
+                            orderAmount,
+                            paidAmount: basket?.loyaltyValue,
+                            balanceAmount: isPartialPayment 
+                                ? orderAmount - (totalPartiallyPaidAmount + basket?.loyaltyValue) 
+                                : orderAmount - basket?.loyaltyValue,
+                            isValid: true,
+                            status: PaymentStatus.PAID,
+                            authCode: '',
+                            issuerUrl: null,
+                            paRequest: null,
+                            pspSessionCookie: { loyaltyPoints: basket?.loyaltyPoints, loyaltyValue: basket?.loyaltyValue },
+                            pspResponseCode: PaymentStatus.PAID,
+                            pspResponseMessage: '',
+                            paymentGatewayId: paymentMethod?.methodId,
+                            paymentGateway: paymentMethod?.methodName,
+                            token: null,
+                            payerId: null,
+                            cvcResult: null,
+                            avsResult: null,
+                            secure3DResult: null,
+                            cardHolderName: null,
+                            issuerCountry: null,
+                            info1: '',
+                            fraudScore: null,
+                            paymentMethod: paymentMethod?.methodName,
+                            paymentInfo1: null, // (pspInformation)
+                            paymentInfo2: null, // (paymentIdentifier)
+                            paymentInfo3: null, // (pspGatewayInfo)
+                            paymentInfo4: null, // (cardType)
+                            paymentInfo5: null, // (cardIssuer)
+                            paymentInfo6: null, // (cardBrand)
+                            paymentInfo9: basket?.loyaltyValue,
+                            cardType: null,
+                            operatorId: null,
+                            refStoreId: null,
+                            tillNumber: null,
+                            externalRefNo: null,
+                            expiryYear: null,
+                            expiryMonth: null,
+                            isMoto: false,
+                            upFrontPayment: false,
+                            upFrontAmount: '0.00',
+                            isPrePaid: false,
+                            isPartialPaymentEnabled: true,
+                        }
+
+                        const paymentResponseInput = {
+                            model: orderModel,
+                            orderId,
+                        };
+
+                        await Logger.logPayment({ data: orderModel, message: `${paymentMethod?.methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
+                        console.log('--- Loyalty paymentResponseInput ---', JSON.stringify(paymentResponseInput))
+                        const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
+                        return paymentResponseResult
+                    }
+                }
+            }
+        } catch (ex) {
+        }
+        return null
+    }
+
+    private async handlePostPaymentResponseActions(gateway: string, dbOrderId: string, orderId: string, amount: number, extras: any, order: any): Promise<void> {
 
         // Gift card creation
         if (order?.id !== Guid.empty && order?.items?.length) {
