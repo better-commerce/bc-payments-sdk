@@ -16,7 +16,7 @@ export class Config {
      */
     static async getPluginConfig(data, { headers, cookies }: any): Promise<any> {
         console.log("pluginConfigInput", { ...{ headers, cookies } });
-        const pluginConfigResult = await Api.call(`api/v2/infra/config/plugin/${data?.pluginCode}`, RequestMethod.GET, data, headers, cookies);
+        const pluginConfigResult = await Api.call(`api/v2/infra/config/plugin`, RequestMethod.GET, { pluginCode: data?.pluginCode }, headers, cookies);
         console.log("pluginConfigResult", pluginConfigResult);
         return pluginConfigResult;
     }

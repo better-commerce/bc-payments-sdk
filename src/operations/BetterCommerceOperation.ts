@@ -1169,7 +1169,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     const selectedShipping = basket?.shippingMethods?.find((x: any) => x?.id === shippingMethodId)
                     const convertOrderInput = {
                         basketId: basket?.id,
-                        customerId: basket?.customerId,
+                        customerId: basket?.customerId || basket?.userId,
                         basket: null,
                         billingAddress: basket?.billingAddress,
                         shippingAddress: basket?.shippingAddress,
@@ -1278,7 +1278,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             orderId,
                         };
 
-                        await Logger.logPayment({ data: orderModel, message: `${paymentMethod?.methodName?.toLowerCase()} | UpdatePaymentWebhook | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
+                        await Logger.logPayment({ data: orderModel, message: `${paymentMethod?.methodName?.toLowerCase()} | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                         console.log('--- Loyalty paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                         const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
                         return paymentResponseResult
