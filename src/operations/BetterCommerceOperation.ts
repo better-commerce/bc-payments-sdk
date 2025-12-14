@@ -1231,7 +1231,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             paidAmount: basket?.loyaltyValue,
                             balanceAmount: isPartialPayment 
                                 ? orderAmount - (totalPartiallyPaidAmount + basket?.loyaltyValue) 
-                                : orderAmount - basket?.loyaltyValue,
+                                : Number(Number((orderAmount - basket?.loyaltyValue).toFixed(2))),
                             isValid: true,
                             status: PaymentStatus.PAID,
                             authCode: '',
