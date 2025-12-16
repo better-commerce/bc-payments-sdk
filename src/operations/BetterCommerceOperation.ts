@@ -1298,17 +1298,16 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             if (paidPayment?.length) {
                 const giftCardItems = order?.items?.filter((item: any) => item?.itemType === 4)
+                // return;
                 if (giftCardItems?.length) {
                     try {
-                        const giftCardsAmount = giftCardItems.reduce((acc: number, item: any) => {
-                            return acc + (item?.price?.raw?.withTax ?? 0);
-                        }, 0)
                         const currency = order?.currencyCode
                         const purchaseOrderReference = orderId?.split('-')?.length > 0 ? orderId?.split('-')?.[0] : orderId
                         const customerId = order?.customerId
                         const recipientEmail = order?.customer?.email || order?.customer?.username
-
-                        const data = { amount: giftCardsAmount, currency, recipientEmail, purchaseOrderReference, orderId: dbOrderId, customerId }
+                        const lines = giftCardItems?.map((item: any) => ({ amount: item?.price?.raw?.withTax ?? 0, currency, recipientEmail, purchaseOrderReference, qty: item?.qty ?? 0 }))
+                        
+                        const data = { lines, orderId: dbOrderId, customerId }
                         await GiftCard.createGiftCard(data, { headers: extras?.headers, cookies: extras?.cookies });
                     } catch (error) {
                         // Log error but don't fail the payment flow
