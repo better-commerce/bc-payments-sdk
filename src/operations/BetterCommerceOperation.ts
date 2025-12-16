@@ -1237,7 +1237,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             authCode: '',
                             issuerUrl: null,
                             paRequest: null,
-                            pspSessionCookie: { loyaltyPoints: basket?.loyaltyPoints, loyaltyValue: basket?.loyaltyValue },
+                            pspSessionCookie: JSON.stringify({ loyaltyPoints: basket?.loyaltyPoints, loyaltyValue: basket?.loyaltyValue }),
                             pspResponseCode: PaymentStatus.PAID,
                             pspResponseMessage: '',
                             paymentGatewayId: paymentMethod?.methodId,
