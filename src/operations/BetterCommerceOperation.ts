@@ -1237,7 +1237,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             authCode: '',
                             issuerUrl: null,
                             paRequest: null,
-                            pspSessionCookie: { loyaltyPoints: basket?.loyaltyPoints, loyaltyValue: basket?.loyaltyValue },
+                            pspSessionCookie: JSON.stringify({ loyaltyPoints: basket?.loyaltyPoints, loyaltyValue: basket?.loyaltyValue }),
                             pspResponseCode: PaymentStatus.PAID,
                             pspResponseMessage: '',
                             paymentGatewayId: paymentMethod?.methodId,
@@ -1298,7 +1298,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
             if (paidPayment?.length) {
                 const giftCardItems = order?.items?.filter((item: any) => item?.itemType === 4)
-                // return;
+
                 if (giftCardItems?.length) {
                     try {
                         const currency = order?.currencyCode
