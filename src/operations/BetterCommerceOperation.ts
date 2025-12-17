@@ -261,9 +261,34 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 // Get all partial payments for this order.
                                 const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
 
-                                // Calculate the total partially paid amount for this order.
-                                const totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
-                                console.log('totalPartiallyPaidAmount', totalPartiallyPaidAmount)
+                                // Calculate the total partially paid amount for this order (from recorded payments).
+                                let totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+
+                                // Preserve the original value (without loyalty) for handleLoyaltyPointsPayment
+                                const totalPartiallyPaidAmountWithoutLoyalty = totalPartiallyPaidAmount;
+
+                                // Check for loyalty value in basket that hasn't been recorded as a payment yet
+                                let basketLoyaltyValue = 0
+                                try {
+                                    const basketId = data?.extras?.cookies?.basketId
+                                    if (basketId) {
+                                        const { result: basket } = await Basket.get({ basketId }, { headers: data?.extras?.headers, cookies: data?.extras?.cookies })
+                                        if (basket?.id !== Guid.empty && basket?.loyaltyValue > 0) {
+                                            // Check if loyalty payment is already recorded in order payments
+                                            const loyaltyPaymentRecorded = payments?.some((p: any) =>
+                                                p?.pspSessionCookie?.includes('loyaltyPoints') ||
+                                                p?.pspSessionCookie?.includes('loyaltyValue')
+                                            )
+                                            if (!loyaltyPaymentRecorded) {
+                                                basketLoyaltyValue = basket.loyaltyValue
+                                                totalPartiallyPaidAmount += basketLoyaltyValue
+                                            }
+                                        }
+                                    }
+                                } catch (e) {
+                                    // Ignore basket fetch errors - proceed with recorded payments only
+                                }
+
 
                                 // Is this a partial payment?
                                 let isPartialPayment = (paymentType === PaymentSelectionType.PARTIAL)
@@ -277,6 +302,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                     // Calculate the partial amount.
                                     partialAmount = orderAmount - totalPartiallyPaidAmount
+                                    amountToBePaid = partialAmount
                                 }
 
                                 // If this is a partial payment.
@@ -284,7 +310,6 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                     // Always set paymentInfo9 to partial amount.
                                     paymentInfo9 = partialAmount
-
                                     // If there are any partial payments, check if the total paid amount is equal to the order amount.
                                     if (totalPartiallyPaidAmount > 0) {
 
@@ -293,7 +318,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                                             // If the [total partially paid + current partial amount] is equal to the order amount, then the payment status is PAID.
                                             statusId: isLastPartialPayment ? PaymentStatus.PAID : PaymentStatus.PENDING,
-                                            purchaseAmount: isLastPartialPayment ? orderAmount : amountToBePaid,
+                                            purchaseAmount: amountToBePaid,
                                             paymentInfo: paymentStatus?.paymentInfo || null
                                         }
                                     } else {
@@ -306,16 +331,19 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 }
 
                                 if (!isPartialPaymentEnabled || (isPartialPaymentEnabled && isLastPartialPayment)) {
-                                    loyaltyPointsPaymentResponse = await this.handleLoyaltyPointsPayment(isPartialPayment, orderAmount, data?.extras, totalPartiallyPaidAmount)
+                                    // Pass totalPartiallyPaidAmountWithoutLoyalty to avoid double-counting loyalty value
+                                    loyaltyPointsPaymentResponse = await this.handleLoyaltyPointsPayment(isPartialPayment, orderAmount, data?.extras, totalPartiallyPaidAmountWithoutLoyalty)
                                 }
                             }
 
                             const isLoyaltyPointsPayment = (loyaltyPointsPaymentResponse?.id && loyaltyPointsPaymentResponse?.id !== Guid.empty)
                             if (isLoyaltyPointsPayment) {
                                 isPartialPaymentEnabled = true
-                                paymentInfo9 = !isCancelled ? paymentStatus?.purchaseAmount : 0
+                                // Only set paymentInfo9 if it wasn't already set by the partial payment block
+                                if (paymentInfo9 === 0) {
+                                    paymentInfo9 = !isCancelled ? amountToBePaid : 0
+                                }
                             }
-
                             /**************** This block is for partial payments only (ENDS) ****************/
 
                             //console.log('paymentStatus', paymentStatus)
