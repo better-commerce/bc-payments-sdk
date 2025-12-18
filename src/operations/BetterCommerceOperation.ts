@@ -353,8 +353,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                                 cardNo: null,
                                 orderNo: parseInt(txnOrderId?.split('-')[0]),
                                 orderAmount,
-                                paidAmount: !isCancelled 
-                                    ? (isLoyaltyPointsPayment) ? orderAmount : paymentStatus?.purchaseAmount 
+                                paidAmount: !isCancelled
+                                    ? (isLoyaltyPointsPayment || isLastPartialPayment) ? orderAmount : paymentStatus?.purchaseAmount
                                     : 0,
                                 balanceAmount: isLoyaltyPointsPayment 
                                     ? 0
@@ -443,6 +443,30 @@ export class BetterCommerceOperation implements ICommerceProvider {
 
                         }
                     }
+                } else if (gateway?.toLowerCase() == 'loyalty') {
+                    const { orderId } = data;
+                    let isPartialPayment = (paymentType === PaymentSelectionType.PARTIAL)
+
+                    // Get order details
+                    const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+
+                    // Get order amount first (before using it in filter)
+                    const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+
+                    // Get all payments for this order.
+                    const payments = orderResult?.payments || [];
+
+                    // Get all partial payments for this order.
+                    const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
+
+                     // Calculate the total partially paid amount for this order (from recorded payments).
+                    let totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+
+                    // Preserve the original value (without loyalty) for handleLoyaltyPointsPayment
+                    const totalPartiallyPaidAmountWithoutLoyalty = totalPartiallyPaidAmount;
+                    loyaltyPointsPaymentResponse = await this.handleLoyaltyPointsPayment(isPartialPayment, orderAmount, data?.extras, totalPartiallyPaidAmountWithoutLoyalty, true)
+                    const isLoyaltyPointsPayment = (loyaltyPointsPaymentResponse?.id && loyaltyPointsPaymentResponse?.id !== Guid.empty)
+                    return isLoyaltyPointsPayment ? PaymentStatus.PAID : PaymentStatus.PENDING;
                 }
             }
         } catch (error: any) {
@@ -1169,7 +1193,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
      * @param {any} extras The extras object containing the basketId and other necessary data.
      * @returns {Promise<void>} The promise of the handled pre-payment actions.
      */
-    private async handleLoyaltyPointsPayment(isPartialPayment: boolean, orderAmount: number, extras: any, totalPartiallyPaidAmount = 0): Promise<void> {
+    private async handleLoyaltyPointsPayment(isPartialPayment: boolean, orderAmount: number, extras: any, totalPartiallyPaidAmount = 0, loyaltyAsLastPayment = false): Promise<void> {
         const basketId = extras?.cookies?.basketId
         let orderId = ''
         try {
@@ -1256,7 +1280,7 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             cardNo: null,
                             orderNo: orderResult?.payment?.orderNo,
                             orderAmount,
-                            paidAmount: basket?.loyaltyValue,
+                            paidAmount: loyaltyAsLastPayment ? orderAmount : basket?.loyaltyValue,
                             balanceAmount: isPartialPayment 
                                 ? orderAmount - (totalPartiallyPaidAmount + basket?.loyaltyValue) 
                                 : Number(Number((orderAmount - basket?.loyaltyValue).toFixed(2))),
