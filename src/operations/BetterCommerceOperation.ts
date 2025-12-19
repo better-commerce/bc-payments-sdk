@@ -447,20 +447,38 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     const { orderId } = data;
                     let isPartialPayment = (paymentType === PaymentSelectionType.PARTIAL)
 
-                    // Get order details
-                    const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+                    let orderAmount = 0;
+                    let totalPartiallyPaidAmount = 0;
 
-                    // Get order amount first (before using it in filter)
-                    const orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
+                    // Try to get order details if orderId exists
+                    if (orderId) {
+                        const { result: orderResult }: any = await Order.get(orderId, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
 
-                    // Get all payments for this order.
-                    const payments = orderResult?.payments || [];
+                        // Get order amount from order if it exists
+                        if (orderResult?.id && orderResult?.id !== Guid.empty) {
+                            orderAmount = orderResult?.grandTotal?.raw?.withTax || 0;
 
-                    // Get all partial payments for this order.
-                    const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
+                            // Get all payments for this order.
+                            const payments = orderResult?.payments || [];
 
-                     // Calculate the total partially paid amount for this order (from recorded payments).
-                    let totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+                            // Get all partial payments for this order.
+                            const orderPayments = payments?.filter((x: any) => x?.isPartialPaymentEnabled && x?.orderAmount == orderAmount) || [];
+
+                            // Calculate the total partially paid amount for this order (from recorded payments).
+                            totalPartiallyPaidAmount = orderPayments?.reduce((sum: any, x: any) => sum + x.paidAmount, 0) || 0;
+                        }
+                    }
+
+                    // If order doesn't exist or orderAmount is 0, get amount from basket (for first full payment with loyalty)
+                    if (orderAmount === 0) {
+                        const basketId = data?.extras?.cookies?.basketId;
+                        if (basketId) {
+                            const { result: basket } = await Basket.get({ basketId }, { headers: data?.extras?.headers, cookies: data?.extras?.cookies });
+                            if (basket?.id && basket?.id !== Guid.empty) {
+                                orderAmount = basket?.grandTotal?.raw?.withTax || 0;
+                            }
+                        }
+                    }
 
                     // Preserve the original value (without loyalty) for handleLoyaltyPointsPayment
                     const totalPartiallyPaidAmountWithoutLoyalty = totalPartiallyPaidAmount;
@@ -1281,9 +1299,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                             orderNo: orderResult?.payment?.orderNo,
                             orderAmount,
                             paidAmount: loyaltyAsLastPayment ? orderAmount : basket?.loyaltyValue,
-                            balanceAmount: isPartialPayment 
-                                ? orderAmount - (totalPartiallyPaidAmount + basket?.loyaltyValue) 
-                                : Number(Number((orderAmount - basket?.loyaltyValue).toFixed(2))),
+                            balanceAmount: loyaltyAsLastPayment
+                                ? 0
+                                : (isPartialPayment
+                                    ? orderAmount - (totalPartiallyPaidAmount + basket?.loyaltyValue)
+                                    : Number(Number((orderAmount - basket?.loyaltyValue).toFixed(2)))),
                             isValid: true,
                             status: PaymentStatus.PAID,
                             authCode: '',
