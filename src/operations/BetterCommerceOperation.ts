@@ -484,7 +484,11 @@ export class BetterCommerceOperation implements ICommerceProvider {
                     const totalPartiallyPaidAmountWithoutLoyalty = totalPartiallyPaidAmount;
                     loyaltyPointsPaymentResponse = await this.handleLoyaltyPointsPayment(isPartialPayment, orderAmount, data?.extras, totalPartiallyPaidAmountWithoutLoyalty, true)
                     const isLoyaltyPointsPayment = (loyaltyPointsPaymentResponse?.id && loyaltyPointsPaymentResponse?.id !== Guid.empty)
-                    return isLoyaltyPointsPayment ? PaymentStatus.PAID : PaymentStatus.PENDING;
+                    // Return an object with status and orderId so the frontend can redirect correctly
+                    return {
+                        status: isLoyaltyPointsPayment ? PaymentStatus.PAID : PaymentStatus.PENDING,
+                        orderId: loyaltyPointsPaymentResponse?.orderId || null,
+                    };
                 }
             }
         } catch (error: any) {
@@ -1353,7 +1357,8 @@ export class BetterCommerceOperation implements ICommerceProvider {
                         await Logger.logPayment({ data: orderModel, message: `${paymentMethod?.methodName?.toLowerCase()} | UpdatePaymentResponse API20 Request` }, { headers: {}, cookies: {} })
                         console.log('--- Loyalty paymentResponseInput ---', JSON.stringify(paymentResponseInput))
                         const { result: paymentResponseResult } = await Checkout.updatePaymentResponse(paymentResponseInput, { cookies: {} });
-                        return paymentResponseResult
+                        // Return both paymentResponseResult and orderId so the frontend can redirect correctly
+                        return { ...paymentResponseResult, orderId }
                     }
                 }
             }
