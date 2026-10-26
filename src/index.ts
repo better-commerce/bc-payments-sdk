@@ -6,7 +6,8 @@ import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderL
 import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
-import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
+import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay, Worldpay } from "./constants/enums/PaymentStatus";
+import { IWorldpayBillingAddress, IWorldpayHostedPaymentForm, IWorldpayPaymentRequest, IWorldpayPaymentResult, WorldpayVerificationMethod } from "./models/payments/IWorldpay";
 
 import { PaymentMethodType, PaymentMethodTypeId, PaymentSelectionType } from "./constants";
 import { getGatewayId, getGatewayName } from "./utils/payment-util";
@@ -16,7 +17,7 @@ import { JuspayPaymentType } from "./constants/enums";
 export { PaymentMethodType, PaymentMethodTypeId, JuspayPaymentType, PaymentSelectionType, };
 
 // Payments Module
-export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, PaymentStatus, };
+export { PayPal as PayPalConstants, Checkout as CheckoutConstants, Stripe as StripeConstants, Klarna as KlarnaConstants, Juspay as JuspayConstants, Worldpay as WorldpayConstants, PaymentStatus, };
 import { PaymentOperation } from "./operations/PaymentOperation";
 
 // BetterCommerce Module
@@ -36,6 +37,9 @@ export { KlarnaPaymentIntentType, KlarnaOrderLine, KlarnaPaymentIntent };
 
 // ClearPay Types
 export { ClearPayAddress, ClearPayOrderLine, ClearPayPaymentIntent };
+
+// Worldpay Types
+export { IWorldpayBillingAddress, IWorldpayHostedPaymentForm, IWorldpayPaymentRequest, IWorldpayPaymentResult, WorldpayVerificationMethod };
 
 // Payment Types
 export { PaymentOperation };

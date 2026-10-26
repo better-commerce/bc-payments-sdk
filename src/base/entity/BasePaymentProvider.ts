@@ -242,6 +242,10 @@ export abstract class BasePaymentProvider {
                     }
                 });
                 return true;
+            } else if (config?.systemName?.toLowerCase() === PaymentMethodType.WORLDPAY.toLowerCase()) {
+
+                // Hosted Payment Page: no gateway SDK to initialise, settings are read by {WorldpayPayment}.
+                return true;
             }
         }
 
