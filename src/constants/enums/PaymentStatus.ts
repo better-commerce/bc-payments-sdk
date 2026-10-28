@@ -248,29 +248,6 @@ export namespace Worldpay {
     SUCCESS = 'Y',
     CANCELLED = 'C',
   }
-
-  /**
-   * Enum {@link TestMode} contains the `testMode` values accepted by the Hosted Payment Page.
-   *
-   * @readonly
-   * @enum {number}
-   */
-  export enum TestMode {
-    LIVE = 0,
-    TEST = 100,
-  }
-
-  /**
-   * Enum {@link AuthMode} contains the `authMode` values accepted by the Hosted Payment Page.
-   * `A` is a full authorisation (sale), `E` is a pre-authorisation.
-   *
-   * @readonly
-   * @enum {string}
-   */
-  export enum AuthMode {
-    FULL_AUTH = 'A',
-    PRE_AUTH = 'E',
-  }
 }
 
 export namespace Juspay {

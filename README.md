@@ -117,10 +117,11 @@ It integrates SDK APIs for the following providers:
 | Name           | Reference                                                                                     | Description                                                                   |
 | :------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
 | HTML Redirect (Hosted Payment Page) | https://developerengine.fisglobal.com/apis/bg-total/html-redirect                | Order fields posted to `/wcc/purchase`; no server-to-server API call.          |
+| NPM Package    | https://github.com/better-commerce/bc-worldpay-sdk                                            | Node.js SDK for the Worldpay Hosted Payment Page - bc-worldpay-sdk            |
 | Dashboard - Sandbox        | https://secure-test.worldpay.com/sso/public/auth/login.html |                                                                               |
 | Dashboard - Live           | https://secure.worldpay.com/sso/public/auth/login.html                               |                                                                               |
 
-Implemented natively in this SDK (no separate `bc-worldpay-sdk` package). The purchase signature is the same as the legacy BetterCommerce (Omnicx) Worldpay plugin, so existing Worldpay installations work unchanged.
+The purchase signature is the same as the legacy BetterCommerce (Omnicx) Worldpay plugin, so existing Worldpay installations work unchanged.
 
 ## Installation
 

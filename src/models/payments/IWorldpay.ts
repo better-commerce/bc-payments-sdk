@@ -1,18 +1,10 @@
+import { IBillingAddress, IHostedPaymentForm, VerificationMethod } from "bc-worldpay-sdk";
 import { PaymentStatus } from "../../constants/enums/PaymentStatus";
 
 /**
  * Billing details pre-filled on the Worldpay Hosted Payment Page.
  */
-export interface IWorldpayBillingAddress {
-    firstName?: string;
-    lastName?: string;
-    address1?: string;
-    address2?: string;
-    address3?: string;
-    city?: string;
-    postCode?: string;
-    countryCode?: string;
-    phoneNo?: string;
+export interface IWorldpayBillingAddress extends IBillingAddress {
 }
 
 /**
@@ -51,19 +43,13 @@ export interface IWorldpayPaymentRequest {
 /**
  * An auto-submitting form the browser must POST to the Worldpay Hosted Payment Page.
  */
-export interface IWorldpayHostedPaymentForm {
-    action: string;
-    method: "POST";
-    fields: Record<string, string>;
+export interface IWorldpayHostedPaymentForm extends IHostedPaymentForm {
 }
 
 /**
- * How a Worldpay response was authenticated.
- * - `mac2`/`mac`: the HMAC-SHA256 / MD5 MAC on the HTML redirect result URL matched.
- * - `callbackPW`: the Payment Response password matched.
- * - `none`: no response secret is configured, so the response could not be authenticated.
+ * How a Worldpay response was authenticated (`mac2`, `mac`, `callbackPW` or `none`).
  */
-export type WorldpayVerificationMethod = "mac2" | "mac" | "callbackPW" | "none";
+export type WorldpayVerificationMethod = VerificationMethod;
 
 /**
  * Normalised result of {@link WorldpayPayment.getOrderDetails} (a Worldpay return/notification).

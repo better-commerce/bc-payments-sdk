@@ -17,6 +17,12 @@ import { ElavonEnvironment } from "bc-elavon-sdk";
 import { OpayoEnvironment } from "bc-opayo-sdk";
 import { OmniCapitalEnvironment } from "bc-omnicapital-sdk";
 import { NuveiEnvironment } from "bc-nuvei-sdk";
+import { WorldpayEnvironment } from "bc-worldpay-sdk";
+
+/**
+ * MD5 secret used by the legacy BetterCommerce (Omnicx) Worldpay plugin when the `Signature` setting is empty.
+ */
+const WORLDPAY_LEGACY_MD5_SECRET = "test1234";
 
 /**
  * Abstract class {BasePaymentProvider} is the base class for all payment providers.
@@ -244,7 +250,33 @@ export abstract class BasePaymentProvider {
                 return true;
             } else if (config?.systemName?.toLowerCase() === PaymentMethodType.WORLDPAY.toLowerCase()) {
 
-                // Hosted Payment Page: no gateway SDK to initialise, settings are read by {WorldpayPayment}.
+                let extras: any = BCEnvironment.getExtras();
+                const setting = (key: string) => config?.settings?.find((x: any) => x.key === key)?.value || Defaults.String.Value;
+                const installationId = String(extras?.worldpayInstallationId || setting("UserName") || setting("MotoUserName")).trim();
+                const merchantCode = setting("AccountCode");
+                // Same default as the legacy BetterCommerce (Omnicx) Worldpay plugin, so existing signatures still match.
+                const md5Secret = setting("Signature") || WORLDPAY_LEGACY_MD5_SECRET;
+                const responseSecret = String(extras?.worldpayResponseSecret || setting("MotoSignature"));
+                const useSandboxOverride = extras?.worldpayUseSandbox;
+                const isWorldpaySandbox = useSandboxOverride !== undefined && useSandboxOverride !== Defaults.String.Value ? stringToBoolean(String(useSandboxOverride)) : isSandbox;
+                const notificationUrl = config?.notificationUrl || Defaults.String.Value;
+                const returnUrl = /^https?:\/\//i.test(notificationUrl) ? notificationUrl : `${extras?.origin || Defaults.String.Value}${notificationUrl}`;
+                extras = {
+                    ...extras,
+                    returnUrl,
+                    cancelUrl: setting("CancelUrl"),
+                    paymentPageUrl: isWorldpaySandbox ? setting("TestUrl") : setting("ProductionUrl"),
+                    requireVerifiedResponse: extras?.worldpayRequireVerifiedResponse,
+                };
+
+                // Init Env
+                WorldpayEnvironment.init(installationId, merchantCode, md5Secret, responseSecret, isWorldpaySandbox, { ...extras,
+                    logActivity: (data: any) => {
+                        if (providerLoggingEnabled) {
+                            Logger.logPayment(data, {});
+                        }
+                    }
+                });
                 return true;
             }
         }
