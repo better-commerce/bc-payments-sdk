@@ -22,6 +22,7 @@ import { OmniCapitalPayment } from "../../modules/payments/OmniCapitalPayment";
 import { INuveiPaymentProvider } from "../contracts/GatewayProviders/INuveiPaymentProvider";
 import { IOpenOrderResponse } from "bc-nuvei-sdk";
 import { NuveiPayment } from "../../modules/payments/NuveiPayment";
+import { WorldpayPayment } from "../../modules/payments/WorldpayPayment";
 
 /**
  * Abstract class {BasePaymentOperation} is the base class for all payment operations 
@@ -503,7 +504,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
      */
     protected getPaymentProvider(): PaymentMethodType {
         const config: any = BCEnvironment.getConfig();
-        console.log("getObject() config", config);
+        // Log the gateway name only: the config holds gateway secrets (Signature, Moto* settings).
+        console.log("getObject() config", config?.systemName);
         /*Logger.logPayment({
             data: { data: config },
             message: `${config?.systemName} | GetPaymentProvider`,
@@ -545,6 +547,8 @@ export abstract class BasePaymentOperation implements ICheckoutPaymentProvider, 
             obj = new OmniCapitalPayment();
         } else if (paymentProvider === PaymentMethodType.NUVEI || paymentProvider === PaymentMethodType.NUVEI_GOOGLE_PAY || paymentProvider === PaymentMethodType.NUVEI_APPLE_PAY || paymentProvider === PaymentMethodType.NUVEI_PAY_BY_BANK) {
             obj = new NuveiPayment();
+        } else if (paymentProvider === PaymentMethodType.WORLDPAY) {
+            obj = new WorldpayPayment();
         }
         return obj;
     }

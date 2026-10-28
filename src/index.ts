@@ -6,6 +6,7 @@ import { IOrderLine as KlarnaOrderLine } from "bc-klarna-sdk/dist/models/IOrderL
 import { OrderLine as ClearPayOrderLine, Address as ClearPayAddress, PaymentIntent as ClearPayPaymentIntent } from "bc-clearpay-sdk";
 import { APIConnectionException, APIException, AuthenticationException, BCException, InvalidRequestException } from "./base/entity";
 import { IPaymentInfo } from "./models/better-commerce/IPaymentInfo";
+import { IBillingAddress as IWorldpayBillingAddress, IHostedPaymentForm as IWorldpayHostedPaymentForm, IPaymentRequest as IWorldpayPaymentRequest, IPaymentResult as IWorldpayPaymentResult, VerificationMethod as WorldpayVerificationMethod, PaymentStatus as WorldpayPaymentStatus, TransStatus as WorldpayTransStatus, TransactionOutcome as WorldpayTransactionOutcome } from "bc-worldpay-sdk";
 import { PaymentStatus, PayPal, Checkout, Stripe, Klarna, Juspay } from "./constants/enums/PaymentStatus";
 
 import { PaymentMethodType, PaymentMethodTypeId, PaymentSelectionType } from "./constants";
@@ -36,6 +37,9 @@ export { KlarnaPaymentIntentType, KlarnaOrderLine, KlarnaPaymentIntent };
 
 // ClearPay Types
 export { ClearPayAddress, ClearPayOrderLine, ClearPayPaymentIntent };
+
+// Worldpay Types
+export { IWorldpayBillingAddress, IWorldpayHostedPaymentForm, IWorldpayPaymentRequest, IWorldpayPaymentResult, WorldpayVerificationMethod, WorldpayPaymentStatus, WorldpayTransStatus, WorldpayTransactionOutcome };
 
 // Payment Types
 export { PaymentOperation };

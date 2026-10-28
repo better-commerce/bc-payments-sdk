@@ -14,6 +14,7 @@
  * @ordinal {string} CHEQUE - Cheque payment method.
  * @ordinal {string} CHECKOUT_APPLE_PAY - Checkout Apple Pay payment method.
  * @ordinal {string} CHECKOUT_KLARNA - Checkout Klarna payment method.
+ * @ordinal {string} WORLDPAY - Worldpay Hosted Payment Page (HTML redirect) payment method.
  */
 export enum PaymentMethodType {
     COD = "cod",
@@ -37,4 +38,5 @@ export enum PaymentMethodType {
     NUVEI_APPLE_PAY = 'nuveiapplepay',
     GIFT_CARD = 'giftcard',
     NUVEI_PAY_BY_BANK = 'nuveipaybybank',
+    WORLDPAY = 'worldpay',
 };

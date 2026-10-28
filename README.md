@@ -17,6 +17,7 @@ It integrates SDK APIs for the following providers:
 | Juspay          | Client-side **Custom Widget + Redirect** |
 | Elavon        | Client-side **Modal Widget + Redirect** |
 | Nuvei        | Client-side **Modal Widget + Redirect** |
+| Worldpay     | **Hosted Payment Page** (form POST + Redirect) |
 
 ## PayPal
 
@@ -110,6 +111,17 @@ It integrates SDK APIs for the following providers:
 | NPM Package    | https://github.com/better-commerce/bc-nuvei-sdk                                              | Node.js SDK for interaction with Nuvei APIs - @better-commerce/bc-nuvei-sdk |
 | Dashboard - Sandbox        | https://sandbox.nuvei.com/login |                                                                               |
 | Dashboard - Live           | https://nuvei.com/login                               |                                                                               |
+
+## Worldpay
+
+| Name           | Reference                                                                                     | Description                                                                   |
+| :------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------- |
+| HTML Redirect (Hosted Payment Page) | https://developerengine.fisglobal.com/apis/bg-total/html-redirect                | Order fields posted to `/wcc/purchase`; no server-to-server API call.          |
+| NPM Package    | https://github.com/better-commerce/bc-worldpay-sdk                                            | Node.js SDK for the Worldpay Hosted Payment Page - bc-worldpay-sdk            |
+| Dashboard - Sandbox        | https://secure-test.worldpay.com/sso/public/auth/login.html |                                                                               |
+| Dashboard - Live           | https://secure.worldpay.com/sso/public/auth/login.html                               |                                                                               |
+
+The purchase signature is the same as the legacy BetterCommerce (Omnicx) Worldpay plugin, so existing Worldpay installations work unchanged.
 
 ## Installation
 
@@ -261,10 +273,45 @@ const applePayConfig = {
 };
 ```
 
+### Worldpay
+
+```
+const worldpayConfig = {
+    systemName: "Worldpay",
+    notificationUrl: "<Return_Url>",
+    settings: [{
+        "key": "UserName",          // Installation id (instId). Falls back to MotoUserName.
+        "value": "<Installation_Id>"
+    }, {
+        "key": "AccountCode",       // Merchant code (accId1)
+        "value": "<Merchant_Code>"
+    }, {
+        "key": "Signature",         // MD5 secret (Worldpay "MD5 secret for transactions"). Empty = no signature sent.
+        "value": "<MD5_Secret>"
+    }, {
+        "key": "MotoSignature",     // Optional: MAC secret (mac2/mac) or Payment Response password (callbackPW)
+        "value": "<Response_Secret>"
+    }, {
+        "key": "UseSandbox",
+        "value": "True"
+    }, {
+        "key": "TestUrl",
+        "value": "https://secure-test.worldpay.com/wcc/purchase"
+    }, {
+        "key": "ProductionUrl",
+        "value": "https://secure.worldpay.com/wcc/purchase"
+    }]
+};
+
+// Optional extras: origin (for a relative notificationUrl), worldpayInstallationId,
+// worldpayResponseSecret, worldpayRequireVerifiedResponse, worldpayUseSandbox (overrides UseSandbox).
+BCEnvironment.addExtras({ origin: "https://www.example.com", worldpayRequireVerifiedResponse: true });
+```
+
 ### Initialization
 
 ```
-BCEnvironment.init(paypalConfig || checkoutConfig || stripeConfig || klarnaConfig);
+BCEnvironment.init(paypalConfig || checkoutConfig || stripeConfig || klarnaConfig || worldpayConfig);
 BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbox: boolean]);
 ```
 
@@ -274,4 +321,27 @@ BCEnvironment.withCredentials("<bc_client_id>", "<bc_shared_secret>", [useSandbo
 
 ```
 const result = await new PaymentOperation().getOrderDetails("<order_id>");
+```
+
+### Worldpay Hosted Payment Page
+
+```
+// 1. After converting the basket to an order, build the form and POST it from the browser.
+const form = await new PaymentOperation().initPaymentIntent({
+    orderId: order.id,
+    orderNo: order.orderNo,
+    paymentId: order.payment.id,
+    amount: order.payment.orderAmount,
+    currency: order.currencyCode,
+    email,
+    billingAddress,
+    returnUrl: "https://www.example.com/payment/worldpay/return",
+    cancelUrl: "https://www.example.com/checkout",
+});
+// => { action: "https://secure.worldpay.com/wcc/purchase", method: "POST", fields: { instId, cartId, amount, ..., signature } }
+
+// 2. On the return / Payment Response, parse and authenticate the Worldpay parameters.
+const result = await new PaymentOperation().getOrderDetails({ ...queryParams, ...formFields });
+// => { outcome: WorldpayTransactionOutcome.AUTHORISED | PENDING | CANCELLED | REFUSED, orderId, orderNo, paymentId, amount, currency, isVerified, ... }
+// Always check result.amount/currency against the order before recording the payment.
 ```

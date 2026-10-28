@@ -15,6 +15,7 @@
  * @ordinal {number} CHEQUE - The identifier for Cheque payment method.
  * @ordinal {number} CHECKOUT_APPLE_PAY - The identifier for Apple Pay payment method which is a sub-type of Checkout payment method.
  * @ordinal {number} CHECKOUT_KLARNA - The identifier for Klarna payment method which is a sub-type of Checkout payment method.
+ * @ordinal {number} WORLDPAY - The identifier for Worldpay Hosted Payment Page payment method.
  */
 export enum PaymentMethodTypeId {
     COD = 0,
@@ -38,4 +39,5 @@ export enum PaymentMethodTypeId {
     NUVEI_APPLE_PAY = 18,
     GIFT_CARD = 19,
     NUVEI_PAY_BY_BANK = 20,
+    WORLDPAY = 21,
 }
