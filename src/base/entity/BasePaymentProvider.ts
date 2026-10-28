@@ -20,6 +20,13 @@ import { NuveiEnvironment } from "bc-nuvei-sdk";
 import { WorldpayEnvironment } from "bc-worldpay-sdk";
 
 /**
+ * MD5 secret the legacy BetterCommerce (Omnicx) Worldpay plugin signs with when the `Signature` setting is empty
+ * (`Omnicx.Plugin.Payment.Worldpay.WorldpayPaymentProcessor`: `IsNullOrWhiteSpace(Settings.Signature) ? "test1234"`).
+ * Live installations configured that way always send this signature, so their Worldpay MD5 check expects it.
+ */
+const WORLDPAY_LEGACY_MD5_SECRET = "test1234";
+
+/**
  * Abstract class {BasePaymentProvider} is the base class for all payment providers.
  *
  * Payment providers are responsible for providing the concrete implementation of the
@@ -249,7 +256,8 @@ export abstract class BasePaymentProvider {
                 const setting = (key: string) => config?.settings?.find((x: any) => x.key === key)?.value || Defaults.String.Value;
                 const installationId = String(extras?.worldpayInstallationId || setting("UserName") || setting("MotoUserName")).trim();
                 const merchantCode = setting("AccountCode");
-                const md5Secret = setting("Signature");
+                // Same default as the legacy plugin, so existing Worldpay installations keep accepting the signature.
+                const md5Secret = setting("Signature") || WORLDPAY_LEGACY_MD5_SECRET;
                 const responseSecret = String(extras?.worldpayResponseSecret || setting("MotoSignature"));
                 const useSandboxOverride = extras?.worldpayUseSandbox;
                 const isWorldpaySandbox = useSandboxOverride !== undefined && useSandboxOverride !== Defaults.String.Value ? stringToBoolean(String(useSandboxOverride)) : isSandbox;
