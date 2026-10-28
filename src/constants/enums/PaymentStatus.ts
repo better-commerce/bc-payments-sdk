@@ -217,39 +217,6 @@ export namespace OmniCapital {
 
 }
 
-export namespace Worldpay {
-
-  /**
-   * Enum {@link PaymentStatus} contains the `paymentStatus` values Worldpay appends to the
-   * success/failure/cancel URLs of a Hosted Payment Page (HTML redirect) order.
-   *
-   * @readonly
-   * @enum {string}
-   */
-  export enum PaymentStatus {
-    AUTHORISED = 'AUTHORISED',
-    CAPTURED = 'CAPTURED',
-    SETTLED = 'SETTLED',
-    SENT_FOR_AUTHORISATION = 'SENT_FOR_AUTHORISATION',
-    REFUSED = 'REFUSED',
-    ERROR = 'ERROR',
-    CANCELLED = 'CANCELLED',
-    SHOPPER_CANCELLED = 'SHOPPER_CANCELLED',
-  }
-
-  /**
-   * Enum {@link TransStatus} contains the `transStatus` values sent in a Business Gateway
-   * Payment Response (`MC_callback`) message.
-   *
-   * @readonly
-   * @enum {string}
-   */
-  export enum TransStatus {
-    SUCCESS = 'Y',
-    CANCELLED = 'C',
-  }
-}
-
 export namespace Juspay {
 
   /**

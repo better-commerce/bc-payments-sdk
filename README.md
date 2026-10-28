@@ -342,6 +342,6 @@ const form = await new PaymentOperation().initPaymentIntent({
 
 // 2. On the return / Payment Response, parse and authenticate the Worldpay parameters.
 const result = await new PaymentOperation().getOrderDetails({ ...queryParams, ...formFields });
-// => { status: PaymentStatus.PAID | DECLINED | CANCELLED | PENDING, orderId, orderNo, paymentId, amount, currency, isVerified, ... }
+// => { outcome: WorldpayTransactionOutcome.AUTHORISED | PENDING | CANCELLED | REFUSED, orderId, orderNo, paymentId, amount, currency, isVerified, ... }
 // Always check result.amount/currency against the order before recording the payment.
 ```
