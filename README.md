@@ -286,7 +286,7 @@ const worldpayConfig = {
         "key": "AccountCode",       // Merchant code (accId1)
         "value": "<Merchant_Code>"
     }, {
-        "key": "Signature",         // MD5 secret. Empty = legacy default "test1234".
+        "key": "Signature",         // MD5 secret (Worldpay "MD5 secret for transactions"). Empty = no signature sent.
         "value": "<MD5_Secret>"
     }, {
         "key": "MotoSignature",     // Optional: MAC secret (mac2/mac) or Payment Response password (callbackPW)
